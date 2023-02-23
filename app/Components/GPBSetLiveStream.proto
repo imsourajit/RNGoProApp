@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message GPBSetLiveStream {
+  string url = 1;
+  string stream_name = 2;
+  string status = 3;
+  uint64 reserved = 4;
+}

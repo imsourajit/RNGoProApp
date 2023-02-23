@@ -25,6 +25,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import Main from './app/Components/Main';
+import BluetoothCon from './app/Components/BluetoothCon';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -63,7 +64,7 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  return <Main />;
+  return <BluetoothCon />;
 
   return (
     <SafeAreaView style={backgroundStyle}>

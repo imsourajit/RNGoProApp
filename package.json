@@ -10,8 +10,14 @@
     "test": "jest"
   },
   "dependencies": {
+    "buffer": "^6.0.3",
+    "convert-string": "^0.1.0",
+    "convert-string-bytes": "^0.1.0",
+    "google-protobuf": "^3.21.2",
+    "protobufjs": "^7.2.2",
     "react": "18.2.0",
     "react-native": "0.71.3",
+    "react-native-ble-manager": "^8.8.0",
     "react-native-wifi-reborn": "^4.7.0"
   },
   "devDependencies": {
