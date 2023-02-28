@@ -9,7 +9,14 @@ import {
   Linking,
 } from 'react-native';
 import WifiManager from 'react-native-wifi-reborn';
-import {CAMERA_IP, CAMERA_NAME, CAMERA_PASSWORD} from '../Utils/Constants';
+import {
+  CAMERA_IP,
+  CAMERA_NAME,
+  CAMERA_PASSWORD,
+  CAMERA_PORT,
+} from '../Utils/Constants';
+import RNFetchBlob from 'rn-fetch-blob';
+import RNFS from 'react-native-fs';
 
 const Main = props => {
   const [isWifiConnected, setWifiConnected] = useState(null);
@@ -57,14 +64,64 @@ const Main = props => {
   };
 
   const _getMediaList = _ => {
-    fetch(`http://${CAMERA_IP}/gopro/media/list`)
+    fetch(`http://${CAMERA_IP}:${CAMERA_PORT}/gopro/media/list`)
       .then(r => r.json())
-      .then(r => console.log('Camera State ====', r.media[0].fs[0]))
+      .then(r => console.log('Camera State ====', r.media))
       .catch(e => console.log('Camera State error', e));
   };
 
+  const getFileExtention = fileUrl => {
+    // To get the file extension
+    return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
+  };
+
+  const downloadFile = () => {
+    const date = new Date();
+    fetch(`http://${CAMERA_IP}:${CAMERA_PORT}/gopro/media/turbo_transfer?p=1`)
+      .then(r => r.json())
+      .then(r => console.log('Camera State ====', r))
+      .catch(e => console.log('Camera State error', e));
+    const {config, fs} = RNFetchBlob;
+    let RootDir = fs.dirs.PictureDir;
+    RNFS.downloadFile({
+      fromUrl: 'http://10.5.5.9:8080/videos/DCIM/100GOPRO/GH010958.MP4',
+      toFile:
+        RootDir +
+        '/file_' +
+        Math.floor(date.getTime() + date.getSeconds() / 2) +
+        '.MP4',
+      background: true,
+      discretionary: true,
+      cacheable: true,
+      begin: r => console.log('Downloading started', r),
+      progress: r =>
+        console.log('Downloading progress', r.bytesWritten / r.contentLength),
+    });
+    fetch(`http://${CAMERA_IP}:${CAMERA_PORT}/gopro/media/turbo_transfer?p=0`)
+      .then(r => r.json())
+      .then(r => console.log('Camera State ====', r))
+      .catch(e => console.log('Camera State error', e));
+  };
+
+  const downloadMedia = async url => {
+    try {
+      const response = await fetch(
+        'http://10.5.5.9:8080/videos/DCIM/100GOPRO/GOPR0996.JPG',
+      );
+
+      const fileName = 'GOPR0996.JPG';
+      const path = `${RNFetchBlob.fs.dirs.DownloadDir}/${fileName}`;
+      console.log('Fetch', path);
+      await RNFS.write(path, 'blob', 1, 'base64');
+      console.log('Media file downloaded successfully!');
+    } catch (error) {
+      console.error('Error downloading media:', error);
+    }
+  };
+
   const __downloadMedia = _ => {
-    Linking.openURL(`http://${CAMERA_IP}/videos/DCIM/100GOPRO/GH010958.MP4`);
+    downloadMedia();
+    downloadFile();
   };
 
   return (
@@ -88,7 +145,7 @@ const Main = props => {
       <Pressable onPress={_getMediaList} style={styles.btn}>
         <Text style={{fontSize: 24}}>Get Media List</Text>
       </Pressable>
-      <Pressable onPress={__downloadMedia} style={styles.btn}>
+      <Pressable onPress={downloadFile} style={styles.btn}>
         <Text style={{fontSize: 24}}>Download Media</Text>
       </Pressable>
     </View>

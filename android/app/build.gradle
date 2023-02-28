@@ -117,6 +117,7 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+
     }
     buildTypes {
         debug {

@@ -9,11 +9,9 @@ import {
   Linking,
   TouchableOpacity,
 } from 'react-native';
-import WifiManager from 'react-native-wifi-reborn';
-import {CAMERA_IP, CAMERA_NAME, CAMERA_PASSWORD} from '../Utils/Constants';
-import {stringToBytes} from 'convert-string';
 
 import BleManager from 'react-native-ble-manager';
+import * as Protobuf from 'protobufjs';
 
 const BluetoothCon = props => {
   const [connectedDevice, setConnectedDevice] = useState({});
@@ -36,7 +34,11 @@ const BluetoothCon = props => {
     }
   };
 
-  const _getReadyForLive = _ => {
+  const _getReadyForLive = async _ => {
+    // Protobuf.load('GPBSetLiveStream.proto', function (err, root) {
+    //   console.log('Err', err, root);
+    // });
+
     BleManager.connect(connectedDevice.id)
       .then(() => {
         BleManager.retrieveServices(connectedDevice.id, []).then(
@@ -45,25 +47,25 @@ const BluetoothCon = props => {
           },
         );
 
-        // BleManager.read(
-        //   connectedDevice.id,
-        //   'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
-        //   'b5f90002-aa8d-11e3-9046-0002a5d5c51b',
-        // )
-        //   .then(r => {
-        //     console.log('Device name', String.fromCharCode(...r));
-        //   })
-        //   .catch(e => console.log(e));
+        BleManager.read(
+          connectedDevice.id,
+          'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+          'b5f90002-aa8d-11e3-9046-0002a5d5c51b',
+        )
+          .then(r => {
+            console.log('Device name', String.fromCharCode(...r));
+          })
+          .catch(e => console.log(e));
 
-        // BleManager.read(
-        //   connectedDevice.id,
-        //   'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
-        //   'b5f90003-aa8d-11e3-9046-0002a5d5c51b',
-        // )
-        //   .then(r => {
-        //     console.log('Device name', String.fromCharCode(...r));
-        //   })
-        //   .catch(e => console.log(e));
+        BleManager.read(
+          connectedDevice.id,
+          'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+          'b5f90003-aa8d-11e3-9046-0002a5d5c51b',
+        )
+          .then(r => {
+            console.log('Device name', String.fromCharCode(...r));
+          })
+          .catch(e => console.log(e));
 
         BleManager.write(
           connectedDevice.id,
@@ -85,7 +87,7 @@ const BluetoothCon = props => {
       connectedDevice.id,
       'fea6',
       'b5f90076-aa8d-11e3-9046-0002a5d5c51b',
-      [],
+      buffer,
     )
       .then(suc => console.log('Notification', suc))
       .catch(e => console.log('Notification error', e));

@@ -1,0 +1,21 @@
+// awesome.json
+{
+  "nested": {
+    "goprolivestream": {
+      "nested": {
+        "LiveStream": {
+          "fields": {
+            "url": {
+              "type": "string",
+              "id": 1
+            },
+            "encode": {
+              "type": "bool",
+              "id": 2
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+syntax = 'proto2';
+package goPro10;
+
+
+message RequestSetLiveStreamMode {
+  optional string url = 1;
+}
