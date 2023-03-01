@@ -310,7 +310,7 @@ const Main = props => {
     );
 
     return fetch(
-      'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod-deletable/63fe06f5b4ade3692e1bb407/63fe2484b4ade3692e1c33fe/origin-63fe2484b4ade3692e1c33fe?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230228%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230228T155756Z&X-Amz-Expires=3600&X-Amz-Signature=c502447c8a9f8a7df1673c61f6ad46578b3ba687ce4b8b2a18a0dd35ed89a740&X-Amz-SignedHeaders=host&x-id=PutObject',
+      'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod-deletable/63fe06f5b4ade3692e1bb407/63fe251d39e457f74b476d51/origin-63fe251d39e457f74b476d51?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230228%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230228T160030Z&X-Amz-Expires=3600&X-Amz-Signature=b2250b7f08d08f4a1bb367e4d04e45c6f190012b1430ed293acf2f41f01e5e96&X-Amz-SignedHeaders=host&x-id=PutObject',
       {
         method: 'PUT',
         body: imageBody,

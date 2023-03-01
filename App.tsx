@@ -5,8 +5,8 @@
  * @format
  */
 
-import React from 'react';
 import type {PropsWithChildren} from 'react';
+import React from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -24,10 +24,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import Main from './app/Components/Main';
-import BluetoothCon from './app/Components/BluetoothCon';
-import GoProFeat from './app/Components/GoProFeat';
-import HttpCommandsTest from './app/Components/HttpCommandsTest';
+import GoPro10 from './src/Modules/GoPro10';
+import {NavigationContainer} from '@react-navigation/native';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -66,7 +64,11 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  return <Main />;
+  return (
+    <NavigationContainer>
+      <GoPro10 />
+    </NavigationContainer>
+  );
 
   return (
     <SafeAreaView style={backgroundStyle}>
