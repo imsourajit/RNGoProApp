@@ -8,6 +8,7 @@ import {GOPRO_BASE_URL} from './Utility/Constants';
 import _ from 'lodash';
 import RNFetchBlob from 'rn-fetch-blob';
 import axios from 'axios';
+import RNFS from 'react-native-fs';
 
 const GoPro10 = props => {
   const [isScanning, setScanning] = useState(false);
@@ -76,6 +77,7 @@ const GoPro10 = props => {
       _turnOnTurboTransfer();
       _getMediaListandDownload();
     } catch (e) {
+      console.log('Error connecting hotspot', e);
       ToastAndroid.show('Something went wrong', ToastAndroid.CENTER);
     }
   };
@@ -97,6 +99,20 @@ const GoPro10 = props => {
       .then(r => console.log('Camera State ====', r))
       .catch(e => console.log('Camera State error', e));
     await WifiManager.disconnect();
+    setTimeout(() => {
+      console.log('Upload Process Started');
+      _startServerUploadProcess();
+    }, 5000);
+  };
+
+  const _startServerUploadProcess = () => {
+    for (let i = 0, uploadPromise = Promise.resolve(); i < 2; i++) {
+      uploadPromise.then(() => {
+        new Promise(resolve => {
+          _getPreSignedUrlForGumlet(i, resolve);
+        });
+      });
+    }
   };
 
   const _getMediaListandDownload = () => {
@@ -108,32 +124,56 @@ const GoPro10 = props => {
         if (Array.isArray(fs)) {
           const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
           setMedia(orderedArray);
-          for (let i = 0, downloadPromise = Promise.resolve(); i < 1; i++) {
+
+          // for (let i = 0; i < 2; i++) {
+          //   const {config, fs} = RNFetchBlob;
+          //   let RootDir = fs.dirs.PictureDir;
+          //   RNFS.downloadFile({
+          //     fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${d}/${orderedArray[i].n}`,
+          //     toFile: RootDir + '/fcone_' + orderedArray[i].n,
+          //     background: true,
+          //     discretionary: false,
+          //     cacheable: false,
+          //     begin: r => console.log('Downloading started', r),
+          //     progress: r =>
+          //       console.log(
+          //         'Downloading progress ',
+          //         (r.bytesWritten / r.contentLength) * 100,
+          //       ),
+          //   });
+          // }
+
+          for (let i = 0, downloadPromise = Promise.resolve(); i < 2; i++) {
             downloadPromise.then(() => {
               new Promise(resolve => {
                 const {config, fs} = RNFetchBlob;
                 let RootDir = fs.dirs.PictureDir;
                 RNFS.downloadFile({
                   fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${d}/${orderedArray[i].n}`,
-                  toFile: RootDir + '/gg_' + orderedArray[i].n,
+                  toFile: RootDir + '/' + orderedArray[i].n,
                   background: true,
                   discretionary: true,
                   cacheable: true,
                   begin: r => console.log('Downloading started', r),
-                  progress: r =>
+                  progress: r => {
+                    const percentile = (r.bytesWritten / r.contentLength) * 100;
+                    if (i == 1 && percentile == 100) {
+                      _turnOffTurboTransfer();
+                    }
                     console.log(
-                      'Downloading progress',
+                      'Downloading progress ',
                       (r.bytesWritten / r.contentLength) * 100,
-                    ),
+                    );
+                  },
                 });
                 resolve();
               });
             });
           }
-          _turnOffTurboTransfer();
         }
       })
-      .catch(e => console.log('Camera State error', e));
+      .catch(e => console.log('Camera State error', e))
+      .finally(() => {});
   };
 
   const uploadBegin = response => {
@@ -154,7 +194,7 @@ const GoPro10 = props => {
     return imageBody;
   };
 
-  const _getPreSignedUrlForGumlet = _ => {
+  const _getPreSignedUrlForGumlet = (index, parentResolve) => {
     const options = {
       method: 'POST',
       url: 'https://api.gumlet.com/v1/video/assets/upload',
@@ -170,50 +210,65 @@ const GoPro10 = props => {
       .request(options)
       .then(function (response) {
         console.log(response.data.upload_url);
+        new Promise((resolve, reject) =>
+          _uploadDownloadedFilesToGumlet(
+            resolve,
+            reject,
+            response.data.upload_url,
+            index,
+            parentResolve,
+          ),
+        );
       })
       .catch(function (error) {
         console.error(error);
       });
   };
 
-  const _uploadDownloadedFilesToGumlet = async _ => {
+  const _uploadDownloadedFilesToGumlet = (
+    resolve,
+    reject,
+    uploadUrl,
+    index,
+    parentResolve,
+  ) => {
     const {config, fs} = RNFetchBlob;
     let RootDir = fs.dirs.PictureDir;
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          console.log('Upload success');
+          console.log('Upload success', index);
+          resolve();
         } else {
           console.log('Upload failed', xhr);
+          resolve();
         }
       }
+      parentResolve();
     };
     xhr.upload.onprogress = function (evt) {
       if (evt.lengthComputable) {
         let percentComplete = (evt.loaded / evt.total) * 100;
-        console.log('Percentage Complete onprogress', percentComplete);
+        console.log('Percentage Complete onprogress', index, percentComplete);
       }
     };
     xhr.addEventListener('progress', evt => {
       if (evt.lengthComputable) {
         percentComplete = (evt.loaded / evt.total) * 100;
       }
-      console.log('Percentage Complete', evt);
+      console.log('Percentage Complete', index, evt);
     });
-    xhr.open(
-      'PUT',
-      'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod-deletable/63fe06f5b4ade3692e1bb407/63ff39035f5f1d24bbbc82f2/origin-63ff39035f5f1d24bbbc82f2?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230301%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230301T113740Z&X-Amz-Expires=3600&X-Amz-Signature=e338d789f0c2d2dc270eb26175f9aa739c0f59376b2e390fd1f81772543148fc&X-Amz-SignedHeaders=host&x-id=PutObject',
-    );
+    xhr.open('PUT', uploadUrl);
     xhr.setRequestHeader('Content-Type', 'video/mp4');
     xhr.send({
-      uri: 'file://' + RootDir + '/gg_GX011078.MP4',
+      uri: 'file://' + RootDir + '/' + orderedMedia[index].n,
       type: 'video/mp4',
-      name: 'GX011078',
+      name: orderedMedia[index].n,
     });
   };
 
-  if (!deviceId && false) {
+  if (!deviceId) {
     return (
       <View style={styles.main}>
         <Text style={styles.noDevice}>
@@ -227,7 +282,6 @@ const GoPro10 = props => {
     <View style={styles.main}>
       <GoProImage name={name} id={deviceId} />
       <WifiControlBtn onPress={_connectHotspot} />
-      <WifiControlBtn onPress={_getPreSignedUrlForGumlet} />
     </View>
   );
 };
