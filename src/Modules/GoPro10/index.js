@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, ToastAndroid, View} from 'react-native';
+import {Linking, StyleSheet, Text, ToastAndroid, View} from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import GoProImage from './Components/GoProImage';
 import WifiControlBtn from './Components/CustomBtns/WifiControlBtns';
@@ -9,15 +9,24 @@ import _ from 'lodash';
 import RNFetchBlob from 'rn-fetch-blob';
 import axios from 'axios';
 import RNFS from 'react-native-fs';
+import {useDispatch} from 'react-redux';
+import {setDownloadingProgress} from './Redux/GoPro10Actions';
+import DownloadedMediaBox from './Components/DownloadedMediaBox';
 
 const GoPro10 = props => {
   const [isScanning, setScanning] = useState(false);
-  const [{id: deviceId, name}, setConnectedDevice] = useState({});
+  const [connectedDevice, setConnectedDevice] = useState({});
   const [hotspotDetails, setHotspotDetails] = useState({
     ssid: '',
     password: '',
   });
   const [orderedMedia, setMedia] = useState([]);
+  const [currentDownloads, setCurrentDownloads] = useState([]);
+
+  const dispatch = useDispatch();
+
+  const {id: deviceId, name} = connectedDevice;
+
   useEffect(() => {
     _scanAndConnectToGoPro();
   }, []);
@@ -69,6 +78,12 @@ const GoPro10 = props => {
         ssid: String.fromCharCode(...ssid),
         password: String.fromCharCode(...password),
       });
+
+      console.log('Hotspot details', {
+        ssid: String.fromCharCode(...ssid),
+        password: String.fromCharCode(...password),
+      });
+
       await WifiManager.connectToProtectedSSID(
         String.fromCharCode(...ssid),
         String.fromCharCode(...password),
@@ -100,8 +115,8 @@ const GoPro10 = props => {
       .catch(e => console.log('Camera State error', e));
     await WifiManager.disconnect();
     setTimeout(() => {
-      console.log('Upload Process Started');
-      _startServerUploadProcess();
+      // console.log('Upload Process Started');
+      // _startServerUploadProcess();
     }, 5000);
   };
 
@@ -124,46 +139,50 @@ const GoPro10 = props => {
         if (Array.isArray(fs)) {
           const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
           setMedia(orderedArray);
-
-          // for (let i = 0; i < 2; i++) {
-          //   const {config, fs} = RNFetchBlob;
-          //   let RootDir = fs.dirs.PictureDir;
-          //   RNFS.downloadFile({
-          //     fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${d}/${orderedArray[i].n}`,
-          //     toFile: RootDir + '/fcone_' + orderedArray[i].n,
-          //     background: true,
-          //     discretionary: false,
-          //     cacheable: false,
-          //     begin: r => console.log('Downloading started', r),
-          //     progress: r =>
-          //       console.log(
-          //         'Downloading progress ',
-          //         (r.bytesWritten / r.contentLength) * 100,
-          //       ),
-          //   });
-          // }
-
-          for (let i = 0, downloadPromise = Promise.resolve(); i < 2; i++) {
+          for (
+            let i = 0, downloadPromise = Promise.resolve();
+            i < orderedArray.length;
+            i++
+          ) {
+            const date = new Date();
+            const fileExif = date.getTime();
             downloadPromise.then(() => {
               new Promise(resolve => {
                 const {config, fs} = RNFetchBlob;
                 let RootDir = fs.dirs.PictureDir;
                 RNFS.downloadFile({
                   fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${d}/${orderedArray[i].n}`,
-                  toFile: RootDir + '/' + orderedArray[i].n,
+                  toFile: RootDir + '/' + fileExif + orderedArray[i].n,
                   background: true,
                   discretionary: true,
                   cacheable: true,
-                  begin: r => console.log('Downloading started', r),
+                  begin: r => {
+                    dispatch(
+                      setDownloadingProgress({
+                        name: orderedArray[i].n,
+                        psuedoName: fileExif + orderedArray[i].n,
+                        progress: 0,
+                      }),
+                    );
+                  },
                   progress: r => {
                     const percentile = (r.bytesWritten / r.contentLength) * 100;
+                    console.log(percentile);
                     if (i == 1 && percentile == 100) {
                       _turnOffTurboTransfer();
                     }
-                    console.log(
-                      'Downloading progress ',
-                      (r.bytesWritten / r.contentLength) * 100,
+
+                    dispatch(
+                      setDownloadingProgress({
+                        name: orderedArray[i].n,
+                        psuedoName: fileExif + orderedArray[i].n,
+                        progress: percentile,
+                      }),
                     );
+
+                    if (percentile / 100 == 1) {
+                      dispatch(setDownloadingProgress({}));
+                    }
                   },
                 });
                 resolve();
@@ -268,12 +287,19 @@ const GoPro10 = props => {
     });
   };
 
+  const _openGoProApp = () => {
+    Linking.openURL(
+      'https://play.google.com/store/apps/details?id=com.gopro.smarty',
+    );
+  };
+
   if (!deviceId) {
     return (
       <View style={styles.main}>
         <Text style={styles.noDevice}>
           No device connected. Please connect device using GoPro Quik App
         </Text>
+        <WifiControlBtn onPress={_openGoProApp} btnText={'Open Go Pro App'} />
       </View>
     );
   }
@@ -281,7 +307,8 @@ const GoPro10 = props => {
   return (
     <View style={styles.main}>
       <GoProImage name={name} id={deviceId} />
-      <WifiControlBtn onPress={_connectHotspot} />
+      <WifiControlBtn onPress={_connectHotspot} btnText={'Backup Media'} />
+      <DownloadedMediaBox data={orderedMedia} />
     </View>
   );
 };

@@ -9,7 +9,7 @@ const WifiControlBtn = props => {
   return (
     <TouchableOpacity onPress={_pressed}>
       <View style={styles.btn}>
-        <Text style={styles.btnTxt}>Download Media</Text>
+        <Text style={styles.btnTxt}>{props.btnText}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 3,
+    margin: 8,
     borderRadius: 30,
     minWidth: 220,
   },
