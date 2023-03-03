@@ -2,6 +2,7 @@ import {
   DOWNLOAD_MEDIA_PROGRESS,
   DOWNLOAD_MEDIA_SUCCESS,
   RESET_DOWNLOAD_MEDIA,
+  UPLOAD_MEDIA_PROGRESS,
   UPLOAD_MEDIA_SUCCESS,
 } from './GoPro10ActionTypes';
 
@@ -31,6 +32,10 @@ export const GoPro10Reducer = (state = initialState, action) => {
         ...state,
         downloadingMedia: {},
       };
+    }
+
+    case UPLOAD_MEDIA_PROGRESS: {
+      return {...state, uploadingMedia: action.data};
     }
 
     case UPLOAD_MEDIA_SUCCESS: {

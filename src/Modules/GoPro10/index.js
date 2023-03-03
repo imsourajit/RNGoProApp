@@ -16,9 +16,15 @@ import _ from 'lodash';
 import RNFetchBlob from 'rn-fetch-blob';
 import axios from 'axios';
 import RNFS from 'react-native-fs';
-import {useDispatch} from 'react-redux';
-import {setDownloadingProgress} from './Redux/GoPro10Actions';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  setDownloadCompletedMedia,
+  setDownloadingProgress,
+  setUploadedCompletedMedia,
+  setUploadingProgress,
+} from './Redux/GoPro10Actions';
 import DownloadedMediaBox from './Components/DownloadedMediaBox';
+import UploadedMediaBox from './Components/UploadedMediaBox';
 
 const GoPro10 = props => {
   const [isScanning, setScanning] = useState(false);
@@ -30,9 +36,14 @@ const GoPro10 = props => {
   const [orderedMedia, setMedia] = useState([]);
   const [currentDownloads, setCurrentDownloads] = useState([]);
 
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
   const dispatch = useDispatch();
 
-  const {id: deviceId, name} = connectedDevice;
+  const {id: deviceId, name, deviceName} = connectedDevice;
+
+  const downloadedMedia = useSelector(st => st.GoPro10Reducer.downloadedMedia);
 
   useEffect(() => {
     _scanAndConnectToGoPro();
@@ -55,7 +66,15 @@ const GoPro10 = props => {
         console.log('Scanned devices', d);
 
         if (Array.isArray(d) && d.length) {
-          setConnectedDevice(d[0]);
+          const ssid = BleManager.read(
+            d[0].id,
+            'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+            'b5f90002-aa8d-11e3-9046-0002a5d5c51b',
+          );
+          setConnectedDevice({
+            ...d[0],
+            deviceName: String.fromCharCode(...ssid),
+          });
         }
 
         console.log('Connected go pro device details', d[0].id);
@@ -121,20 +140,13 @@ const GoPro10 = props => {
       .then(r => console.log('Camera State ====', r))
       .catch(e => console.log('Camera State error', e));
     await WifiManager.disconnect();
+    setIsDownloading(false);
+    setIsUploading(true);
     setTimeout(() => {
-      // console.log('Upload Process Started');
-      // _startServerUploadProcess();
-    }, 5000);
-  };
+      console.log('Upload Process Started');
 
-  const _startServerUploadProcess = () => {
-    for (let i = 0, uploadPromise = Promise.resolve(); i < 2; i++) {
-      uploadPromise.then(() => {
-        new Promise(resolve => {
-          _getPreSignedUrlForGumlet(i, resolve);
-        });
-      });
-    }
+      _startServerUploadProcess();
+    }, 5000);
   };
 
   const _downloadSingleFile = async (orderedArray, index, directoryName) => {
@@ -160,7 +172,7 @@ const GoPro10 = props => {
       },
       progress: r => {
         const percentile = (r.bytesWritten / r.contentLength) * 100;
-        console.log(percentile, index);
+        // console.log(percentile, index);
 
         dispatch(
           setDownloadingProgress({
@@ -173,6 +185,13 @@ const GoPro10 = props => {
 
         if (percentile / 100 == 1) {
           dispatch(setDownloadingProgress({}));
+          dispatch(
+            setDownloadCompletedMedia({
+              name: orderedArray[index].n,
+              psuedoName: fileNamePrefix + orderedArray[index].n,
+              index: index,
+            }),
+          );
         }
       },
     }).promise;
@@ -192,6 +211,7 @@ const GoPro10 = props => {
       if (Array.isArray(fs)) {
         const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
         setMedia(orderedArray);
+        setIsDownloading(true);
         _downloadSingleFile(orderedArray, 0, d);
       } else {
         ToastAndroid.show('No media files found', ToastAndroid.CENTER);
@@ -199,71 +219,6 @@ const GoPro10 = props => {
     } catch (e) {
       ToastAndroid.show('Something went wrong', ToastAndroid.CENTER);
     }
-  };
-
-  const _getMediaListandDownload = () => {
-    fetch(`${GOPRO_BASE_URL}gopro/media/list`)
-      .then(r => r.json())
-      .then(r => {
-        const [{fs, d}, ...rest] = r.media;
-        console.log('Media List', r.media, fs);
-        if (Array.isArray(fs)) {
-          const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
-          setMedia(orderedArray);
-          for (
-            let i = 0, downloadPromise = Promise.resolve();
-            i < orderedArray.length;
-            i++
-          ) {
-            const date = new Date();
-            const fileExif = date.getTime();
-            downloadPromise.then(() => {
-              new Promise(resolve => {
-                const {config, fs} = RNFetchBlob;
-                let RootDir = fs.dirs.PictureDir;
-                RNFS.downloadFile({
-                  fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${d}/${orderedArray[i].n}`,
-                  toFile: RootDir + '/' + fileExif + orderedArray[i].n,
-                  background: true,
-                  discretionary: true,
-                  cacheable: true,
-                  begin: r => {
-                    dispatch(
-                      setDownloadingProgress({
-                        name: orderedArray[i].n,
-                        psuedoName: fileExif + orderedArray[i].n,
-                        progress: 0,
-                      }),
-                    );
-                  },
-                  progress: r => {
-                    const percentile = (r.bytesWritten / r.contentLength) * 100;
-                    console.log(percentile);
-                    if (i == 1 && percentile == 100) {
-                      _turnOffTurboTransfer();
-                    }
-
-                    dispatch(
-                      setDownloadingProgress({
-                        name: orderedArray[i].n,
-                        psuedoName: fileExif + orderedArray[i].n,
-                        progress: percentile,
-                      }),
-                    );
-
-                    if (percentile / 100 == 1) {
-                      dispatch(setDownloadingProgress({}));
-                    }
-                  },
-                });
-                resolve();
-              });
-            });
-          }
-        }
-      })
-      .catch(e => console.log('Camera State error', e))
-      .finally(() => {});
   };
 
   const uploadBegin = response => {
@@ -284,7 +239,20 @@ const GoPro10 = props => {
     return imageBody;
   };
 
-  const _getPreSignedUrlForGumlet = (index, parentResolve) => {
+  const _startServerUploadProcess = () => {
+    // TODO : DownloadedMedia should be the thing thar are not present in uploadedmedia
+    _getPreSignedUrlForGumlet(downloadedMedia, 0);
+
+    for (let i = 0, uploadPromise = Promise.resolve(); i < 2; i++) {
+      uploadPromise.then(() => {
+        new Promise(resolve => {
+          _getPreSignedUrlForGumlet(i, resolve);
+        });
+      });
+    }
+  };
+
+  const _getPreSignedUrlForGumlet = (downloadedMedia, index) => {
     const options = {
       method: 'POST',
       url: 'https://api.gumlet.com/v1/video/assets/upload',
@@ -296,30 +264,31 @@ const GoPro10 = props => {
       data: {collection_id: '63fe06f5b4ade3692e1bb407', format: 'HLS'},
     };
 
-    axios
-      .request(options)
-      .then(function (response) {
-        new Promise((resolve, reject) =>
-          _uploadDownloadedFilesToGumlet(
-            resolve,
-            reject,
-            response.data.upload_url,
-            index,
-            parentResolve,
-          ),
-        );
-      })
-      .catch(function (error) {
-        console.error(error);
-      });
+    if (index < downloadedMedia.length) {
+      axios
+        .request(options)
+        .then(function (response) {
+          new Promise((resolve, reject) =>
+            _uploadDownloadedFilesToGumlet(
+              response.data.upload_url,
+              downloadedMedia,
+              index,
+            ),
+          );
+        })
+        .catch(function (error) {
+          console.error(error);
+        });
+    } else {
+      setIsUploading(false);
+      ToastAndroid.show('Successfully uploaded', ToastAndroid.CENTER);
+    }
   };
 
   const _uploadDownloadedFilesToGumlet = (
-    resolve,
-    reject,
     uploadUrl,
+    downloadedMedia,
     index,
-    parentResolve,
   ) => {
     const {config, fs} = RNFetchBlob;
     let RootDir = fs.dirs.PictureDir;
@@ -327,33 +296,47 @@ const GoPro10 = props => {
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
+          dispatch(
+            setUploadedCompletedMedia({
+              name: downloadedMedia[index].n,
+              psuedoName: downloadedMedia.psuedoName,
+              index: index,
+            }),
+          );
           console.log('Upload success', index);
-          resolve();
         } else {
           console.log('Upload failed', xhr);
-          resolve();
         }
+        _getPreSignedUrlForGumlet(downloadedMedia, index + 1);
       }
-      parentResolve();
     };
     xhr.upload.onprogress = function (evt) {
       if (evt.lengthComputable) {
         let percentComplete = (evt.loaded / evt.total) * 100;
+        dispatch(
+          setUploadingProgress({
+            name: downloadedMedia[index].n,
+            psuedoName: downloadedMedia.psuedoName,
+            progress: percentComplete,
+            index: index,
+          }),
+        );
+        dispatch(
+          setUploadedCompletedMedia({
+            name: downloadedMedia[index].n,
+            psuedoName: downloadedMedia.psuedoName,
+            index: index,
+          }),
+        );
         console.log('Percentage Complete onprogress', index, percentComplete);
       }
     };
-    xhr.addEventListener('progress', evt => {
-      if (evt.lengthComputable) {
-        percentComplete = (evt.loaded / evt.total) * 100;
-      }
-      console.log('Percentage Complete', index, evt);
-    });
     xhr.open('PUT', uploadUrl);
     xhr.setRequestHeader('Content-Type', 'video/mp4');
     xhr.send({
-      uri: 'file://' + RootDir + '/' + orderedMedia[index].n,
+      uri: 'file://' + RootDir + '/' + downloadedMedia[index].psuedoName,
       type: 'video/mp4',
-      name: orderedMedia[index].n,
+      name: downloadedMedia[index].psuedoName,
     });
   };
 
@@ -376,9 +359,10 @@ const GoPro10 = props => {
 
   return (
     <ScrollView style={styles.main}>
-      <GoProImage name={name} id={deviceId} />
+      <GoProImage name={deviceName} id={deviceId} />
       <WifiControlBtn onPress={_connectHotspot} btnText={'Backup Media'} />
-      <DownloadedMediaBox data={orderedMedia} />
+      {isDownloading ? <DownloadedMediaBox data={orderedMedia} /> : null}
+      {isUploading ? <UploadedMediaBox data={downloadedMedia} /> : null}
     </ScrollView>
   );
 };
