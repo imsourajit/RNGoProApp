@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Linking, StyleSheet, Text, ToastAndroid, View} from 'react-native';
+import {
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import GoProImage from './Components/GoProImage';
 import WifiControlBtn from './Components/CustomBtns/WifiControlBtns';
@@ -90,7 +97,7 @@ const GoPro10 = props => {
         false,
       );
       _turnOnTurboTransfer();
-      _getMediaListandDownload();
+      _downloadMediaFromGoPro();
     } catch (e) {
       console.log('Error connecting hotspot', e);
       ToastAndroid.show('Something went wrong', ToastAndroid.CENTER);
@@ -127,6 +134,70 @@ const GoPro10 = props => {
           _getPreSignedUrlForGumlet(i, resolve);
         });
       });
+    }
+  };
+
+  const _downloadSingleFile = async (orderedArray, index, directoryName) => {
+    const date = new Date();
+    const fileNamePrefix = date.getTime();
+    const {config, fs} = RNFetchBlob;
+    let RootDir = fs.dirs.PictureDir;
+    await RNFS.downloadFile({
+      fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${directoryName}/${orderedArray[index].n}`,
+      toFile: RootDir + '/' + fileNamePrefix + orderedArray[index].n,
+      background: true,
+      discretionary: true,
+      cacheable: true,
+      begin: r => {
+        dispatch(
+          setDownloadingProgress({
+            name: orderedArray[index].n,
+            psuedoName: fileNamePrefix + orderedArray[index].n,
+            progress: 0,
+            index: index,
+          }),
+        );
+      },
+      progress: r => {
+        const percentile = (r.bytesWritten / r.contentLength) * 100;
+        console.log(percentile, index);
+
+        dispatch(
+          setDownloadingProgress({
+            name: orderedArray[index].n,
+            psuedoName: fileNamePrefix + orderedArray[index].n,
+            progress: percentile,
+            index: index,
+          }),
+        );
+
+        if (percentile / 100 == 1) {
+          dispatch(setDownloadingProgress({}));
+        }
+      },
+    }).promise;
+    if (index < orderedArray.length - 1) {
+      await _downloadSingleFile(orderedArray, index + 1, directoryName);
+    } else {
+      _turnOffTurboTransfer();
+    }
+  };
+
+  const _downloadMediaFromGoPro = async () => {
+    try {
+      const mediaJson = await fetch(`${GOPRO_BASE_URL}gopro/media/list`);
+      const res = await mediaJson.json();
+      const [{fs, d}, ...rest] = res.media;
+
+      if (Array.isArray(fs)) {
+        const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
+        setMedia(orderedArray);
+        _downloadSingleFile(orderedArray, 0, d);
+      } else {
+        ToastAndroid.show('No media files found', ToastAndroid.CENTER);
+      }
+    } catch (e) {
+      ToastAndroid.show('Something went wrong', ToastAndroid.CENTER);
     }
   };
 
@@ -228,7 +299,6 @@ const GoPro10 = props => {
     axios
       .request(options)
       .then(function (response) {
-        console.log(response.data.upload_url);
         new Promise((resolve, reject) =>
           _uploadDownloadedFilesToGumlet(
             resolve,
@@ -305,19 +375,19 @@ const GoPro10 = props => {
   }
 
   return (
-    <View style={styles.main}>
+    <ScrollView style={styles.main}>
       <GoProImage name={name} id={deviceId} />
       <WifiControlBtn onPress={_connectHotspot} btnText={'Backup Media'} />
       <DownloadedMediaBox data={orderedMedia} />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   main: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    // alignItems: 'center',
+    // justifyContent: 'center',
   },
   noDevice: {
     fontFamily: 'Roboto',

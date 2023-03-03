@@ -14,7 +14,6 @@ const initialState = {
 };
 
 export const GoPro10Reducer = (state = initialState, action) => {
-  console.log(action.type);
   switch (action.type) {
     case DOWNLOAD_MEDIA_PROGRESS: {
       return {...state, downloadingMedia: action.data};
