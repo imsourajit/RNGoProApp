@@ -1,0 +1,60 @@
+import {
+  SET_DIR_NAME_TO_DOWNLOAD,
+  SET_DOWNLOADED_COMPLETED,
+  SET_DOWNLOADING_FILE,
+  SET_GOPRO_FILES_TO_LOCAL_STORAGE,
+  SET_UPLOADEDED_COMPLETED,
+  SET_UPLOADING_FILE,
+} from './GoProActionTypes';
+
+const initialState = {
+  mediaList: [],
+  downloadedMediaList: [],
+  downloadedDirName: null,
+  downloadingFile: null,
+  uploadedMediaList: [],
+  uploadingFile: null,
+};
+
+export const GoProReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case SET_GOPRO_FILES_TO_LOCAL_STORAGE:
+      return {
+        ...state,
+        mediaList: action.data,
+      };
+
+    case SET_DOWNLOADING_FILE:
+      return {
+        ...state,
+        downloadingFile: action.data,
+      };
+
+    case SET_UPLOADING_FILE:
+      return {
+        ...state,
+        uploadingFile: action.data,
+      };
+
+    case SET_DIR_NAME_TO_DOWNLOAD:
+      return {
+        ...state,
+        downloadedDirName: action.data,
+      };
+
+    case SET_DOWNLOADED_COMPLETED:
+      return {
+        ...state,
+        downloadedMediaList: [...state.downloadedMediaList, action.data],
+      };
+
+    case SET_UPLOADEDED_COMPLETED:
+      return {
+        ...state,
+        uploadedMediaList: [...state.downloadedMediaList, action.data],
+      };
+
+    default:
+      return state;
+  }
+};

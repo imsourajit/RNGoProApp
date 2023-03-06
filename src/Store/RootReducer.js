@@ -1,6 +1,6 @@
 import {combineReducers} from 'redux';
-import {GoPro10Reducer} from '../Modules/GoPro10/Redux/GoPro10Reducer';
+import {GoProReducer} from '../Modules/GoPro/Redux/GoProReducers';
 
-const rootReducer = combineReducers({GoPro10Reducer: GoPro10Reducer});
+const rootReducer = combineReducers({GoProReducer: GoProReducer});
 
 export default rootReducer;

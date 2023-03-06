@@ -1,15 +1,21 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-const WifiControlBtn = props => {
-  const _pressed = _ => {
-    props.onPress();
+const CustomBtn = props => {
+  const {btnTxt = '', onPress = () => {}, data = undefined} = props;
+
+  const _pressed = () => {
+    onPress(data);
   };
+
+  if (btnTxt.length < 1) {
+    return null;
+  }
 
   return (
     <TouchableOpacity onPress={_pressed}>
       <View style={styles.btn}>
-        <Text style={styles.btnTxt}>{props.btnText}</Text>
+        <Text style={styles.btnTxt}>{btnTxt}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -17,19 +23,15 @@ const WifiControlBtn = props => {
 
 const styles = StyleSheet.create({
   btn: {
-    backgroundColor: '#22798F',
+    backgroundColor: 'darkblue',
     padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 8,
-    borderRadius: 30,
-    minWidth: 220,
+    margin: 10,
+    borderRadius: 15,
   },
   btnTxt: {
-    fontSize: 15,
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
 });
 
-export default WifiControlBtn;
+export default CustomBtn;

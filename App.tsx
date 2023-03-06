@@ -7,31 +7,18 @@
 
 import React from 'react';
 import {StyleSheet, Text} from 'react-native';
-import GoPro10 from './src/Modules/GoPro10';
 import {NavigationContainer} from '@react-navigation/native';
 import {Provider} from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {persistReducer, persistStore} from 'redux-persist';
-import rootReducer from './src/Store/RootReducer';
-import {createStore} from 'redux';
 import {PersistGate} from 'redux-persist/integration/react';
-
-const persistConfig = {
-  key: 'root',
-  storage: AsyncStorage,
-};
-
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
-export const store = createStore(persistedReducer);
-export const persistor = persistStore(store);
+import GoPro from './src/Modules/GoPro';
+import store, {persistor} from './src/Store/store';
 
 function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
         <NavigationContainer>
-          <GoPro10 />
+          <GoPro />
         </NavigationContainer>
       </PersistGate>
     </Provider>
