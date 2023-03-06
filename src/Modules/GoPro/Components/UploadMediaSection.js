@@ -99,6 +99,7 @@ const UploadMediaSection = props => {
         if (index < downloadedMedia.length) {
           _getPreSignedUrlForGumlet(downloadedMedia, index + 1);
         } else {
+          props.completeUploadProcess();
         }
       }
     };

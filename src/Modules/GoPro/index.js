@@ -10,7 +10,7 @@ import BleManager from 'react-native-ble-manager';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import CustomBtn from './Components/CustomBtn';
 import WifiManager from 'react-native-wifi-reborn';
-import {GOPRO_BASE_URL} from './Utility/Constants';
+import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
 import DownloadMediaSection from './Components/DownloadMediaSection';
 import _ from 'lodash';
 import {useDispatch, useSelector} from 'react-redux';
@@ -19,6 +19,7 @@ import {
   storeGoProMediaFilesListLocally,
 } from './Redux/GoProActions';
 import UploadMediaSection from './Components/UploadMediaSection';
+import Upload from 'react-native-background-upload';
 
 const GoPro = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
@@ -199,20 +200,54 @@ const GoPro = props => {
     ToastAndroid.show('Backup completed', ToastAndroid.CENTER);
   };
 
+  const testForUpload = _ => {
+    const options = {
+      url: 'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod-deletable/63fe06f5b4ade3692e1bb407/6405df0502583615ede9e74f/origin-6405df0502583615ede9e74f?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230306%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230306T123934Z&X-Amz-Expires=3600&X-Amz-Signature=18815efcec41ff99a7bfc6c2212bc5c59f066bb62f8a95497f0c04ec5cfaa1d3&X-Amz-SignedHeaders=host&x-id=PutObject',
+      path: APP_DIR + '/m.MP4',
+      method: 'PUT',
+      type: 'multipart',
+      maxRetries: 2, // set retry count (Android only). Default 2
+      headers: {
+        'content-type': 'application/json',
+      },
+      notification: {
+        enabled: true,
+      },
+      useUtf8Charset: true,
+    };
+
+    const {startUpload} = Upload;
+
+    startUpload(options)
+      .then(uploadId => {
+        console.log('Upload started');
+        Upload.addListener('progress', uploadId, data => {
+          console.log(`Progress: ${data.progress}%`);
+        });
+        Upload.addListener('error', uploadId, data => {
+          console.log(`Error: ${data.error}%`);
+        });
+        Upload.addListener('cancelled', uploadId, data => {
+          console.log('Cancelled!');
+        });
+        Upload.addListener('completed', uploadId, data => {
+          // data includes responseCode: number and responseBody: Object
+          console.log('Completed!');
+        });
+      })
+      .catch(err => {
+        console.log('Upload error!', err);
+      });
+  };
+
   if (!Object.keys(devicesConnected).length) {
     return <NoDevicesConnectedScreen />;
   }
 
-  console.log('Devices Connected', devicesConnected);
-
   return (
     <View style={styles.main}>
       <Text>Device Connected: {devicesConnected.name}</Text>
-      <CustomBtn
-        data={''}
-        onPress={_sessionFilesBackup}
-        btnTxt={'Take Backup'}
-      />
+      <CustomBtn data={''} onPress={testForUpload} btnTxt={'Take Backup'} />
       {isDownloading ? (
         <DownloadMediaSection startUploadingProcess={_startUploadingProcess} />
       ) : null}
