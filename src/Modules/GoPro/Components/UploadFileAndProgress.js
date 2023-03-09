@@ -70,7 +70,7 @@ const UploadFileAndProgress = ({data, index, totalFiles}) => {
             </Text>
           </View>
           <Progress.Bar
-            progress={progressPercentile.progress / 100}
+            progress={uploadingFile?.progress / 100}
             width={Dimensions.get('window').width - 60}
             animated={true}
             color={'#17699b'}
