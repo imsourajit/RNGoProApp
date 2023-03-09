@@ -151,7 +151,7 @@ const GoPro = props => {
   // };
 
   const _startUploadingProcess = async () => {
-    // _setTurboTransfer(0);
+    _setTurboTransfer(0);
     await WifiManager.disconnect();
     setTimeout(() => {
       setIsDownloading(false);
@@ -162,10 +162,6 @@ const GoPro = props => {
   // Start download process
   const _startDownloadingProcess = () => {
     _getMediaList();
-
-    // 1. Set Reducer that download has started
-    // 2. Get all the downloaded files of this session
-    // 3. Get the progress of downloding files
   };
 
   // Turn hotspot and connect to gopro
@@ -177,7 +173,7 @@ const GoPro = props => {
       hotspotDetails.password,
       false,
     );
-    // _setTurboTransfer(1); //Turn on turbo transfer for faster download
+    _setTurboTransfer(1); //Turn on turbo transfer for faster download
     _startDownloadingProcess();
   };
 
@@ -198,6 +194,8 @@ const GoPro = props => {
     setIsUploading(false);
     ToastAndroid.show('Backup completed', ToastAndroid.CENTER);
   };
+
+  console.log(hotspotDetails);
 
   if (!Object.keys(devicesConnected).length) {
     return <NoDevicesConnectedScreen />;
