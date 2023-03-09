@@ -91,7 +91,7 @@ const DownloadMediaSection = props => {
       }),
     );
     if (index < filesToDownload.length - 1) {
-      await _downloadFilesSequentially(filesToDownload, index + 1);
+      _downloadFilesSequentially(filesToDownload, index + 1);
     } else {
       props.startUploadingProcess(); //start uploading process
     }

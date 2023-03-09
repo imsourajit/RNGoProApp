@@ -31,7 +31,7 @@ const UploadMediaSection = props => {
     });
 
     setFilesToUpload(yetToUploadFiles);
-  }, [downloadedMediaList]);
+  }, [downloadedMediaList, uploadedMediaList]);
 
   useEffect(() => {
     if (Array.isArray(filesToUpload) && filesToUpload.length) {
