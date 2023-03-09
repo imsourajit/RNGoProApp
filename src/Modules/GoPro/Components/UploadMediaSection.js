@@ -126,7 +126,13 @@ const UploadMediaSection = props => {
   };
 
   const _renderDownloading = ({item, index}) => {
-    return <UploadFileAndProgress data={item} index={index} />;
+    return (
+      <UploadFileAndProgress
+        data={item}
+        index={index}
+        totalFile={filesToUpload}
+      />
+    );
   };
 
   const _listHeaderComponent = () => (
@@ -142,7 +148,7 @@ const UploadMediaSection = props => {
       data={filesToUpload}
       renderItem={_renderDownloading}
       keyExtractor={item => item.n.toString()}
-      ListHeaderComponent={_listHeaderComponent}
+      // ListHeaderComponent={_listHeaderComponent}
     />
   );
 };

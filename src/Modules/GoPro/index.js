@@ -1,15 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {
-  Image,
   NativeAppEventEmitter,
   StyleSheet,
-  Text,
   ToastAndroid,
   View,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
-import CustomBtn from './Components/CustomBtn';
 import WifiManager from 'react-native-wifi-reborn';
 import {GOPRO_BASE_URL} from './Utility/Constants';
 import DownloadMediaSection from './Components/DownloadMediaSection';
@@ -21,6 +18,7 @@ import {
 } from './Redux/GoProActions';
 import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
+import CustomBtn from './Components/CustomBtn';
 
 const GoPro = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
@@ -153,7 +151,7 @@ const GoPro = props => {
   // };
 
   const _startUploadingProcess = async () => {
-    _setTurboTransfer(0);
+    // _setTurboTransfer(0);
     await WifiManager.disconnect();
     setTimeout(() => {
       setIsDownloading(false);
@@ -179,7 +177,7 @@ const GoPro = props => {
       hotspotDetails.password,
       false,
     );
-    _setTurboTransfer(1); //Turn on turbo transfer for faster download
+    // _setTurboTransfer(1); //Turn on turbo transfer for faster download
     _startDownloadingProcess();
   };
 
@@ -211,11 +209,7 @@ const GoPro = props => {
         deviceDetails={hotspotDetails}
         id={devicesConnected.id}
       />
-      <Image
-        source={require('./Assets/goPro.png')}
-        style={{height: 300, width: 400}}
-      />
-      <Text>Device Connected: {devicesConnected.name}</Text>
+
       <CustomBtn
         data={''}
         onPress={_sessionFilesBackup}

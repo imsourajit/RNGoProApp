@@ -26,7 +26,7 @@ const DownloadMediaSection = props => {
       }
     });
 
-    setFilesToDownload(yetToDownloadFiles);
+    setFilesToDownload(yetToDownloadFiles.reverse());
   }, [mediaList]);
 
   useEffect(() => {
@@ -98,14 +98,14 @@ const DownloadMediaSection = props => {
   };
 
   const _renderDownloading = ({item, index}) => {
-    return <FileAndProgress data={item} index={index} />;
+    return (
+      <FileAndProgress data={item} index={index} totalFiles={filesToDownload} />
+    );
   };
 
   const _listHeaderComponent = () => (
     <Text style={styles.header}>Downloading Files</Text>
   );
-
-  console.log(filesToDownload);
 
   if (Array.isArray(filesToDownload) && !filesToDownload.length) {
     return <Text>No files to download</Text>;
@@ -116,7 +116,7 @@ const DownloadMediaSection = props => {
       data={filesToDownload}
       renderItem={_renderDownloading}
       keyExtractor={item => item.n.toString()}
-      ListHeaderComponent={_listHeaderComponent}
+      // ListHeaderComponent={_listHeaderComponent}
     />
   );
 };
