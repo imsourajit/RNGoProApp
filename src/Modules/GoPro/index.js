@@ -210,11 +210,15 @@ const GoPro = props => {
         id={devicesConnected.id}
       />
 
-      <CustomBtn
-        data={''}
-        onPress={_sessionFilesBackup}
-        btnTxt={'Take Backup'}
-      />
+      {!isDownloading && !isUploading ? (
+        <View style={{flex: 1, justifyContent: 'flex-end', marginBottom: 100}}>
+          <CustomBtn
+            data={''}
+            onPress={_sessionFilesBackup}
+            btnTxt={'Take Backup'}
+          />
+        </View>
+      ) : null}
       {isDownloading ? (
         <DownloadMediaSection startUploadingProcess={_startUploadingProcess} />
       ) : null}
