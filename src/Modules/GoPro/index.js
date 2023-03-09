@@ -20,6 +20,7 @@ import {
   storeGoProMediaFilesListLocally,
 } from './Redux/GoProActions';
 import UploadMediaSection from './Components/UploadMediaSection';
+import GoProDeviceDetails from './Components/GoProDeviceDetails';
 
 const GoPro = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
@@ -206,6 +207,10 @@ const GoPro = props => {
 
   return (
     <View style={styles.main}>
+      <GoProDeviceDetails
+        deviceDetails={hotspotDetails}
+        id={devicesConnected.id}
+      />
       <Image
         source={require('./Assets/goPro.png')}
         style={{height: 300, width: 400}}
@@ -231,6 +236,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#141414',
   },
 });
 
