@@ -217,8 +217,6 @@ const GoPro = props => {
     }
   };
 
-  console.log(hotspotDetails);
-
   if (!Object.keys(devicesConnected).length) {
     return <NoDevicesConnectedScreen />;
   }
