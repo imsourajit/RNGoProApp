@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {
   NativeAppEventEmitter,
+  PermissionsAndroid,
+  Platform,
   StyleSheet,
   ToastAndroid,
   View,
@@ -30,6 +32,26 @@ const GoPro = props => {
   const dispatch = useDispatch();
   const {mediaList, downloadedMediaList, downloadedDirName, uploadedMediaList} =
     useSelector(st => st.GoProReducer);
+
+  useEffect(() => {
+    async function GetAllPermissions() {
+      try {
+        if (Platform.OS === 'android') {
+          const userResponse = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          ]);
+          return userResponse;
+        }
+      } catch (err) {
+        // Warning(err);
+      }
+    }
+
+    GetAllPermissions();
+  }, []);
 
   useEffect(() => {
     let yetToUploadFiles = [];
@@ -151,7 +173,7 @@ const GoPro = props => {
   // };
 
   const _startUploadingProcess = async () => {
-    _setTurboTransfer(0);
+    await _setTurboTransfer(0);
     await WifiManager.disconnect();
     setTimeout(() => {
       setIsDownloading(false);
@@ -173,17 +195,21 @@ const GoPro = props => {
       hotspotDetails.password,
       false,
     );
-    _setTurboTransfer(1); //Turn on turbo transfer for faster download
+    await _setTurboTransfer(1); //Turn on turbo transfer for faster download
     _startDownloadingProcess();
   };
 
-  const _setTurboTransfer = flag => {
-    fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`)
-      .then(r => {
-        ToastAndroid.show('Turbotransfer on', ToastAndroid.CENTER);
-      })
-      .then(r => console.log('Camera State ====', r))
-      .catch(e => console.log('Camera State error', e));
+  const _setTurboTransfer = async flag => {
+    await fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`);
+    ToastAndroid.show(`Turbo transfer ${flag ? 'off' : 'on'}`);
+    return;
+
+    // fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`)
+    //   .then(r => {
+    //     ToastAndroid.show('Turbotransfer on', ToastAndroid.CENTER);
+    //   })
+    //   .then(r => console.log('Camera State ====', r))
+    //   .catch(e => console.log('Camera State error', e));
   };
 
   const _sessionFilesBackup = async () => {
