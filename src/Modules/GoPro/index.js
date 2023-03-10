@@ -21,6 +21,7 @@ import {
 import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import CustomBtn from './Components/CustomBtn';
+import QRCode from 'react-native-qrcode-svg';
 
 const GoPro = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
@@ -51,22 +52,6 @@ const GoPro = props => {
     }
 
     GetAllPermissions();
-  }, []);
-
-  useEffect(() => {
-    let yetToUploadFiles = [];
-
-    downloadedMediaList.map((item, index) => {
-      const isDefined = _.find(uploadedMediaList, obj => obj.n == item.n);
-      if (isDefined == undefined) {
-        yetToUploadFiles.push(item);
-      }
-    });
-
-    if (yetToUploadFiles.length) {
-      setIsDownloading(false);
-      setIsUploading(true);
-    }
   }, []);
 
   useEffect(() => {
@@ -173,7 +158,7 @@ const GoPro = props => {
   // };
 
   const _startUploadingProcess = async () => {
-    await _setTurboTransfer(0);
+    // await _setTurboTransfer(0);
     await WifiManager.disconnect();
     setTimeout(() => {
       setIsDownloading(false);
@@ -195,21 +180,13 @@ const GoPro = props => {
       hotspotDetails.password,
       false,
     );
-    await _setTurboTransfer(1); //Turn on turbo transfer for faster download
+    // await _setTurboTransfer(1); //Turn on turbo transfer for faster download
     _startDownloadingProcess();
   };
 
   const _setTurboTransfer = async flag => {
     await fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`);
     ToastAndroid.show(`Turbo transfer ${flag ? 'off' : 'on'}`);
-    return;
-
-    // fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`)
-    //   .then(r => {
-    //     ToastAndroid.show('Turbotransfer on', ToastAndroid.CENTER);
-    //   })
-    //   .then(r => console.log('Camera State ====', r))
-    //   .catch(e => console.log('Camera State error', e));
   };
 
   const _sessionFilesBackup = async () => {
@@ -219,6 +196,25 @@ const GoPro = props => {
   const _completeUploadProcess = () => {
     setIsUploading(false);
     ToastAndroid.show('Backup completed', ToastAndroid.CENTER);
+  };
+
+  // To make sure on load the take backup button should be visible even if there are pending uploads
+  const _scanForFootagesToUploadToServer = () => {
+    let yetToUploadFiles = [];
+
+    downloadedMediaList.map((item, index) => {
+      const isDefined = _.find(uploadedMediaList, obj => obj.n == item.n);
+      if (isDefined == undefined) {
+        yetToUploadFiles.push(item);
+      }
+    });
+
+    if (yetToUploadFiles.length) {
+      setIsDownloading(false);
+      setIsUploading(true);
+    } else {
+      ToastAndroid.show('No media files found to upload', ToastAndroid.CENTER);
+    }
   };
 
   console.log(hotspotDetails);
@@ -233,7 +229,15 @@ const GoPro = props => {
         deviceDetails={hotspotDetails}
         id={devicesConnected.id}
       />
-
+      <View
+        style={{marginVertical: 60, backgroundColor: '#FFFFFF', padding: 30}}>
+        <QRCode value="oW1mVr1080!W!GLC" size={200} />
+      </View>
+      <CustomBtn
+        data={''}
+        onPress={_scanForFootagesToUploadToServer}
+        btnTxt={'Scan for footages to upload'}
+      />
       {!isDownloading && !isUploading ? (
         <View style={{flex: 1, justifyContent: 'flex-end', marginBottom: 100}}>
           <CustomBtn

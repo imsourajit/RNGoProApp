@@ -9,28 +9,30 @@ const UploadFileAndProgress = ({data, index, totalFiles}) => {
   const progressPercentile = uploadingFile?.progress ?? 0;
 
   let m = [];
-
-  for (let i = 0; i < index; i++) {
-    m.push(
-      <View
-        style={{
-          flexDirection: 'row',
-          marginHorizontal: 10,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <Image
-          source={require('../Assets/tick.png')}
+  if (Array.isArray(totalFiles) && totalFiles.length) {
+    for (let i = 0; i < index; i++) {
+      m.push(
+        <View
+          key={totalFiles[i].n}
           style={{
-            width: 15,
-            height: 15,
-            backgroundColor: '#222222',
-            resizeMode: 'contain',
-          }}
-        />
-        <Text style={{marginLeft: 2, fontSize: 14}}>{totalFiles[i].n}</Text>
-      </View>,
-    );
+            flexDirection: 'row',
+            marginHorizontal: 10,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Image
+            source={require('../Assets/tick.png')}
+            style={{
+              width: 15,
+              height: 15,
+              backgroundColor: '#222222',
+              resizeMode: 'contain',
+            }}
+          />
+          <Text style={{marginLeft: 2, fontSize: 14}}>{totalFiles[i].n}</Text>
+        </View>,
+      );
+    }
   }
 
   if (!uploadingFile) {

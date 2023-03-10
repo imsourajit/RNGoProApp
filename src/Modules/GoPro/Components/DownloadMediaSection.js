@@ -26,7 +26,7 @@ const DownloadMediaSection = props => {
       }
     });
 
-    setFilesToDownload(yetToDownloadFiles.reverse());
+    setFilesToDownload(yetToDownloadFiles);
   }, [mediaList]);
 
   useEffect(() => {
