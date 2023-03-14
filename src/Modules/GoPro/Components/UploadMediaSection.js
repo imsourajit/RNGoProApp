@@ -24,7 +24,10 @@ const UploadMediaSection = props => {
     let yetToUploadFiles = [];
 
     downloadedMediaList.map((item, index) => {
-      const isDefined = _.find(uploadedMediaList, obj => obj.n == item.n);
+      const isDefined = _.find(
+        uploadedMediaList,
+        obj => obj.psuedoName == item.psuedoName,
+      );
       if (isDefined == undefined) {
         yetToUploadFiles.push(item);
       }
@@ -93,13 +96,13 @@ const UploadMediaSection = props => {
             }),
           );
           console.log('Upload success', index);
+          if (index < downloadedMedia.length) {
+            _getPreSignedUrlForGumlet(downloadedMedia, index + 1);
+          } else {
+            props.completeUploadProcess();
+          }
         } else {
           console.log('Upload failed', xhr);
-        }
-        if (index < downloadedMedia.length) {
-          _getPreSignedUrlForGumlet(downloadedMedia, index + 1);
-        } else {
-          props.completeUploadProcess();
         }
       }
     };

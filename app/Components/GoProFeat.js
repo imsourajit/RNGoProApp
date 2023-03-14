@@ -1,24 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  TouchableOpacity,
   NativeEventEmitter,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
-import * as path from 'path';
 import WifiManager from 'react-native-wifi-reborn';
 
 import * as protobuf from 'protobufjs';
+import {bytesToString} from 'convert-string';
 
 const jsonDescriptor = require('./goprolivestream.json');
 
 const reqLiveStream = require('./RequestLiveStream_pb');
-import buffer from 'buffer';
-import {Message} from 'protobufjs';
-import {bytesToString} from 'convert-string';
 
 const bleManagerEmitter = new NativeEventEmitter(BleManager);
 
@@ -57,6 +53,7 @@ async function connectAndPrepare(peripheral, service, characteristic) {
   );
   // Actions triggereng BleManagerDidUpdateValueForCharacteristic event
 }
+
 const GoProFeat = props => {
   const [connectedDevice, setConnectedDevice] = useState({id: ''});
 
@@ -217,7 +214,7 @@ const GoProFeat = props => {
     const msgType = root.lookupType('goprolivestream.LiveStream');
 
     const message = msgType.create({
-      url: 'rtmp://a.rtmp.youtube.com/live2/9pdk-jfgv-6fau-z4v4-1wha/',
+      url: 'rtmp://live.twitch.tv/app/live_886107155_KbkkdL6BWSiSfSVm6CibN3aqedvZL5/',
       encode: true,
     });
 

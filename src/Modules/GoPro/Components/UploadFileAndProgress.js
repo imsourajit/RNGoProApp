@@ -35,10 +35,6 @@ const UploadFileAndProgress = ({data, index, totalFiles}) => {
     }
   }
 
-  if (!uploadingFile) {
-    return null;
-  }
-
   if (uploadingFile && uploadingFile.index == index) {
     return (
       <View

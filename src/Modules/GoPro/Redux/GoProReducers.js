@@ -51,7 +51,7 @@ export const GoProReducer = (state = initialState, action) => {
     case SET_UPLOADEDED_COMPLETED:
       return {
         ...state,
-        uploadedMediaList: [...state.downloadedMediaList, action.data],
+        uploadedMediaList: [...state.uploadedMediaList, action.data],
       };
 
     default:

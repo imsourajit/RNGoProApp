@@ -180,13 +180,17 @@ const GoPro = props => {
       hotspotDetails.password,
       false,
     );
-    // await _setTurboTransfer(1); //Turn on turbo transfer for faster download
+    _setTurboTransfer(1); //Turn on turbo transfer for faster download
     _startDownloadingProcess();
   };
 
-  const _setTurboTransfer = async flag => {
-    await fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`);
-    ToastAndroid.show(`Turbo transfer ${flag ? 'off' : 'on'}`);
+  const _setTurboTransfer = flag => {
+    fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`)
+      .then(r => {
+        ToastAndroid.show('Turbotransfer on', ToastAndroid.CENTER);
+      })
+      .then(r => console.log('Camera State ====', r))
+      .catch(e => console.log('Camera State error', e));
   };
 
   const _sessionFilesBackup = async () => {
