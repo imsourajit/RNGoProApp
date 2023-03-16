@@ -28,6 +28,7 @@ const CameraAPI = () => {
 
   useEffect(() => {
     if (!isFocused) {
+      Orientation.lockToPortrait();
       Orientation.unlockAllOrientations();
     }
   }, [isFocused]);
@@ -38,7 +39,7 @@ const CameraAPI = () => {
 
   const handleAuthApi = async () => {
     const response = await fetch(BASE_URL + '/auth/api-key', {
-      body: '{"apiKey": API_KEY}',
+      body: '{"apiKey": "' + API_KEY + '"}',
       headers: {
         'Content-Type': 'application/json',
       },

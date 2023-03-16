@@ -41,10 +41,14 @@ const MainScreen = props => {
       <Text style={styles.question}>Choose a device to do live stream</Text>
       <View style={styles.deviceLists}>
         <Pressable onPress={goToCamera}>
-          <View style={styles.box} />
+          <View style={styles.box}>
+            <Text style={styles.btnTxt}>Camera</Text>
+          </View>
         </Pressable>
         <Pressable onPress={goToGoPro}>
-          <View style={styles.box} />
+          <View style={styles.box}>
+            <Text>Go Pro</Text>
+          </View>
         </Pressable>
       </View>
     </View>
@@ -65,11 +69,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     flexDirection: 'row',
+    marginTop: 15,
   },
   box: {
     width: 100,
     height: 100,
-    backgroundColor: '#ABABAB',
+    // backgroundColor: '#ABABAB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnTxt: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
