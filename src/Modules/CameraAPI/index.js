@@ -38,7 +38,7 @@ const CameraAPI = () => {
 
   const handleAuthApi = async () => {
     const response = await fetch(BASE_URL + '/auth/api-key', {
-      body: '{"apiKey": "b4nYqEu0r4AAYx22BHddr5bAAXWpMVyQaytYfP33xui"}',
+      body: '{"apiKey": API_KEY}',
       headers: {
         'Content-Type': 'application/json',
       },
