@@ -9,6 +9,11 @@ const UploadFileAndProgress = ({data, index, totalFiles}) => {
   const progressPercentile = uploadingFile?.progress ?? 0;
 
   let m = [];
+
+  if (!totalFiles?.length) {
+    return null;
+  }
+
   if (Array.isArray(totalFiles) && totalFiles.length) {
     for (let i = 0; i < index; i++) {
       m.push(
@@ -51,9 +56,11 @@ const UploadFileAndProgress = ({data, index, totalFiles}) => {
             // marginTop: 5,
             fontSize: 16,
           }}>
-          {`Uploading ${index + 1} of ${
-            totalFiles?.length ?? 0
-          } files to Server`}
+          {progressPercentile == 0
+            ? 'Optimizing Video'
+            : `Uploading ${index + 1} of ${
+                totalFiles?.length ?? 0
+              } files to Server`}
         </Text>
         <View>
           <View
@@ -72,6 +79,7 @@ const UploadFileAndProgress = ({data, index, totalFiles}) => {
             width={Dimensions.get('window').width - 60}
             animated={true}
             color={'#17699b'}
+            indeterminate={progressPercentile == 0}
           />
         </View>
         <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 10}}>

@@ -6,6 +6,7 @@ import {APP_DIR} from '../Utility/Constants';
 import axios from 'axios';
 import UploadFileAndProgress from './UploadFileAndProgress';
 import {setUploadCompleted, setUploadingFile} from '../Redux/GoProActions';
+import {backgroundUpload, Video} from 'react-native-compressor';
 
 const UploadMediaSection = props => {
   const {
@@ -63,7 +64,7 @@ const UploadMediaSection = props => {
         .request(options)
         .then(function (response) {
           new Promise((resolve, reject) =>
-            _uploadDownloadedFilesToGumlet(
+            _compressAndUploadToGumlet(
               response.data.upload_url,
               downloadedMedia,
               index,
@@ -76,6 +77,63 @@ const UploadMediaSection = props => {
     } else {
       ToastAndroid.show('Successfully uploaded', ToastAndroid.CENTER);
     }
+  };
+
+  const _compressAndUploadToGumlet = async (
+    uploadUrl,
+    downloadedMedia,
+    index,
+  ) => {
+    try {
+      const dstUrl = await Video.compress(
+        'file://' + APP_DIR + '/' + downloadedMedia[index].psuedoName,
+        {
+          compressionMethod: 'auto',
+          minimumFileSizeForCompress: 0,
+        },
+        progress => {
+          console.log('Compression Progress: ', progress);
+          dispatch(
+            setUploadingFile({
+              name: downloadedMedia[index].n,
+              psuedoName: downloadedMedia.psuedoName,
+              progress: 0,
+              index: index,
+            }),
+          );
+        },
+      );
+      console.log({dstUrl}, 'compression result');
+
+      const uploadResult = await backgroundUpload(
+        uploadUrl,
+        dstUrl,
+        {
+          httpMethod: 'PUT',
+          headers: {
+            'Content-Type': 'video/mp4',
+          },
+        },
+        (written, total) => {
+          console.log(written, total);
+          dispatch(
+            setUploadingFile({
+              name: downloadedMedia[index].n,
+              psuedoName: downloadedMedia.psuedoName,
+              progress: (written / total) * 100,
+              index: index,
+            }),
+          );
+          if (written / total == 1) {
+            if (index < downloadedMedia.length) {
+              _getPreSignedUrlForGumlet(downloadedMedia, index + 1);
+            } else {
+              props.completeUploadProcess();
+            }
+          }
+        },
+      );
+    } catch (e) {}
   };
 
   const _uploadDownloadedFilesToGumlet = (

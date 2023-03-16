@@ -10,7 +10,7 @@ import {
 import BleManager from 'react-native-ble-manager';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import WifiManager from 'react-native-wifi-reborn';
-import {GOPRO_BASE_URL} from './Utility/Constants';
+import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
 import DownloadMediaSection from './Components/DownloadMediaSection';
 import _ from 'lodash';
 import {useDispatch, useSelector} from 'react-redux';
@@ -22,6 +22,7 @@ import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import CustomBtn from './Components/CustomBtn';
 import QRCode from 'react-native-qrcode-svg';
+import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 
 const GoPro = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
@@ -127,6 +128,137 @@ const GoPro = props => {
       getHotspotDetails();
     }
   }, [devicesConnected]);
+
+  const testFFmpegCompression = _ => {
+    // let RootDir = APP_DIR;
+    // const xhr = new XMLHttpRequest();
+    // xhr.onreadystatechange = function () {
+    //   if (xhr.readyState === 4) {
+    //     if (xhr.status === 200) {
+    //       console.log('Upload success');
+    //     }
+    //   }
+    // };
+    // xhr.upload.onprogress = function (evt) {
+    //   if (evt.lengthComputable) {
+    //     let percentComplete = (evt.loaded / evt.total) * 100;
+    //     console.log('P co', percentComplete);
+    //   }
+    // };
+    // xhr.open(
+    //   'PUT',
+    //   'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/641067b292827199f9781323/origin-641067b292827199f9781323?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T122523Z&X-Amz-Expires=3600&X-Amz-Signature=94fdd4bbd5ccc473969152cddc310c396f431a160178ed2bb4f4a2914f52a310&X-Amz-SignedHeaders=host&x-id=PutObject',
+    // );
+    // xhr.setRequestHeader('Content-Type', 'video/mp4');
+    // xhr.send({
+    //   uri: 'file://${APP_DIR}/jil2.MP4',
+    //   type: 'video/mp4',
+    //   name: 'jil.MP4',
+    // });
+
+    FFmpegKit.executeAsync(
+      `-i file://${APP_DIR}/jil.MP4 -c:v mpeg4 file://${APP_DIR}/jil2.MP4`,
+      async session => {
+        const returnCode = await session.getReturnCode();
+
+        if (ReturnCode.isSuccess(returnCode)) {
+          console.log('Success Log');
+
+          let RootDir = APP_DIR;
+          const xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+              if (xhr.status === 200) {
+                console.log('Upload success');
+              }
+            }
+          };
+          // xhr.upload.onprogress = function (evt) {
+          //   if (evt.lengthComputable) {
+          //     let percentComplete = (evt.loaded / evt.total) * 100;
+          //     console.log('P co', percentComplete);
+          //   }
+          // };
+          xhr.open(
+            'PUT',
+            'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/641067b292827199f9781323/origin-641067b292827199f9781323?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T122523Z&X-Amz-Expires=3600&X-Amz-Signature=94fdd4bbd5ccc473969152cddc310c396f431a160178ed2bb4f4a2914f52a310&X-Amz-SignedHeaders=host&x-id=PutObject',
+          );
+          xhr.setRequestHeader('Content-Type', 'video/mp4');
+          xhr.send({
+            uri: 'file://${APP_DIR}/jil2.MP4',
+            type: 'video/mp4',
+            name: 'jil.MP4',
+          });
+          // SUCCESS
+        } else if (ReturnCode.isCancel(returnCode)) {
+          // CANCEL
+          console.log('Cancel Log');
+        } else {
+          // ERROR
+          console.log('Error Log');
+        }
+      },
+    );
+  };
+
+  // const testCompress = async () => {
+  //   try {
+  //     const dstUrl = await Video.compress(
+  //       'file://' + APP_DIR + '/jil.MP4',
+  //       {
+  //         compressionMethod: 'auto',
+  //         minimumFileSizeForCompress: 0,
+  //         // maxSize: 1080,
+  //       },
+  //       progress => {
+  //         console.log('Compression Progress: ', progress);
+  //       },
+  //     );
+  //     console.log({dstUrl}, 'compression result');
+  //
+  //     const uploadResult = await backgroundUpload(
+  //       'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/6410749e92827199f9782828/origin-6410749e92827199f9782828?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T132031Z&X-Amz-Expires=3600&X-Amz-Signature=54b1f46f8ce3618f5faf1f0f7b0d14a310e2f8fc8d94fc472859da1048cff46f&X-Amz-SignedHeaders=host&x-id=PutObject',
+  //       dstUrl,
+  //       {
+  //         httpMethod: 'PUT',
+  //         headers: {
+  //           'Content-Type': 'video/mp4',
+  //         },
+  //       },
+  //       (written, total) => {
+  //         console.log(written, total);
+  //       },
+  //     );
+  //
+  //     let RootDir = APP_DIR;
+  //     const xhr = new XMLHttpRequest();
+  //     xhr.onreadystatechange = function () {
+  //       if (xhr.readyState === 4) {
+  //         if (xhr.status === 200) {
+  //           console.log('Upload success');
+  //         }
+  //       }
+  //     };
+  //     // xhr.upload.onprogress = function (evt) {
+  //     //   if (evt.lengthComputable) {
+  //     //     let percentComplete = (evt.loaded / evt.total) * 100;
+  //     //     console.log('P co', percentComplete);
+  //     //   }
+  //     // };
+  //     xhr.open(
+  //       'PUT',
+  //       'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/6410707892827199f9781f03/origin-6410707892827199f9781f03?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T130248Z&X-Amz-Expires=3600&X-Amz-Signature=e19cf26153ade1861943f1fb9c81a581204b6422ba531c51b32402fcb80a641e&X-Amz-SignedHeaders=host&x-id=PutObject',
+  //     );
+  //     xhr.setRequestHeader('Content-Type', 'video/mp4');
+  //     xhr.send({
+  //       uri: dstUrl,
+  //       type: 'video/mp4',
+  //       name: 'jil.MP4',
+  //     });
+  //   } catch (error) {
+  //     console.log({error}, 'compression error');
+  //   }
+  // };
 
   const _getMediaList = async () => {
     try {
