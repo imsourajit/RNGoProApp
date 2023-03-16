@@ -29,7 +29,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 46,
+    paddingHorizontal: 46,
+    backgroundColor: '#000000',
   },
   noDeviceConnectedTxt: {
     fontSize: 20,
