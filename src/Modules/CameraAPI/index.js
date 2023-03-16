@@ -28,7 +28,7 @@ const CameraAPI = () => {
 
   useEffect(() => {
     if (!isFocused) {
-      Orientation.lockToPortrait();
+      Orientation.unlockAllOrientations();
     }
   }, [isFocused]);
 
