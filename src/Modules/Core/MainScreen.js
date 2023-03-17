@@ -1,11 +1,13 @@
 import React, {useEffect} from 'react';
 import {
+  Dimensions,
   PermissionsAndroid,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import RightArrowBox from './Components/RightArrowBox';
 
 const MainScreen = props => {
   useEffect(() => {
@@ -29,17 +31,37 @@ const MainScreen = props => {
   };
 
   const goToCamera = () => {
-    props.navigation.navigate('Camera');
+    props.navigation.navigate('BatchSelectionScreen', {
+      selectedDevice: 'CAMERA',
+    });
   };
 
   const goToGoPro = () => {
-    props.navigation.navigate('GoPro');
+    props.navigation.navigate('BatchSelectionScreen', {
+      selectedDevice: 'GO_PRO',
+    });
+  };
+
+  const _openSessionDetailsPage = () => {
+    props.navigation.navigate('SessionListsScreen');
+  };
+  const _openBatchesPage = () => {
+    props.navigation.navigate('BatchesListScreen');
   };
 
   return (
     <View style={styles.main}>
-      <Text style={styles.question}>Choose a device to do live stream</Text>
-      <View style={styles.deviceLists}>
+      <View style={styles.arrowBoxes}>
+        <RightArrowBox
+          pressed={_openSessionDetailsPage}
+          btnTitle={'Sessions'}
+        />
+        <RightArrowBox pressed={_openBatchesPage} btnTitle={'Batches'} />
+      </View>
+
+      <View style={styles.sessionBtnBoxes}>
+        <Text style={styles.sessionBtnBoxesTitle}>Start Session</Text>
+
         <Pressable onPress={goToCamera}>
           <View style={styles.box}>
             <Text style={styles.btnTxt}>Camera</Text>
@@ -47,10 +69,25 @@ const MainScreen = props => {
         </Pressable>
         <Pressable onPress={goToGoPro}>
           <View style={styles.box}>
-            <Text>Go Pro</Text>
+            <Text style={styles.btnTxt}>Go Pro</Text>
           </View>
         </Pressable>
       </View>
+
+      {/*<Text style={styles.question}>Choose a device to do live stream</Text>*/}
+
+      {/*<View style={styles.deviceLists}>*/}
+      {/*  <Pressable onPress={goToCamera}>*/}
+      {/*    <View style={styles.box}>*/}
+      {/*      <Text style={styles.btnTxt}>Camera</Text>*/}
+      {/*    </View>*/}
+      {/*  </Pressable>*/}
+      {/*  <Pressable onPress={goToGoPro}>*/}
+      {/*    <View style={styles.box}>*/}
+      {/*      <Text>Go Pro</Text>*/}
+      {/*    </View>*/}
+      {/*  </Pressable>*/}
+      {/*</View>*/}
     </View>
   );
 };
@@ -59,7 +96,17 @@ const styles = StyleSheet.create({
   main: {
     backgroundColor: '#000000',
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+  },
+  arrowBoxes: {
+    paddingHorizontal: 32,
+  },
+  sessionBtnBoxes: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: 20,
+    alignItems: 'center',
   },
   question: {
     fontSize: 25,
@@ -72,15 +119,24 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   box: {
-    width: 100,
-    height: 100,
-    // backgroundColor: '#ABABAB',
+    width: Dimensions.get('window').width - 120,
+    // height: 100,
+    backgroundColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 25,
+    padding: 10,
+    marginVertical: 20,
   },
   btnTxt: {
-    fontSize: 16,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  sessionBtnBoxesTitle: {
+    fontSize: 33,
+    fontWeight: 'bold',
+    color: '#000000',
   },
 });
 
