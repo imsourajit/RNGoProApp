@@ -1,12 +1,13 @@
 import NetInfo from '@react-native-community/netinfo';
 import React from 'react';
 import axios from 'axios';
-import {Platform, ToastAndroid} from 'react-native';
+import {ToastAndroid} from 'react-native';
+import {updateAuthToken} from '../Modules/Core/Redux/UserActions';
 
 const STAGING_END_POINT = 'https://qa-platform.thewagmi.app/platform';
 const PRODUCTION_END_POINT = 'https://platform.thewagmi.app/platform';
 
-const apiUrl = PRODUCTION_END_POINT;
+const apiUrl = STAGING_END_POINT;
 
 const getDeviceName = async () => {
   let deviceName = '';
@@ -14,13 +15,12 @@ const getDeviceName = async () => {
   return Promise.resolve(deviceName);
 };
 
-const DataServices = {
+const ApiService = {
   getStoredData: () => {},
 
   xVedToken: null,
 
-  getXVedToken: () => {
-  },
+  getXVedToken: () => {},
 
   getConfig: () => {
     let headerParams = {
@@ -58,8 +58,8 @@ const DataServices = {
     failureCallback = null,
     extraParams = {},
   ) => {
-    const hasConnection = await DataServices.init();
-    // inProgress && dispatch(inProgress());
+    const hasConnection = await ApiService.init();
+    inProgress && dispatch(inProgress());
     if (hasConnection) {
       let endPoint = `${apiUrl}/${url}`;
 
@@ -68,23 +68,23 @@ const DataServices = {
       }
 
       axios
-        .get(endPoint, DataServices.getConfig())
+        .get(endPoint, ApiService.getConfig())
         .then(res => {
-          // if (res.headers.hasOwnProperty('x-ved-token')) {
-          //   dispatch(updateUserToken(res.headers['x-ved-token']));
-          // }
+          if (res.headers.hasOwnProperty('x-ved-token')) {
+            dispatch(updateAuthToken(res.headers['x-ved-token']));
+          }
 
           if (successCallback) {
             successCallback(res?.data ?? []);
           }
-          // success && dispatch(success(res?.data ?? []));
+          success && dispatch(success(res?.data ?? []));
         })
         .catch(e => {
           console.log('Api error', JSON.stringify(e));
           if (failureCallback) {
             failureCallback(e.response?.data);
           }
-          // failure && dispatch(failure(e.response?.data));
+          failure && dispatch(failure(e.response?.data));
         });
     }
   },
@@ -101,29 +101,29 @@ const DataServices = {
     failureCallback = null,
     extraParams = {},
   ) => {
-    const hasConnection = await DataServices.init();
-    // inProgress && dispatch(inProgress());
+    const hasConnection = await ApiService.init();
+    inProgress && dispatch(inProgress());
     if (hasConnection) {
       const endPoint = `${apiUrl}/${url}`;
       axios
-        .post(endPoint, params, DataServices.getConfig())
+        .post(endPoint, params, ApiService.getConfig())
         .then(res => {
-          // if (res.headers.hasOwnProperty('x-ved-token')) {
-          //   dispatch(updateUserToken(res.headers['x-ved-token']));
-          // }
+          if (res.headers.hasOwnProperty('x-ved-token')) {
+            dispatch(updateAuthToken(res.headers['x-ved-token']));
+          }
           if (successCallback) {
             successCallback(res?.data);
           }
-          // success && dispatch(success(res?.data));
+          success && dispatch(success(res?.data));
         })
         .catch(e => {
           if (failureCallback) {
             failureCallback(e.response.data);
           }
-          // failure && dispatch(failure(e.response.data));
+          failure && dispatch(failure(e.response.data));
         });
     }
   },
 };
 
-export default DataServices;
+export default ApiService;

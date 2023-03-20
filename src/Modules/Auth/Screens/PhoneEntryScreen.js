@@ -7,15 +7,32 @@ import {
   ToastAndroid,
   View,
 } from 'react-native';
+import {useDispatch} from 'react-redux';
+import {sendOtpForValidation} from '../../Core/Redux/UserActions';
 
 const PhoneEntryScreen = props => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isOtpSent, setOtpSentStatus] = useState(false);
   const [otp, setOtp] = useState('');
 
-  const sendOtp = () => {
+  const dispatch = useDispatch();
+
+  const proceedBtnPressed = () => {
     if (_checkPhoneNumberValidation()) {
-      props.navigation.navigate('OtpInputScreen');
+      dispatch(
+        sendOtpForValidation(
+          {
+            phoneNumber,
+          },
+          response => {
+            props.navigation.navigate('OtpInputScreen', {
+              phoneNumber,
+            });
+            console.log('Send otp response', response);
+          },
+          error => console.log('Otp send api error', error),
+        ),
+      );
     }
   };
 
@@ -30,7 +47,7 @@ const PhoneEntryScreen = props => {
   return (
     <View style={styles.main}>
       <View>
-        <Text>Enter your mobile number</Text>
+        <Text style={{color: '#FFFFFF'}}>Enter your mobile number</Text>
         <TextInput
           style={styles.inputBox}
           value={phoneNumber}
@@ -42,7 +59,7 @@ const PhoneEntryScreen = props => {
         />
       </View>
 
-      <Pressable onPress={sendOtp}>
+      <Pressable onPress={proceedBtnPressed}>
         <View style={styles.btn}>
           <Text style={styles.btnTxt}>Proceed</Text>
         </View>

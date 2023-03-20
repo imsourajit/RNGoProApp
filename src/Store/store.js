@@ -6,7 +6,7 @@ import rootReducer from './RootReducer';
 
 const persistConfig = {
   key: 'root',
-  whitelist: ['GoProReducer'],
+  whitelist: ['GoProReducer', 'userReducer'],
   storage: AsyncStorage,
   timeout: null,
 };

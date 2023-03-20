@@ -6,19 +6,20 @@
  */
 
 import React from 'react';
-import {StyleSheet, Text} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import store, {persistor} from './src/Store/store';
-import AuthStackNavigator from './src/Modules/Auth/AuthNavigator';
+
+import Source from './src/Modules/Core/Source';
 
 function App() {
   return (
     <Provider store={store}>
-      <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
+      <PersistGate persistor={persistor}>
         <NavigationContainer>
-          <AuthStackNavigator />
+          <Source />
         </NavigationContainer>
       </PersistGate>
     </Provider>

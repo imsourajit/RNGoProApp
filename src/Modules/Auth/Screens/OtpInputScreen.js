@@ -1,14 +1,39 @@
 import React, {useState} from 'react';
 import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
+import {useDispatch} from 'react-redux';
+import {setUserDetails, validateOtp} from '../../Core/Redux/UserActions';
 
 const OtpInputScreen = props => {
   const [otpCode, setOtpCode] = useState('');
-  const validateOtp = () => {};
+  const [otpValidationError, setOtpValidationError] = useState('');
+
+  const {phoneNumber} = props.route.params;
+
+  const dispatch = useDispatch();
+
+  const validateOtpBtnPressed = () => {
+    dispatch(
+      validateOtp(
+        {
+          otp: otpCode,
+          phoneNumber: phoneNumber,
+        },
+        res => {
+          dispatch(setUserDetails(res.user));
+          console.log('Otp Verification response', res);
+        },
+        err => {
+          setOtpValidationError(err.errorMessage);
+          console.log('Otp Verification error', err);
+        },
+      ),
+    );
+  };
 
   return (
     <View style={styles.main}>
       <View>
-        <Text>Enter otp</Text>
+        <Text style={{color: '#FFFFFF'}}>Enter otp</Text>
         <TextInput
           style={styles.otpCodeContainer}
           value={otpCode}
@@ -16,9 +41,10 @@ const OtpInputScreen = props => {
           maxLength={4}
           keyboardType={'phone-pad'}
         />
+        <Text style={{color: 'red', fontSize: 16}}>{otpValidationError}</Text>
       </View>
 
-      <Pressable onPress={validateOtp}>
+      <Pressable onPress={validateOtpBtnPressed}>
         <View style={styles.btn}>
           <Text style={styles.btnTxt}>Proceed</Text>
         </View>
