@@ -61,7 +61,6 @@ const MainScreen = props => {
 
       <View style={styles.sessionBtnBoxes}>
         <Text style={styles.sessionBtnBoxesTitle}>Start Session</Text>
-
         <Pressable onPress={goToCamera}>
           <View style={styles.box}>
             <Text style={styles.btnTxt}>Camera</Text>
@@ -73,21 +72,6 @@ const MainScreen = props => {
           </View>
         </Pressable>
       </View>
-
-      {/*<Text style={styles.question}>Choose a device to do live stream</Text>*/}
-
-      {/*<View style={styles.deviceLists}>*/}
-      {/*  <Pressable onPress={goToCamera}>*/}
-      {/*    <View style={styles.box}>*/}
-      {/*      <Text style={styles.btnTxt}>Camera</Text>*/}
-      {/*    </View>*/}
-      {/*  </Pressable>*/}
-      {/*  <Pressable onPress={goToGoPro}>*/}
-      {/*    <View style={styles.box}>*/}
-      {/*      <Text>Go Pro</Text>*/}
-      {/*    </View>*/}
-      {/*  </Pressable>*/}
-      {/*</View>*/}
     </View>
   );
 };

@@ -12,6 +12,9 @@ import Orientation, {
   OrientationLocker,
 } from 'react-native-orientation-locker';
 import {useIsFocused} from '@react-navigation/native';
+import LiveTimer from './Components/LiveTimer';
+import {useDispatch} from 'react-redux';
+import {setLiveTime} from './Redux/CameraApiActions';
 
 const CameraAPI = () => {
   const ref = useRef(null);
@@ -19,6 +22,7 @@ const CameraAPI = () => {
   const [accessToken, setAccessToken] = useState(null);
 
   const isFocused = useIsFocused();
+  const dispatch = useDispatch();
 
   const styles = appStyles(streaming);
 
@@ -71,6 +75,7 @@ const CameraAPI = () => {
       ref.current?.stopStreaming();
       setStreaming(false);
     } else {
+      dispatch(setLiveTime(0));
       ref.current?.startStreaming(resJSON.streamKey);
       setStreaming(true);
     }
@@ -119,6 +124,14 @@ const CameraAPI = () => {
 
       <View
         style={[
+          buttonContainer({top: 20}).container,
+          {backgroundColor: 'red'},
+        ]}>
+        <LiveTimer toStart={streaming} />
+      </View>
+
+      <View
+        style={[
           buttonContainer({bottom: 40}).container,
           {backgroundColor: 'red'},
         ]}>
@@ -144,13 +157,13 @@ const appStyles = streaming =>
     },
     streamingButton: {
       borderRadius: 5,
-      backgroundColor: !streaming ? 'red' : 'white',
+      backgroundColor: streaming ? 'red' : 'white',
       padding: 10,
       // width: ,
       // height: 50,
     },
     btnTxt: {
-      color: !streaming ? 'white' : 'black',
+      color: streaming ? 'white' : 'black',
       fontSize: 16,
     },
   });

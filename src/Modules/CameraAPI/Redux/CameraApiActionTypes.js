@@ -1,0 +1,2 @@
+export const SET_LIVE_TIME = 'SET_LIVE_TIME';
+export const UPDATE_LIVE_TIME = 'UPDATE_LIVE_TIME';
