@@ -99,6 +99,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  SplitBoxes: {
+    fontSize: 20,
+    textAlign: 'center',
+    color: '#eaeaea',
+  },
 });
 
 export default Auth;

@@ -30,6 +30,7 @@
     "react-native": "0.71.3",
     "react-native-ble-manager": "^8.8.0",
     "react-native-compressor": "https://github.com/Shobbak/react-native-compressor",
+    "react-native-contacts": "^7.0.5",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.9.0",
     "react-native-orientation-locker": "^1.5.0",
