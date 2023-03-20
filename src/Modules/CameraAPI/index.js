@@ -37,10 +37,12 @@ const CameraAPI = () => {
     : '3Nir7GCG0LrfUtZ7ELghM51iaOv0m7yU2vryHyaOKca';
 
   useEffect(() => {
-    if (!isFocused) {
-      Orientation.lockToPortrait();
-      // Orientation.unlockAllOrientations();
+    if (isFocused) {
+      Orientation.lockToLandscape();
     }
+    return () => {
+      Orientation.lockToPortrait();
+    };
   }, [isFocused]);
 
   useEffect(() => {
