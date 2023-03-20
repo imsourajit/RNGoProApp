@@ -1,6 +1,12 @@
 import {LiveStreamView} from '@api.video/react-native-livestream';
 import React, {useEffect, useRef, useState} from 'react';
-import {StatusBar, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Orientation, {
   LANDSCAPE,
   OrientationLocker,
@@ -29,7 +35,7 @@ const CameraAPI = () => {
   useEffect(() => {
     if (!isFocused) {
       Orientation.lockToPortrait();
-      Orientation.unlockAllOrientations();
+      // Orientation.unlockAllOrientations();
     }
   }, [isFocused]);
 
@@ -48,7 +54,6 @@ const CameraAPI = () => {
 
     const resJson = await response.json();
     setAccessToken(resJson.access_token);
-    console.log(resJson);
   };
 
   const handleStream = async () => {
@@ -62,7 +67,6 @@ const CameraAPI = () => {
       method: 'POST',
     });
     const resJSON = await response.json();
-    console.log('@streamkey resp', resJSON);
     if (streaming) {
       ref.current?.stopStreaming();
       setStreaming(false);
@@ -70,7 +74,6 @@ const CameraAPI = () => {
       ref.current?.startStreaming(resJSON.streamKey);
       setStreaming(true);
     }
-    console.log(ref);
   };
 
   return (
@@ -114,11 +117,16 @@ const CameraAPI = () => {
         enablePinchedZoom
       />
 
-      <View style={buttonContainer({bottom: 40}).container}>
-        <TouchableOpacity
-          style={styles.streamingButton}
-          onPress={handleStream}
-        />
+      <View
+        style={[
+          buttonContainer({bottom: 40}).container,
+          {backgroundColor: 'red'},
+        ]}>
+        <TouchableOpacity style={styles.streamingButton} onPress={handleStream}>
+          <Text style={styles.btnTxt}>
+            {!streaming ? 'Go Live' : 'End Session'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -135,10 +143,15 @@ const appStyles = streaming =>
       alignSelf: 'stretch',
     },
     streamingButton: {
-      borderRadius: 50,
-      backgroundColor: streaming ? 'red' : 'white',
-      width: 50,
-      height: 50,
+      borderRadius: 5,
+      backgroundColor: !streaming ? 'red' : 'white',
+      padding: 10,
+      // width: ,
+      // height: 50,
+    },
+    btnTxt: {
+      color: !streaming ? 'white' : 'black',
+      fontSize: 16,
     },
   });
 
