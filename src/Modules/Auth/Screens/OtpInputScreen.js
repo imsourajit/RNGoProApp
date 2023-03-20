@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 32,
     justifyContent: 'space-between',
+    paddingTop: 20,
   },
   otpCodeContainer: {
     borderWidth: 0.3,
