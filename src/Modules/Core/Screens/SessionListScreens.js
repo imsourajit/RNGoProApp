@@ -1,18 +1,29 @@
-import React from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {FlatList, StyleSheet, ToastAndroid, View} from 'react-native';
 import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDescription';
+import {useDispatch} from 'react-redux';
+import {listSessionsByCoachId} from '../Redux/UserActions';
 
 const SessionListScreens = props => {
-  const DATA = [
-    {
-      title: '17 March',
-      desc: 'DNR Reflection',
-    },
-    {
-      title: '18th March',
-      desc: 'Sobha',
-    },
-  ];
+  const [sessionsList, setSessionsList] = useState(null);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(
+      listSessionsByCoachId(
+        {
+          startTime: new Date().getTime() - 10 * 24 * 60 * 60 * 1000,
+          // endTime: new Date().getTime(),
+          start: 0,
+          size: 20,
+        },
+        suc => setSessionsList(suc),
+        err =>
+          ToastAndroid.show('Oops!! Something went wrong', ToastAndroid.SHORT),
+      ),
+    );
+  }, []);
+
   const _goToSessionWebview = _ => {};
 
   const _renderListOfSessions = ({item, index}) => (
@@ -25,7 +36,7 @@ const SessionListScreens = props => {
   return (
     <View style={styles.main}>
       <FlatList
-        data={DATA}
+        data={sessionsList}
         renderItem={_renderListOfSessions}
         keyExtractor={(item, index) => item.title.toString() + index}
       />

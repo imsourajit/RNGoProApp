@@ -3,6 +3,7 @@ import React from 'react';
 import axios from 'axios';
 import {ToastAndroid} from 'react-native';
 import {updateAuthToken} from '../Modules/Core/Redux/UserActions';
+import store from '../Store/store';
 
 const STAGING_END_POINT = 'https://qa-platform.thewagmi.app/platform';
 const PRODUCTION_END_POINT = 'https://platform.thewagmi.app/platform';
@@ -16,7 +17,7 @@ const getDeviceName = async () => {
 };
 
 const ApiService = {
-  getStoredData: () => {},
+  getStoredData: () => store.getState(),
 
   xVedToken: null,
 
@@ -26,6 +27,17 @@ const ApiService = {
     let headerParams = {
       'Content-Type': 'application/json',
     };
+
+    if (
+      ApiService.getStoredData().userReducer.hasOwnProperty('authToken') &&
+      ApiService.getStoredData().userReducer.authToken !== null
+    ) {
+      headerParams = {
+        ...headerParams,
+        'X-Ved-Token': ApiService.getStoredData().userReducer.authToken,
+        'Cache-Control': 'no-cache',
+      };
+    }
 
     return {headers: {...headerParams}};
   },

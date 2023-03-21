@@ -1,18 +1,21 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const RightArrowBoxesWithDescription = props => {
-  const {pressed, btnTitle, btnDesc} = props;
+  const {pressed, btnTitle, btnDesc, data, isIconShow} = props;
+
+  const onPress = () => {
+    pressed(data);
+  };
 
   return (
-    <Pressable onPress={pressed}>
+    <Pressable onPress={onPress}>
       <View style={styles.btn}>
         <View>
           <Text style={styles.btnTxt}>{btnTitle}</Text>
           <Text style={styles.btnDesc}>{btnDesc}</Text>
         </View>
-        <MaterialIcons name={'arrow-forward-ios'} size={28} color={'#000000'} />
+        {/*{isIconShow === false <MaterialIcons name={"arrow-forward-ios"} size={28} color={"#000000"} />}*/}
       </View>
     </Pressable>
   );

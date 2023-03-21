@@ -1,4 +1,5 @@
 import {SET_LIVE_TIME, UPDATE_LIVE_TIME} from './CameraApiActionTypes';
+import ApiService from '../../../Services/ApiService';
 
 export const setLiveTime = time => {
   return {
@@ -13,3 +14,15 @@ export const updateLiveTime = time => {
     data: time,
   };
 };
+
+export const getSessionIdToTagInLiveVideo =
+  (params, onSuccess, onError) => dispatch =>
+    ApiService.post(
+      dispatch,
+      '',
+      'fcone/session/start',
+      params,
+      null,
+      onSuccess,
+      onError,
+    );

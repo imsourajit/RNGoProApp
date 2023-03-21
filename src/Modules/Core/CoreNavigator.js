@@ -71,6 +71,18 @@ const CoreStackNavigator = () => {
       <CoreStack.Screen
         name="StudentsListScreen"
         component={StudentListsScreen}
+        options={{
+          headerShown: true,
+          title: 'Students',
+          headerStyle: {
+            backgroundColor: '#000000',
+            elevation: 0,
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </CoreStack.Navigator>
   );

@@ -9,6 +9,8 @@ export const sendOtpForValidation =
       'fcone/user/login/get-otp',
       params,
       null,
+      null,
+      null,
       onSuccess,
       onFailure,
     );
@@ -18,6 +20,8 @@ export const validateOtp = (params, onSuccess, onFailure) => dispatch =>
     '',
     'fcone/user/login/verify-otp',
     params,
+    null,
+    null,
     null,
     onSuccess,
     onFailure,
@@ -32,3 +36,58 @@ export const setUserDetails = user => ({
   type: SET_USER_DETAILS,
   data: user,
 });
+
+export const addBatchByCoachId = (params, onSuccess, onError) => dispatch =>
+  ApiService.post(
+    dispatch,
+    '',
+    'fcone/batch/add',
+    params,
+    null,
+    null,
+    null,
+    onSuccess,
+    onError,
+  );
+
+export const listBatchesByCoachId =
+  (params, onSuccess, onError) => dispatch => {
+    ApiService.get(
+      dispatch,
+      '',
+      'fcone/batch/batches-by-coachId',
+      params,
+      null,
+      null,
+      null,
+      onSuccess,
+      onError,
+    );
+  };
+
+export const listStudentsByBatchId =
+  (params, onSuccess, onFailure) => dispatch =>
+    ApiService.get(
+      dispatch,
+      '',
+      'fcone/batch/students-by-batchId',
+      params,
+      null,
+      null,
+      null,
+      onSuccess,
+      onFailure,
+    );
+
+export const listSessionsByCoachId = (params, onSuccess, onError) => dispatch =>
+  ApiService.get(
+    dispatch,
+    '',
+    'fcone/session/for-duration',
+    params,
+    null,
+    null,
+    null,
+    onSuccess,
+    onError,
+  );

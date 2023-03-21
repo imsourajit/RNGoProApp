@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     paddingHorizontal: 32,
     justifyContent: 'space-between',
+    paddingVertical: 30,
   },
   inputBox: {
     borderWidth: 0.3,

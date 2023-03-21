@@ -1,31 +1,78 @@
-import React from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDescription';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Contacts from 'react-native-contacts';
+import {useDispatch, useSelector} from 'react-redux';
+import {addBatchByCoachId, listBatchesByCoachId} from '../Redux/UserActions';
 
 const BatchesListScreen = props => {
-  const DATA = [
-    {
-      title: 'DNR Reflection',
-      desc: '10 Students',
-    },
-    {
-      title: 'Sobha',
-      desc: '25 Students',
-    },
-  ];
-  const _goToStudentsListPage = _ => {
-    props.navigation.navigate('StudentsListScreen');
+  const dispatch = useDispatch();
+
+  const [batches, setBatches] = useState(null);
+  const [formVisibility, setFormVisibility] = useState(false);
+  const [batchTitle, setBatchTitle] = useState('');
+
+  const {
+    user: {userId},
+  } = useSelector(st => st.userReducer);
+
+  useEffect(() => {
+    getListOfBatches();
+  }, [userId]);
+
+  const getListOfBatches = () => {
+    dispatch(
+      listBatchesByCoachId(
+        {
+          coachId: userId,
+        },
+        res => setBatches(res),
+        err => {
+          console.log('Error', err);
+          ToastAndroid.show('Unable to fetch list', ToastAndroid.SHORT);
+        },
+      ),
+    );
   };
 
-  const _renderListOfSessions = ({item, index}) => (
-    <RightArrowBoxesWithDescription
-      pressed={_goToStudentsListPage}
-      btnTitle={item.title}
-      btnDesc={item.desc}
-    />
-  );
+  const _goToStudentsListPage = bId => {
+    props.navigation.navigate('StudentsListScreen', {
+      batchId: bId,
+    });
+  };
+
+  const _renderListOfSessions = ({item, index}) => {
+    const {students} = item;
+
+    let btnDesc = '';
+
+    if (students === null || (Array.isArray(students) && !students.length)) {
+      btnDesc = '0 student';
+    } else {
+      btnDesc =
+        students.length === 1 ? '1 student' : students.length + ' students';
+    }
+
+    return (
+      <RightArrowBoxesWithDescription
+        pressed={_goToStudentsListPage}
+        btnTitle={item.title}
+        btnDesc={btnDesc}
+        data={item.id}
+      />
+    );
+  };
 
   const fetchContactList = () => {
     Contacts.getAll().then(contacts => {
@@ -33,10 +80,86 @@ const BatchesListScreen = props => {
       console.log('@contacts', contacts);
     });
   };
+
+  const addBatch = () => {
+    dispatch(
+      addBatchByCoachId(
+        {
+          title: batchTitle,
+          coachId: userId,
+        },
+        res => {
+          console.log('Batch has been added', res);
+          getListOfBatches();
+          setFormVisibility(false);
+          ToastAndroid.show('New batch added successfully', ToastAndroid.SHORT);
+        },
+        err => console.log('Error while adding batch', err),
+      ),
+    );
+  };
+
+  const addBatchesFormVisibility = () => {
+    setFormVisibility(true);
+  };
+
+  if (!Array.isArray(batches)) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#000000',
+        }}>
+        <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.main}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={formVisibility}
+        onRequestClose={() => {
+          setFormVisibility(false);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Add Batch</Text>
+            <TextInput
+              value={batchTitle}
+              onChangeText={setBatchTitle}
+              style={{
+                borderWidth: 1,
+                borderColor: '#FFFFFF',
+                fontSize: 17,
+              }}
+              placeholder={'Enter Batch title'}
+              placeholderTextColor={'#EAEAEA'}
+            />
+            <Pressable
+              style={[styles.button]}
+              onPress={() => {
+                if (batchTitle.length > 3) {
+                  addBatch();
+                  return;
+                }
+                ToastAndroid.show(
+                  'Please enter batch title',
+                  ToastAndroid.SHORT,
+                );
+              }}>
+              <Text style={styles.textStyle}>Add batch</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
       <FlatList
-        data={DATA}
+        data={batches}
         renderItem={_renderListOfSessions}
         keyExtractor={(item, index) => item.title.toString() + index}
       />
@@ -52,7 +175,7 @@ const BatchesListScreen = props => {
           name={'add-circle'}
           size={75}
           color={'#FFFFFF'}
-          onPress={fetchContactList}
+          onPress={addBatchesFormVisibility}
         />
       </View>
     </View>
@@ -64,6 +187,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
     paddingHorizontal: 16,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    // alignItems: 'center',
+  },
+  modalText: {
+    color: '#FFFFFF',
+    alignSelf: 'center',
+    fontSize: 20,
+    marginBottom: 30,
+  },
+  modalView: {
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    margin: 20,
+    borderRadius: 10,
+    padding: 10,
+  },
+  button: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: '#FFA366',
+    margin: 10,
+    marginHorizontal: 30,
+  },
+  textStyle: {
+    color: '#FFFFFF',
+    fontSize: 16,
   },
 });
 
