@@ -10,9 +10,9 @@ const SessionListScreens = props => {
 
   function getDayMonthNameFromMillis(millis) {
     const date = new Date(millis);
-    const options = {day: '2-digit', month: 'long'};
-    const dayMonthName = date.toLocaleString('en-US', options);
-    return dayMonthName;
+    const day = date.toLocaleString('en-US', {day: '2-digit'});
+    const month = date.toLocaleString('en-US', {month: 'long'});
+    return `${day} ${month}`;
   }
 
   useEffect(() => {
