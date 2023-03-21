@@ -134,11 +134,11 @@ const BatchesListScreen = props => {
               onChangeText={setBatchTitle}
               style={{
                 borderWidth: 1,
-                borderColor: '#FFFFFF',
+                borderColor: '#ababab',
                 fontSize: 17,
               }}
               placeholder={'Enter Batch title'}
-              placeholderTextColor={'#EAEAEA'}
+              placeholderTextColor={'#ababab'}
             />
             <Pressable
               style={[styles.button]}
@@ -194,13 +194,13 @@ const styles = StyleSheet.create({
     // alignItems: 'center',
   },
   modalText: {
-    color: '#FFFFFF',
+    color: '#000000',
     alignSelf: 'center',
     fontSize: 20,
     marginBottom: 30,
   },
   modalView: {
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     margin: 20,
     borderRadius: 10,
     padding: 10,

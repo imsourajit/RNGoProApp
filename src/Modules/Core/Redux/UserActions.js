@@ -1,5 +1,11 @@
 import ApiService from '../../../Services/ApiService';
-import {SET_USER_DETAILS, UPDATE_AUTH_TOKEN} from './UserActionTypes';
+import {
+  ADD_CONTACTS,
+  EMPTY_CONTACTS,
+  REMOVE_CONTACTS,
+  SET_USER_DETAILS,
+  UPDATE_AUTH_TOKEN,
+} from './UserActionTypes';
 
 export const sendOtpForValidation =
   (params, onSuccess, onFailure) => dispatch =>
@@ -83,7 +89,35 @@ export const listSessionsByCoachId = (params, onSuccess, onError) => dispatch =>
   ApiService.get(
     dispatch,
     '',
-    'fcone/session/for-duration',
+    'fcone/session/coach',
+    params,
+    null,
+    null,
+    null,
+    onSuccess,
+    onError,
+  );
+
+export const selectContact = data => ({
+  type: ADD_CONTACTS,
+  data,
+});
+
+export const removeSelectedContact = data => ({
+  type: REMOVE_CONTACTS,
+  data,
+});
+
+export const emptySelectedContactList = _ => ({
+  type: EMPTY_CONTACTS,
+  data: [],
+});
+
+export const addStudentsToBatch = (params, onSuccess, onError) => dispatch =>
+  ApiService.post(
+    dispatch,
+    '',
+    'fcone/batch/add-student',
     params,
     null,
     null,
