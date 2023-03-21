@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, StyleSheet, ToastAndroid, View} from 'react-native';
+import {FlatList, Linking, StyleSheet, ToastAndroid, View} from 'react-native';
 import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDescription';
 import {useDispatch} from 'react-redux';
 import {listSessionsByCoachId} from '../Redux/UserActions';
@@ -32,13 +32,16 @@ const SessionListScreens = props => {
     );
   }, []);
 
-  const _goToSessionWebview = _ => {};
+  const _goToSessionWebview = url => {
+    Linking.openURL(url);
+  };
 
   const _renderListOfSessions = ({item, index}) => (
     <RightArrowBoxesWithDescription
       pressed={_goToSessionWebview}
       btnTitle={getDayMonthNameFromMillis(item.startTime)}
       btnDesc={item.centreTitle ?? ''}
+      data={item.liveStreamUrl}
     />
   );
   return (

@@ -1,5 +1,5 @@
 import {LiveStreamView} from '@api.video/react-native-livestream';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -44,6 +44,10 @@ const CameraAPI = props => {
   const API_KEY = isProd
     ? 'b4nYqEu0r4AAYx22BHddr5bAAXWpMVyQaytYfP33xui'
     : '3Nir7GCG0LrfUtZ7ELghM51iaOv0m7yU2vryHyaOKca';
+
+  useLayoutEffect(() => {
+    Orientation.lockToLandscape();
+  }, []);
 
   useEffect(() => {
     if (isFocused) {
@@ -176,7 +180,7 @@ const CameraAPI = props => {
         ]}>
         <TouchableOpacity style={styles.streamingButton} onPress={handleStream}>
           <Text style={styles.btnTxt}>
-            {!streaming ? 'Go Live' : 'End Session'}
+            {!streaming ? 'Go Live' : ' End Session'}
           </Text>
         </TouchableOpacity>
       </View>
