@@ -13,16 +13,25 @@ import Orientation, {
 } from 'react-native-orientation-locker';
 import {useIsFocused} from '@react-navigation/native';
 import LiveTimer from './Components/LiveTimer';
-import {useDispatch} from 'react-redux';
-import {setLiveTime} from './Redux/CameraApiActions';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  getSessionIdToTagInLiveVideo,
+  setLiveTime,
+  tagLiveUrlsToSession,
+} from './Redux/CameraApiActions';
 
-const CameraAPI = () => {
+const CameraAPI = props => {
   const ref = useRef(null);
   const [streaming, setStreaming] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
+  const [sessionDetails, setSessionDetails] = useState(null);
 
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
+
+  const {
+    user: {userId},
+  } = useSelector(st => st.userReducer);
 
   const styles = appStyles(streaming);
 
@@ -41,9 +50,25 @@ const CameraAPI = () => {
       Orientation.lockToLandscape();
     }
     return () => {
+      dispatch(setLiveTime(0));
       Orientation.lockToPortrait();
     };
   }, [isFocused]);
+
+  useEffect(() => {
+    dispatch(
+      getSessionIdToTagInLiveVideo(
+        {
+          batchId: props.route.params.batchId,
+          coachId: userId,
+        },
+        res => {
+          setSessionDetails(res);
+        },
+        err => console.log(err),
+      ),
+    );
+  }, []);
 
   useEffect(() => {
     handleAuthApi();
@@ -76,10 +101,22 @@ const CameraAPI = () => {
     if (streaming) {
       ref.current?.stopStreaming();
       setStreaming(false);
+      props.navigation.goBack();
     } else {
       dispatch(setLiveTime(0));
       ref.current?.startStreaming(resJSON.streamKey);
       setStreaming(true);
+      dispatch(
+        tagLiveUrlsToSession(
+          {
+            sessionId: sessionDetails.id,
+            liveStreamUrl: resJSON.assets.hls,
+            thumbnail: resJSON.assets.thumbnail,
+          },
+          res => console.log('Session Details updated', res),
+          err => console.log('Session update failed', err),
+        ),
+      );
     }
   };
 

@@ -1,20 +1,40 @@
-import React, {useState} from 'react';
-import {FlatList, Pressable, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import RadioButtonSelectionBox from '../Components/RadioButtonSelectionBox';
+import {listBatchesByCoachId} from '../Redux/UserActions';
+import {useDispatch, useSelector} from 'react-redux';
 
 const BatchSelectionScreen = props => {
   const [batchSelected, selectBatch] = useState(null);
+  const [batches, setBatches] = useState([]);
 
-  const DATA = [
-    {
-      title: 'DNR Reflection',
-      desc: '10 Students',
-    },
-    {
-      title: 'Sobha',
-      desc: '25 Students',
-    },
-  ];
+  const dispatch = useDispatch();
+  const {
+    user: {userId},
+  } = useSelector(st => st.userReducer);
+
+  useEffect(() => {
+    dispatch(
+      listBatchesByCoachId(
+        {
+          coachId: userId,
+        },
+        res => setBatches(res),
+        err => {
+          console.log('Error', err);
+          ToastAndroid.show('Unable to fetch list', ToastAndroid.SHORT);
+        },
+      ),
+    );
+  }, []);
+
   const _goToStudentsListPage = batchIndex => {
     selectBatch(batchIndex);
   };
@@ -30,21 +50,30 @@ const BatchSelectionScreen = props => {
   );
 
   const _startSession = () => {
+    if (batchSelected == null) {
+      ToastAndroid.show('Please select batch', ToastAndroid.SHORT);
+      return;
+    }
+
     const {selectedDevice} = props.route.params;
     if (selectedDevice === 'CAMERA') {
-      props.navigation.navigate('Camera');
+      props.navigation.navigate('Camera', {
+        batchId: batches[batchSelected]?.id,
+      });
       return;
     }
 
     if (selectedDevice === 'GO_PRO') {
-      props.navigation.navigate('GoPro');
+      props.navigation.navigate('GoPro', {
+        batchId: batches[batchSelected]?.id,
+      });
       return;
     }
   };
   return (
     <View style={styles.main}>
       <FlatList
-        data={DATA}
+        data={batches}
         renderItem={_renderListOfSessions}
         keyExtractor={(item, index) => item.title.toString() + index}
       />

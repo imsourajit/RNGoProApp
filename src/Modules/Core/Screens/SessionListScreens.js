@@ -8,6 +8,13 @@ const SessionListScreens = props => {
   const [sessionsList, setSessionsList] = useState(null);
   const dispatch = useDispatch();
 
+  function getDayMonthNameFromMillis(millis) {
+    const date = new Date(millis);
+    const options = {day: '2-digit', month: 'long'};
+    const dayMonthName = date.toLocaleString('en-US', options);
+    return dayMonthName;
+  }
+
   useEffect(() => {
     dispatch(
       listSessionsByCoachId(
@@ -16,7 +23,9 @@ const SessionListScreens = props => {
           start: 0,
           size: 20,
         },
-        suc => setSessionsList(suc),
+        suc => {
+          setSessionsList(suc.filter(itm => itm.liveStreamUrl !== null));
+        },
         err =>
           ToastAndroid.show('Oops!! Something went wrong', ToastAndroid.SHORT),
       ),
@@ -28,8 +37,8 @@ const SessionListScreens = props => {
   const _renderListOfSessions = ({item, index}) => (
     <RightArrowBoxesWithDescription
       pressed={_goToSessionWebview}
-      btnTitle={item.title}
-      btnDesc={item.desc}
+      btnTitle={getDayMonthNameFromMillis(item.startTime)}
+      btnDesc={item.centreTitle ?? ''}
     />
   );
   return (
@@ -37,7 +46,7 @@ const SessionListScreens = props => {
       <FlatList
         data={sessionsList}
         renderItem={_renderListOfSessions}
-        keyExtractor={(item, index) => item.title.toString() + index}
+        keyExtractor={(item, index) => item.startTime.toString() + index}
       />
     </View>
   );

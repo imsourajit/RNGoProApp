@@ -23,6 +23,21 @@ export const getSessionIdToTagInLiveVideo =
       'fcone/session/start',
       params,
       null,
+      null,
+      null,
       onSuccess,
       onError,
     );
+
+export const tagLiveUrlsToSession = (params, onSuccess, onError) => dispatch =>
+  ApiService.post(
+    dispatch,
+    '',
+    'fcone/session/update',
+    params,
+    null,
+    null,
+    null,
+    onSuccess,
+    onError,
+  );
