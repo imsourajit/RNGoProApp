@@ -19,6 +19,7 @@ import {
   setLiveTime,
   tagLiveUrlsToSession,
 } from './Redux/CameraApiActions';
+import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
 
 const CameraAPI = props => {
   const ref = useRef(null);
@@ -50,6 +51,10 @@ const CameraAPI = props => {
   }, []);
 
   useEffect(() => {
+    askForPermission();
+  }, []);
+
+  useEffect(() => {
     if (isFocused) {
       Orientation.lockToLandscape();
     }
@@ -78,6 +83,15 @@ const CameraAPI = props => {
     handleAuthApi();
   }, []);
 
+  const askForPermission = async () => {
+    requestMultiple([PERMISSIONS.IOS.CAMERA, PERMISSIONS.IOS.MICROPHONE]).then(
+      statuses => {
+        console.log('Camera', statuses[PERMISSIONS.IOS.CAMERA]);
+        console.log('FaceID', statuses[PERMISSIONS.IOS.MICROPHONE]);
+      },
+    );
+  };
+
   const handleAuthApi = async () => {
     const response = await fetch(BASE_URL + '/auth/api-key', {
       body: '{"apiKey": "' + API_KEY + '"}',
@@ -93,7 +107,7 @@ const CameraAPI = props => {
 
   const handleStream = async () => {
     const response = await fetch(BASE_URL + '/live-streams', {
-      body: '{"record": true, "name": "My Live Stream","public": true}',
+      body: '{"record": true, "name": "My Live Stream","public": false}',
       headers: {
         Accept: 'application/json',
         Authorization: 'Bearer ' + accessToken,
@@ -122,6 +136,7 @@ const CameraAPI = props => {
         ),
       );
     }
+    console.log(resJSON);
   };
 
   return (
