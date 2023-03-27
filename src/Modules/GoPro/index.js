@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  Dimensions,
   NativeAppEventEmitter,
   PermissionsAndroid,
   Platform,
@@ -361,8 +362,22 @@ const GoPro = props => {
         id={devicesConnected.id}
       />
       <View
-        style={{marginVertical: 60, backgroundColor: '#FFFFFF', padding: 30}}>
-        <QRCode value="oW1mVr1080!W!GLC" size={200} />
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <View
+          style={{
+            // marginVertical: 60,
+            backgroundColor: '#FFFFFF',
+            padding: 20,
+          }}>
+          <QRCode
+            value="oW1mVr1080!W!GLC"
+            size={Dimensions.get('window').width - 40}
+          />
+        </View>
       </View>
       {/*<CustomBtn*/}
       {/*  data={''}*/}

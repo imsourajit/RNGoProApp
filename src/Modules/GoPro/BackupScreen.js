@@ -1,9 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {
+  Dimensions,
+  Image,
   NativeAppEventEmitter,
   PermissionsAndroid,
   Platform,
+  Pressable,
   StyleSheet,
+  Text,
   ToastAndroid,
   View,
 } from 'react-native';
@@ -20,7 +24,6 @@ import {
 } from './Redux/GoProActions';
 import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
-import CustomBtn from './Components/CustomBtn';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 
 const BackupScreen = props => {
@@ -372,33 +375,43 @@ const BackupScreen = props => {
 
   return (
     <View style={styles.main}>
-      <GoProDeviceDetails
-        deviceDetails={hotspotDetails}
-        id={devicesConnected.id}
-      />
+      <View style={{marginHorizontal: 16}}>
+        <GoProDeviceDetails
+          deviceDetails={hotspotDetails}
+          id={devicesConnected.id}
+        />
+      </View>
       {/*<View*/}
       {/*  style={{marginVertical: 60, backgroundColor: '#FFFFFF', padding: 30}}>*/}
       {/*  <QRCode value="oW1mVr1080!W!GLC" size={200} />*/}
       {/*</View>*/}
-      <View
-        style={{
-          // flex: 1,
-          marginTop: 400,
-          alignItems: 'center',
-        }}>
-        <CustomBtn
-          data={''}
-          onPress={_scanForFootagesToUploadToServer}
-          btnTxt={'Scan for footages to upload'}
+
+      <View style={styles.sessionBtnBoxes}>
+        <Text style={styles.sessionBtnBoxesTitle}>Start Session</Text>
+
+        <Image
+          source={require('./Assets/goPro.png')}
+          style={styles.goProImage}
         />
-        {!isDownloading && !isUploading ? (
-          <View style={{flex: 1, marginBottom: 100}}>
-            <CustomBtn
-              data={''}
-              onPress={_sessionFilesBackup}
-              btnTxt={'Take Backup'}
-            />
+        {/*<Pressable onPress={goToCamera}>*/}
+        {/*  <View style={styles.box}>*/}
+        {/*    <Text style={styles.btnTxt}>Camera</Text>*/}
+        {/*  </View>*/}
+        {/*</Pressable>*/}
+        <Pressable onPress={_scanForFootagesToUploadToServer}>
+          <View style={styles.box}>
+            <Text style={[styles.btnTxt, {fontSize: 18}]}>
+              Scan for footages to upload
+            </Text>
           </View>
+        </Pressable>
+
+        {!isDownloading && !isUploading ? (
+          <Pressable onPress={_sessionFilesBackup}>
+            <View style={styles.box}>
+              <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
+            </View>
+          </Pressable>
         ) : null}
         {isDownloading ? (
           <DownloadMediaSection
@@ -409,6 +422,36 @@ const BackupScreen = props => {
           <UploadMediaSection completeUploadProcess={_completeUploadProcess} />
         ) : null}
       </View>
+
+      {/*<View*/}
+      {/*  style={{*/}
+      {/*    // flex: 1,*/}
+      {/*    marginTop: 400,*/}
+      {/*    alignItems: 'center',*/}
+      {/*  }}>*/}
+      {/*  <CustomBtn*/}
+      {/*    data={''}*/}
+      {/*    onPress={_scanForFootagesToUploadToServer}*/}
+      {/*    btnTxt={'Scan for footages to upload'}*/}
+      {/*  />*/}
+      {/*  {!isDownloading && !isUploading ? (*/}
+      {/*    <View style={{flex: 1, marginBottom: 100}}>*/}
+      {/*      <CustomBtn*/}
+      {/*        data={''}*/}
+      {/*        onPress={_sessionFilesBackup}*/}
+      {/*        btnTxt={'Take Backup'}*/}
+      {/*      />*/}
+      {/*    </View>*/}
+      {/*  ) : null}*/}
+      {/*  {isDownloading ? (*/}
+      {/*    <DownloadMediaSection*/}
+      {/*      startUploadingProcess={_startUploadingProcess}*/}
+      {/*    />*/}
+      {/*  ) : null}*/}
+      {/*  {isUploading ? (*/}
+      {/*    <UploadMediaSection completeUploadProcess={_completeUploadProcess} />*/}
+      {/*  ) : null}*/}
+      {/*</View>*/}
     </View>
   );
 };
@@ -416,9 +459,56 @@ const BackupScreen = props => {
 const styles = StyleSheet.create({
   main: {
     flex: 1,
-    alignItems: 'center',
-    padding: 20,
+    // alignItems: 'center',
+    // // paddingHorizontal: 20,
+    paddingTop: 20,
     backgroundColor: '#141414',
+    justifyContent: 'space-between',
+  },
+  arrowBoxes: {
+    // paddingHorizontal: 32,
+  },
+  sessionBtnBoxes: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: 20,
+    alignItems: 'center',
+  },
+  question: {
+    fontSize: 25,
+    textAlign: 'center',
+  },
+  deviceLists: {
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 15,
+  },
+  box: {
+    width: Dimensions.get('window').width - 120,
+    // height: 100,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 25,
+    padding: 10,
+    marginVertical: 20,
+  },
+  btnTxt: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  sessionBtnBoxesTitle: {
+    fontSize: 33,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  goProImage: {
+    width: 300,
+    height: 200,
+    resizeMode: 'cover',
   },
 });
 
