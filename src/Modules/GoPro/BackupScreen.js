@@ -11,17 +11,19 @@ import BleManager from 'react-native-ble-manager';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import WifiManager from 'react-native-wifi-reborn';
 import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
+import DownloadMediaSection from './Components/DownloadMediaSection';
 import _ from 'lodash';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   setDirectoryNameToDownload,
   storeGoProMediaFilesListLocally,
 } from './Redux/GoProActions';
+import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
-import QRCode from 'react-native-qrcode-svg';
+import CustomBtn from './Components/CustomBtn';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 
-const GoPro = props => {
+const BackupScreen = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
   const [hotspotDetails, setHotspotDetails] = useState({});
 
@@ -350,6 +352,20 @@ const GoPro = props => {
     }
   };
 
+  // if (devicesConnected == null) {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         backgroundColor: '#000000',
+  //         justifyContent: 'center',
+  //         alignItems: 'center',
+  //       }}>
+  //       <ActivityIndicator size={'large'} />
+  //     </View>
+  //   );
+  // }
+
   if (!Object.keys(devicesConnected).length) {
     return <NoDevicesConnectedScreen />;
   }
@@ -360,30 +376,39 @@ const GoPro = props => {
         deviceDetails={hotspotDetails}
         id={devicesConnected.id}
       />
+      {/*<View*/}
+      {/*  style={{marginVertical: 60, backgroundColor: '#FFFFFF', padding: 30}}>*/}
+      {/*  <QRCode value="oW1mVr1080!W!GLC" size={200} />*/}
+      {/*</View>*/}
       <View
-        style={{marginVertical: 60, backgroundColor: '#FFFFFF', padding: 30}}>
-        <QRCode value="oW1mVr1080!W!GLC" size={200} />
+        style={{
+          // flex: 1,
+          marginTop: 400,
+          alignItems: 'center',
+        }}>
+        <CustomBtn
+          data={''}
+          onPress={_scanForFootagesToUploadToServer}
+          btnTxt={'Scan for footages to upload'}
+        />
+        {!isDownloading && !isUploading ? (
+          <View style={{flex: 1, marginBottom: 100}}>
+            <CustomBtn
+              data={''}
+              onPress={_sessionFilesBackup}
+              btnTxt={'Take Backup'}
+            />
+          </View>
+        ) : null}
+        {isDownloading ? (
+          <DownloadMediaSection
+            startUploadingProcess={_startUploadingProcess}
+          />
+        ) : null}
+        {isUploading ? (
+          <UploadMediaSection completeUploadProcess={_completeUploadProcess} />
+        ) : null}
       </View>
-      {/*<CustomBtn*/}
-      {/*  data={''}*/}
-      {/*  onPress={_scanForFootagesToUploadToServer}*/}
-      {/*  btnTxt={'Scan for footages to upload'}*/}
-      {/*/>*/}
-      {/*{!isDownloading && !isUploading ? (*/}
-      {/*  <View style={{flex: 1, justifyContent: 'flex-end', marginBottom: 100}}>*/}
-      {/*    <CustomBtn*/}
-      {/*      data={''}*/}
-      {/*      onPress={_sessionFilesBackup}*/}
-      {/*      btnTxt={'Take Backup'}*/}
-      {/*    />*/}
-      {/*  </View>*/}
-      {/*) : null}*/}
-      {/*{isDownloading ? (*/}
-      {/*  <DownloadMediaSection startUploadingProcess={_startUploadingProcess} />*/}
-      {/*) : null}*/}
-      {/*{isUploading ? (*/}
-      {/*  <UploadMediaSection completeUploadProcess={_completeUploadProcess} />*/}
-      {/*) : null}*/}
     </View>
   );
 };
@@ -397,4 +422,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GoPro;
+export default BackupScreen;

@@ -7,6 +7,7 @@ import SessionListScreens from './Screens/SessionListScreens';
 import BatchesListScreen from './Screens/BatchesListScreen';
 import BatchSelectionScreen from './Screens/BatchSelectionScreen';
 import StudentListsScreen from './Screens/StudentListsScreen';
+import BackupScreen from '../GoPro/BackupScreen';
 
 const CoreStack = createStackNavigator();
 
@@ -68,6 +69,7 @@ const CoreStackNavigator = () => {
       />
       <CoreStack.Screen name="Camera" component={CameraAPI} />
       <CoreStack.Screen name="GoPro" component={GoPro} />
+      <CoreStack.Screen name="BackupScreen" component={BackupScreen} />
       <CoreStack.Screen
         name="StudentsListScreen"
         component={StudentListsScreen}

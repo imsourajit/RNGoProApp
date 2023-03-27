@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import {
   Dimensions,
+  Image,
   PermissionsAndroid,
   Pressable,
   StyleSheet,
@@ -50,6 +51,10 @@ const MainScreen = props => {
     props.navigation.navigate('BatchesListScreen');
   };
 
+  const goToBackUpScreen = _ => {
+    props.navigation.navigate('BackupScreen');
+  };
+
   return (
     <View style={styles.main}>
       <View style={styles.arrowBoxes}>
@@ -62,14 +67,25 @@ const MainScreen = props => {
 
       <View style={styles.sessionBtnBoxes}>
         <Text style={styles.sessionBtnBoxesTitle}>Start Session</Text>
-        <Pressable onPress={goToCamera}>
-          <View style={styles.box}>
-            <Text style={styles.btnTxt}>Camera</Text>
-          </View>
-        </Pressable>
+
+        <Image
+          source={require('../GoPro/Assets/goPro.png')}
+          style={styles.goProImage}
+        />
+        {/*<Pressable onPress={goToCamera}>*/}
+        {/*  <View style={styles.box}>*/}
+        {/*    <Text style={styles.btnTxt}>Camera</Text>*/}
+        {/*  </View>*/}
+        {/*</Pressable>*/}
         <Pressable onPress={goToGoPro}>
           <View style={styles.box}>
-            <Text style={styles.btnTxt}>Go Pro</Text>
+            <Text style={styles.btnTxt}>Go LIVE</Text>
+          </View>
+        </Pressable>
+
+        <Pressable onPress={goToBackUpScreen}>
+          <View style={styles.box}>
+            <Text style={styles.btnTxt}>Upload</Text>
           </View>
         </Pressable>
       </View>
@@ -122,6 +138,11 @@ const styles = StyleSheet.create({
     fontSize: 33,
     fontWeight: 'bold',
     color: '#000000',
+  },
+  goProImage: {
+    width: 400,
+    height: 300,
+    resizeMode: 'cover',
   },
 });
 
