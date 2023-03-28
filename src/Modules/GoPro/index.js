@@ -1,26 +1,27 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Dimensions,
+  FlatList,
   NativeAppEventEmitter,
   PermissionsAndroid,
   Platform,
+  Pressable,
   StyleSheet,
+  Text,
   ToastAndroid,
   View,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
-import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import WifiManager from 'react-native-wifi-reborn';
 import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
-import _ from 'lodash';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   setDirectoryNameToDownload,
   storeGoProMediaFilesListLocally,
 } from './Redux/GoProActions';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
-import QRCode from 'react-native-qrcode-svg';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
+import QRBoxes from './Components/QRBoxes';
 
 const GoPro = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
@@ -28,10 +29,19 @@ const GoPro = props => {
 
   const [isDownloading, setIsDownloading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLastReached, setQRFlatListReachedEnd] = useState(false);
 
   const dispatch = useDispatch();
   const {mediaList, downloadedMediaList, downloadedDirName, uploadedMediaList} =
     useSelector(st => st.GoProReducer);
+
+  const qrCodeFlatListRef = useRef(null);
+  let currentRefIndex = useRef(null).current;
+
+  const QR_CODE_ARR = [
+    '!MRTMP="rtmp://broadcast.api.video/s/aade8f26-2ed7-4250-8beb-312475042e1f"',
+    'oW1mVr1080!W!GLC',
+  ];
 
   useEffect(() => {
     async function GetAllPermissions() {
@@ -126,6 +136,17 @@ const GoPro = props => {
       getHotspotDetails();
     }
   }, [devicesConnected]);
+
+  const _scrollToNextItem = () => {
+    currentRefIndex = 1;
+    if (Math.abs(QR_CODE_ARR.length - currentRefIndex) === 1) {
+      setQRFlatListReachedEnd(true);
+    }
+    if (currentRefIndex < QR_CODE_ARR.length) {
+      qrCodeFlatListRef && qrCodeFlatListRef.current.scrollToIndex({index: 1});
+      currentRefIndex++;
+    }
+  };
 
   const testFFmpegCompression = _ => {
     // let RootDir = APP_DIR;
@@ -323,6 +344,16 @@ const GoPro = props => {
       .catch(e => console.log('Camera State error', e));
   };
 
+  const _renderQRImages = ({item, index}) => {
+    return (
+      <QRBoxes
+        qrCommand={item}
+        isLastIndex={QR_CODE_ARR.length - 1 === index}
+        position={index + 1}
+      />
+    );
+  };
+
   const _sessionFilesBackup = async () => {
     await _goProHttpConnection();
   };
@@ -352,9 +383,9 @@ const GoPro = props => {
     }
   };
 
-  if (!Object.keys(devicesConnected).length) {
-    return <NoDevicesConnectedScreen />;
-  }
+  // if (!Object.keys(devicesConnected).length) {
+  //   return <NoDevicesConnectedScreen />;
+  // }
 
   return (
     <View style={styles.main}>
@@ -365,51 +396,42 @@ const GoPro = props => {
       <View
         style={{
           flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
+          // justifyContent: 'center',
+          // alignItems: 'center',
+          marginTop: 40,
+          // backgroundColor: 'red',
         }}>
-        <View
+        <FlatList
+          ref={qrCodeFlatListRef}
+          data={QR_CODE_ARR}
+          renderItem={_renderQRImages}
+          keyExtractor={item => item.toString()}
+          horizontal={true}
+          scrollEnabled={false}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
           style={{
-            // marginVertical: 60,
-            backgroundColor: '#FFFFFF',
-            padding: 20,
-          }}>
-          <QRCode
-            value='!MRTMP="rtmp://broadcast.api.video/s/aade8f26-2ed7-4250-8beb-312475042e1f"'
-            size={Dimensions.get('window').width - 200}
-          />
+            // backgroundColor: 'red',
+            height: 400,
+          }}
+        />
+        <Pressable onPress={_scrollToNextItem}>
           <View
             style={{
-              margin: 50,
-              backgroundColor: '#000000',
-            }}
-          />
-          <QRCode
-            value="oW1mVr1080!W!GLC"
-            size={Dimensions.get('window').width - 200}
-          />
-        </View>
+              padding: 10,
+              backgroundColor: '#FFFFFF',
+              width: Dimensions.get('window').width - 32,
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderRadius: 20,
+              marginBottom: 60,
+            }}>
+            <Text style={{color: '#000000', fontSize: 18, fontWeight: 'bold'}}>
+              {!isLastReached ? 'Next' : 'Done'}
+            </Text>
+          </View>
+        </Pressable>
       </View>
-      {/*<CustomBtn*/}
-      {/*  data={''}*/}
-      {/*  onPress={_scanForFootagesToUploadToServer}*/}
-      {/*  btnTxt={'Scan for footages to upload'}*/}
-      {/*/>*/}
-      {/*{!isDownloading && !isUploading ? (*/}
-      {/*  <View style={{flex: 1, justifyContent: 'flex-end', marginBottom: 100}}>*/}
-      {/*    <CustomBtn*/}
-      {/*      data={''}*/}
-      {/*      onPress={_sessionFilesBackup}*/}
-      {/*      btnTxt={'Take Backup'}*/}
-      {/*    />*/}
-      {/*  </View>*/}
-      {/*) : null}*/}
-      {/*{isDownloading ? (*/}
-      {/*  <DownloadMediaSection startUploadingProcess={_startUploadingProcess} />*/}
-      {/*) : null}*/}
-      {/*{isUploading ? (*/}
-      {/*  <UploadMediaSection completeUploadProcess={_completeUploadProcess} />*/}
-      {/*) : null}*/}
     </View>
   );
 };

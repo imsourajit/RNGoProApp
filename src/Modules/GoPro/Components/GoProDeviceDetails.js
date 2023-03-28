@@ -16,9 +16,11 @@ const GoProDeviceDetails = props => {
       </View>
       <View style={styles.rightBlock}>
         <Text style={styles.deviceName} numberOfLines={2}>
-          {ssid}
+          {ssid ?? 'Go Pro'}
         </Text>
-        <Text style={styles.deviceId}>Device Id: {props.id}</Text>
+        {props?.id ? (
+          <Text style={styles.deviceId}>Device Id: {props.id}</Text>
+        ) : null}
       </View>
     </View>
   );
