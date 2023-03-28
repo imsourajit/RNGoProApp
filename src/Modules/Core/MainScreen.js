@@ -85,7 +85,7 @@ const MainScreen = props => {
 
         <Pressable onPress={goToBackUpScreen}>
           <View style={styles.box}>
-            <Text style={styles.btnTxt}>Upload</Text>
+            <Text style={styles.btnTxt}>Record Session</Text>
           </View>
         </Pressable>
       </View>

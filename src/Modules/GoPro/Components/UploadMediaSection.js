@@ -6,7 +6,7 @@ import {APP_DIR} from '../Utility/Constants';
 import axios from 'axios';
 import UploadFileAndProgress from './UploadFileAndProgress';
 import {setUploadCompleted, setUploadingFile} from '../Redux/GoProActions';
-import {backgroundUpload, Video} from 'react-native-compressor';
+import {backgroundUpload} from 'react-native-compressor';
 
 const UploadMediaSection = props => {
   const {
@@ -91,26 +91,26 @@ const UploadMediaSection = props => {
     console.log(uploadUrl, downloadedMedia, index);
 
     try {
-      const dstUrl = await Video.compress(
-        'file://' + APP_DIR + '/' + downloadedMedia[index].psuedoName,
-        {
-          compressionMethod: 'auto',
-          minimumFileSizeForCompress: 0,
-        },
-        progress => {
-          // console.log('Compression Progress: ', progress);
-          dispatch(
-            setUploadingFile({
-              name: downloadedMedia[index].n,
-              psuedoName: downloadedMedia.psuedoName,
-              progress: 0,
-              index: index,
-            }),
-          );
-        },
-      );
-      // _uploadDownloadedFilesToGumlet(uploadUrl, downloadedMedia, index, dstUrl);
-
+      // const dstUrl = await Video.compress(
+      //   'file://' + APP_DIR + '/' + downloadedMedia[index].psuedoName,
+      //   {
+      //     compressionMethod: 'auto',
+      //     minimumFileSizeForCompress: 0,
+      //   },
+      //   progress => {
+      //     // console.log('Compression Progress: ', progress);
+      //     dispatch(
+      //       setUploadingFile({
+      //         name: downloadedMedia[index].n,
+      //         psuedoName: downloadedMedia.psuedoName,
+      //         progress: 0,
+      //         index: index,
+      //       }),
+      //     );
+      //   },
+      // );
+      const dstUrl =
+        'file://' + APP_DIR + '/' + downloadedMedia[index].psuedoName;
       const uploadResult = await backgroundUpload(
         uploadUrl,
         dstUrl,
