@@ -23,6 +23,10 @@ import {
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 import QRBoxes from './Components/QRBoxes';
+import {
+  getSessionIdToTagInLiveVideo,
+  tagLiveUrlsToSession,
+} from '../CameraAPI/Redux/CameraApiActions';
 
 const isProd = false;
 
@@ -45,6 +49,10 @@ const GoPro = props => {
   const {mediaList, downloadedMediaList, downloadedDirName, uploadedMediaList} =
     useSelector(st => st.GoProReducer);
 
+  const {
+    user: {userId},
+  } = useSelector(st => st.userReducer);
+
   const qrCodeFlatListRef = useRef(null);
   let currentRefIndex = useRef(null).current;
 
@@ -56,7 +64,22 @@ const GoPro = props => {
   // ];
 
   useEffect(() => {
-    handleAuthApi();
+    dispatch(
+      getSessionIdToTagInLiveVideo(
+        {
+          batchId: props.route.params.batchId,
+          coachId: userId,
+        },
+        res => {
+          handleAuthApi(res.id);
+        },
+        err =>
+          ToastAndroid.show(
+            'Oops!!! Something went wrong.',
+            ToastAndroid.CENTER,
+          ),
+      ),
+    );
   }, []);
 
   useEffect(() => {
@@ -399,7 +422,7 @@ const GoPro = props => {
     }
   };
 
-  const handleAuthApi = async () => {
+  const handleAuthApi = async sessionId => {
     setGeneratingQR(true);
     const response = await fetch(BASE_URL + '/auth/api-key', {
       body: '{"apiKey": "' + API_KEY + '"}',
@@ -420,10 +443,28 @@ const GoPro = props => {
       method: 'POST',
     });
     const streamDetailsJSON = await response2nd.json();
-    setQRCodeArr([
-      `!MRTMP="rtmp://broadcast.api.video/s/${streamDetailsJSON.streamKey}"`,
-      'oW1mVr1080!W!GLC',
-    ]);
+    dispatch(
+      tagLiveUrlsToSession(
+        {
+          sessionId: sessionId,
+          liveStreamUrl: streamDetailsJSON?.assets?.hls,
+          ...streamDetailsJSON,
+        },
+        res => {
+          setQRCodeArr([
+            `!MRTMP="rtmp://broadcast.api.video/s/${streamDetailsJSON.streamKey}"`,
+            'oW1mVr1080!W!GLC',
+          ]);
+        },
+        err => {
+          ToastAndroid.show(
+            'Oops!!! Something went wrong',
+            ToastAndroid.CENTER,
+          );
+        },
+      ),
+    );
+
     setGeneratingQR(false);
   };
 

@@ -30,7 +30,10 @@ const PhoneEntryScreen = props => {
             });
             console.log('Send otp response', response);
           },
-          error => console.log('Otp send api error', error),
+          error => {
+            console.log('Otp send api error', error);
+            ToastAndroid.show(error.errorMessage, ToastAndroid.CENTER);
+          },
         ),
       );
     }
