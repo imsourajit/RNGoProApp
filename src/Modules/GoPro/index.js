@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   NativeAppEventEmitter,
@@ -23,6 +24,14 @@ import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 import QRBoxes from './Components/QRBoxes';
 
+const isProd = false;
+
+const BASE_URL = isProd ? 'https://ws.api.video' : 'https://sandbox.api.video';
+
+const API_KEY = isProd
+  ? 'b4nYqEu0r4AAYx22BHddr5bAAXWpMVyQaytYfP33xui'
+  : '3Nir7GCG0LrfUtZ7ELghM51iaOv0m7yU2vryHyaOKca';
+
 const GoPro = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
   const [hotspotDetails, setHotspotDetails] = useState({});
@@ -30,6 +39,7 @@ const GoPro = props => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isLastReached, setQRFlatListReachedEnd] = useState(false);
+  const [isGeneratingQR, setGeneratingQR] = useState(false);
 
   const dispatch = useDispatch();
   const {mediaList, downloadedMediaList, downloadedDirName, uploadedMediaList} =
@@ -38,10 +48,16 @@ const GoPro = props => {
   const qrCodeFlatListRef = useRef(null);
   let currentRefIndex = useRef(null).current;
 
-  const QR_CODE_ARR = [
-    '!MRTMP="rtmp://broadcast.api.video/s/aade8f26-2ed7-4250-8beb-312475042e1f"',
-    'oW1mVr1080!W!GLC',
-  ];
+  const [QR_CODE_ARR, setQRCodeArr] = useState([]);
+
+  // const QR_CODE_ARR = [
+  //   '!MRTMP="rtmp://broadcast.api.video/s/aade8f26-2ed7-4250-8beb-312475042e1f"',
+  //   'oW1mVr1080!W!GLC',
+  // ];
+
+  useEffect(() => {
+    handleAuthApi();
+  }, []);
 
   useEffect(() => {
     async function GetAllPermissions() {
@@ -383,10 +399,38 @@ const GoPro = props => {
     }
   };
 
+  const handleAuthApi = async () => {
+    setGeneratingQR(true);
+    const response = await fetch(BASE_URL + '/auth/api-key', {
+      body: '{"apiKey": "' + API_KEY + '"}',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    });
+
+    const resJson = await response.json();
+    const response2nd = await fetch(BASE_URL + '/live-streams', {
+      body: '{"record": true, "name": "My Live Stream","public": true}',
+      headers: {
+        Accept: 'application/json',
+        Authorization: 'Bearer ' + resJson.access_token,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    });
+    const streamDetailsJSON = await response2nd.json();
+    setQRCodeArr([
+      `!MRTMP="rtmp://broadcast.api.video/s/${streamDetailsJSON.streamKey}"`,
+      'oW1mVr1080!W!GLC',
+    ]);
+    setGeneratingQR(false);
+  };
+
   // if (!Object.keys(devicesConnected).length) {
   //   return <NoDevicesConnectedScreen />;
   // }
-
+  console.log(QR_CODE_ARR);
   return (
     <View style={styles.main}>
       <GoProDeviceDetails
@@ -401,36 +445,43 @@ const GoPro = props => {
           marginTop: 40,
           // backgroundColor: 'red',
         }}>
-        <FlatList
-          ref={qrCodeFlatListRef}
-          data={QR_CODE_ARR}
-          renderItem={_renderQRImages}
-          keyExtractor={item => item.toString()}
-          horizontal={true}
-          scrollEnabled={false}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          style={{
-            // backgroundColor: 'red',
-            height: 400,
-          }}
-        />
-        <Pressable onPress={_scrollToNextItem}>
-          <View
+        {isGeneratingQR ? (
+          <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+        ) : (
+          <FlatList
+            ref={qrCodeFlatListRef}
+            data={QR_CODE_ARR}
+            renderItem={_renderQRImages}
+            // keyExtractor={item => item.toString()}
+            horizontal={true}
+            scrollEnabled={false}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             style={{
-              padding: 10,
-              backgroundColor: '#FFFFFF',
-              width: Dimensions.get('window').width - 32,
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 20,
-              marginBottom: 60,
-            }}>
-            <Text style={{color: '#000000', fontSize: 18, fontWeight: 'bold'}}>
-              {!isLastReached ? 'Next' : 'Done'}
-            </Text>
-          </View>
-        </Pressable>
+              // backgroundColor: 'red',
+              height: 400,
+            }}
+          />
+        )}
+        {QR_CODE_ARR.length ? (
+          <Pressable onPress={_scrollToNextItem}>
+            <View
+              style={{
+                padding: 10,
+                backgroundColor: '#FFFFFF',
+                width: Dimensions.get('window').width - 32,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: 20,
+                marginBottom: 60,
+              }}>
+              <Text
+                style={{color: '#000000', fontSize: 18, fontWeight: 'bold'}}>
+                {!isLastReached ? 'Next' : 'Done'}
+              </Text>
+            </View>
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
