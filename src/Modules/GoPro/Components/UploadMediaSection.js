@@ -34,6 +34,8 @@ const UploadMediaSection = props => {
       }
     });
 
+    console.log('Files', yetToUploadFiles);
+
     setFilesToUpload(yetToUploadFiles);
   }, [downloadedMediaList, uploadedMediaList]);
 
@@ -44,7 +46,9 @@ const UploadMediaSection = props => {
   }, [filesToUpload]);
 
   const _uploadFilesSequentially = media => {
-    _getPreSignedUrlForGumlet(media, 0);
+    if (media.length) {
+      _getPreSignedUrlForGumlet(media, 0);
+    }
   };
 
   const _getPreSignedUrlForGumlet = (downloadedMedia, index) => {
@@ -84,6 +88,8 @@ const UploadMediaSection = props => {
     downloadedMedia,
     index,
   ) => {
+    console.log(uploadUrl, downloadedMedia, index);
+
     try {
       const dstUrl = await Video.compress(
         'file://' + APP_DIR + '/' + downloadedMedia[index].psuedoName,
@@ -92,7 +98,7 @@ const UploadMediaSection = props => {
           minimumFileSizeForCompress: 0,
         },
         progress => {
-          console.log('Compression Progress: ', progress);
+          // console.log('Compression Progress: ', progress);
           dispatch(
             setUploadingFile({
               name: downloadedMedia[index].n,
@@ -103,7 +109,7 @@ const UploadMediaSection = props => {
           );
         },
       );
-      console.log({dstUrl}, 'compression result');
+      // _uploadDownloadedFilesToGumlet(uploadUrl, downloadedMedia, index, dstUrl);
 
       const uploadResult = await backgroundUpload(
         uploadUrl,
@@ -115,7 +121,7 @@ const UploadMediaSection = props => {
           },
         },
         (written, total) => {
-          console.log(written, total);
+          // console.log(written, total);
           dispatch(
             setUploadingFile({
               name: downloadedMedia[index].n,
@@ -125,25 +131,37 @@ const UploadMediaSection = props => {
             }),
           );
           if (written / total == 1) {
-            if (index < downloadedMedia.length) {
+            console.log(index < downloadedMedia.length - 1);
+            if (index < downloadedMedia.length - 1) {
               _getPreSignedUrlForGumlet(downloadedMedia, index + 1);
             } else {
+              dispatch(
+                setUploadCompleted({
+                  name: downloadedMedia[index].n,
+                  psuedoName: downloadedMedia.psuedoName,
+                  index,
+                }),
+              );
               props.completeUploadProcess();
             }
           }
         },
       );
-    } catch (e) {}
+    } catch (e) {
+      console.log('Something went wrong', e);
+    }
   };
 
   const _uploadDownloadedFilesToGumlet = (
     uploadUrl,
     downloadedMedia,
     index,
+    compressUrl,
   ) => {
     let RootDir = APP_DIR;
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
+      console.log('Xhr', xhr);
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           dispatch(
@@ -154,13 +172,13 @@ const UploadMediaSection = props => {
             }),
           );
           console.log('Upload success', index);
-          if (index < downloadedMedia.length) {
+          if (index < downloadedMedia.length - 1) {
             _getPreSignedUrlForGumlet(downloadedMedia, index + 1);
           } else {
             props.completeUploadProcess();
           }
         } else {
-          console.log('Upload failed', xhr);
+          console.log('Upload failed', xhr.status);
         }
       }
     };
@@ -180,18 +198,18 @@ const UploadMediaSection = props => {
     xhr.open('PUT', uploadUrl);
     xhr.setRequestHeader('Content-Type', 'video/mp4');
     xhr.send({
-      uri: 'file://' + RootDir + '/' + downloadedMedia[index].psuedoName,
+      uri: compressUrl,
       type: 'video/mp4',
       name: downloadedMedia[index].psuedoName,
     });
   };
 
-  const _renderDownloading = ({item, index}) => {
+  const _renderUploading = ({item, index}) => {
     return (
       <UploadFileAndProgress
         data={item}
         index={index}
-        totalFile={filesToUpload}
+        totalFiles={filesToUpload}
       />
     );
   };
@@ -207,7 +225,7 @@ const UploadMediaSection = props => {
   return (
     <FlatList
       data={filesToUpload}
-      renderItem={_renderDownloading}
+      renderItem={_renderUploading}
       keyExtractor={item => item.n.toString()}
       // ListHeaderComponent={_listHeaderComponent}
     />

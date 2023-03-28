@@ -345,6 +345,7 @@ const GoPro = props => {
 
     if (yetToUploadFiles.length) {
       setIsDownloading(false);
+
       setIsUploading(true);
     } else {
       ToastAndroid.show('No media files found to upload', ToastAndroid.CENTER);
@@ -374,8 +375,18 @@ const GoPro = props => {
             padding: 20,
           }}>
           <QRCode
+            value='!MRTMP="rtmp://broadcast.api.video/s/aade8f26-2ed7-4250-8beb-312475042e1f"'
+            size={Dimensions.get('window').width - 200}
+          />
+          <View
+            style={{
+              margin: 50,
+              backgroundColor: '#000000',
+            }}
+          />
+          <QRCode
             value="oW1mVr1080!W!GLC"
-            size={Dimensions.get('window').width - 40}
+            size={Dimensions.get('window').width - 200}
           />
         </View>
       </View>

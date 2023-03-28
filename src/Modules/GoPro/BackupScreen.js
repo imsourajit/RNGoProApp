@@ -267,6 +267,7 @@ const BackupScreen = props => {
       const mediaJson = await fetch(`${GOPRO_BASE_URL}gopro/media/list`);
       const res = await mediaJson.json();
       const [{fs, d}, ...rest] = res.media;
+      console.log('@@@res', res);
       if (Array.isArray(fs) && fs.length) {
         const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
         dispatch(storeGoProMediaFilesListLocally(orderedArray));
@@ -355,20 +356,6 @@ const BackupScreen = props => {
     }
   };
 
-  // if (devicesConnected == null) {
-  //   return (
-  //     <View
-  //       style={{
-  //         flex: 1,
-  //         backgroundColor: '#000000',
-  //         justifyContent: 'center',
-  //         alignItems: 'center',
-  //       }}>
-  //       <ActivityIndicator size={'large'} />
-  //     </View>
-  //   );
-  // }
-
   if (!Object.keys(devicesConnected).length) {
     return <NoDevicesConnectedScreen />;
   }
@@ -386,6 +373,19 @@ const BackupScreen = props => {
       {/*  <QRCode value="oW1mVr1080!W!GLC" size={200} />*/}
       {/*</View>*/}
 
+      <View
+        style={{
+          paddingHorizontal: 16,
+        }}>
+        {isDownloading ? (
+          <DownloadMediaSection
+            startUploadingProcess={_startUploadingProcess}
+          />
+        ) : null}
+        {isUploading ? (
+          <UploadMediaSection completeUploadProcess={_completeUploadProcess} />
+        ) : null}
+      </View>
       <View style={styles.sessionBtnBoxes}>
         <Text style={styles.sessionBtnBoxesTitle}>Start Session</Text>
 
@@ -393,11 +393,6 @@ const BackupScreen = props => {
           source={require('./Assets/goPro.png')}
           style={styles.goProImage}
         />
-        {/*<Pressable onPress={goToCamera}>*/}
-        {/*  <View style={styles.box}>*/}
-        {/*    <Text style={styles.btnTxt}>Camera</Text>*/}
-        {/*  </View>*/}
-        {/*</Pressable>*/}
         <Pressable onPress={_scanForFootagesToUploadToServer}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>
@@ -412,14 +407,6 @@ const BackupScreen = props => {
               <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
             </View>
           </Pressable>
-        ) : null}
-        {isDownloading ? (
-          <DownloadMediaSection
-            startUploadingProcess={_startUploadingProcess}
-          />
-        ) : null}
-        {isUploading ? (
-          <UploadMediaSection completeUploadProcess={_completeUploadProcess} />
         ) : null}
       </View>
 

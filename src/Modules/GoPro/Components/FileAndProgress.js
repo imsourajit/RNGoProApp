@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimensions, Image, StyleSheet, Text, View} from 'react-native';
+import {Dimensions, StyleSheet, Text, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import * as Progress from 'react-native-progress';
 
@@ -9,31 +9,31 @@ const FileAndProgress = ({data, index, totalFiles}) => {
   const progressPercentile = downloadingFile?.progress ?? 0;
 
   let m = [];
-  if (Array.isArray(totalFiles) && totalFiles.length) {
-    for (let i = 0; i < index; i++) {
-      m.push(
-        <View
-          key={totalFiles[i].n}
-          style={{
-            flexDirection: 'row',
-            marginHorizontal: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Image
-            source={require('../Assets/tick.png')}
-            style={{
-              width: 15,
-              height: 15,
-              backgroundColor: '#222222',
-              resizeMode: 'contain',
-            }}
-          />
-          <Text style={{marginLeft: 2, fontSize: 14}}>{totalFiles[i].n}</Text>
-        </View>,
-      );
-    }
-  }
+  // if (Array.isArray(totalFiles) && totalFiles.length) {
+  //   for (let i = 0; i < index; i++) {
+  //     m.push(
+  //       <View
+  //         key={totalFiles[i].n}
+  //         style={{
+  //           flexDirection: 'row',
+  //           marginHorizontal: 10,
+  //           justifyContent: 'center',
+  //           alignItems: 'center',
+  //         }}>
+  //         <Image
+  //           source={require('../Assets/tick.png')}
+  //           style={{
+  //             width: 15,
+  //             height: 15,
+  //             backgroundColor: '#222222',
+  //             resizeMode: 'contain',
+  //           }}
+  //         />
+  //         <Text style={{marginLeft: 2, fontSize: 14}}>{totalFiles[i].n}</Text>
+  //       </View>,
+  //     );
+  //   }
+  // }
 
   if (!downloadingFile) {
     return null;
@@ -73,14 +73,14 @@ const FileAndProgress = ({data, index, totalFiles}) => {
           </View>
           <Progress.Bar
             progress={downloadingFile?.progress / 100}
-            width={Dimensions.get('window').width - 60}
+            width={Dimensions.get('window').width - 52}
             animated={true}
             color={'#17699b'}
           />
         </View>
-        <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 10}}>
-          {m}
-        </View>
+        {/*<View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 10}}>*/}
+        {/*  {m}*/}
+        {/*</View>*/}
       </View>
     );
   }
