@@ -8,6 +8,7 @@ import BatchesListScreen from './Screens/BatchesListScreen';
 import BatchSelectionScreen from './Screens/BatchSelectionScreen';
 import StudentListsScreen from './Screens/StudentListsScreen';
 import BackupScreen from '../GoPro/BackupScreen';
+import GoProRecordScreen from '../GoPro/GoProRecordScreen';
 
 const CoreStack = createStackNavigator();
 
@@ -68,8 +69,54 @@ const CoreStackNavigator = () => {
         }}
       />
       <CoreStack.Screen name="Camera" component={CameraAPI} />
-      <CoreStack.Screen name="GoPro" component={GoPro} />
-      <CoreStack.Screen name="BackupScreen" component={BackupScreen} />
+      <CoreStack.Screen
+        name="GoPro"
+        component={GoPro}
+        options={{
+          headerShown: true,
+          title: 'Go LIVE',
+          headerStyle: {
+            backgroundColor: '#000000',
+            elevation: 0,
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <CoreStack.Screen
+        name="GoProRecordScreen"
+        component={GoProRecordScreen}
+        options={{
+          headerShown: true,
+          title: 'Record Session',
+          headerStyle: {
+            backgroundColor: '#000000',
+            elevation: 0,
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <CoreStack.Screen
+        options={{
+          headerShown: true,
+          title: 'Backup Files',
+          headerStyle: {
+            backgroundColor: '#000000',
+            elevation: 0,
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        name="BackupScreen"
+        component={BackupScreen}
+      />
       <CoreStack.Screen
         name="StudentsListScreen"
         component={StudentListsScreen}

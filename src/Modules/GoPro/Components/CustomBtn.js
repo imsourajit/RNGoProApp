@@ -23,14 +23,17 @@ const CustomBtn = props => {
 
 const styles = StyleSheet.create({
   btn: {
-    backgroundColor: 'darkblue',
+    backgroundColor: '#3164F4',
     padding: 10,
     margin: 10,
     borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   btnTxt: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    fontSize: 20,
   },
 });
 

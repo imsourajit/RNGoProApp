@@ -1,11 +1,26 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, Linking, StyleSheet, ToastAndroid, View} from 'react-native';
-import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDescription';
+import {
+  ActivityIndicator,
+  FlatList,
+  Linking,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {listSessionsByCoachId} from '../Redux/UserActions';
+import BleManager from 'react-native-ble-manager';
+import NoDevicesConnectedScreen from '../../GoPro/Screens/NoDevicesConnectedScreen';
+import WifiManager from 'react-native-wifi-reborn';
+import {GOPRO_BASE_URL} from '../../GoPro/Utility/Constants';
 
 const SessionListScreens = props => {
-  const [sessionsList, setSessionsList] = useState(null);
+  const [sessionsList, setSessionsList] = useState([]);
+  const [isHotspotConnected, setHotspotConnection] = useState(false);
+
+  const [isDeviceConnected, setDeviceConnected] = useState(null);
+
   const dispatch = useDispatch();
 
   function getDayMonthNameFromMillis(millis) {
@@ -32,22 +47,160 @@ const SessionListScreens = props => {
     );
   }, []);
 
+  // useEffect(() => {
+  //   //connect GoPro Hotspot
+  //   _connectToHotspot();
+  // }, []);
+  //
+  // useEffect(() => {
+  //   if (isDeviceConnected) {
+  //     _getDeviceDetailsAndConnectHotspot()
+  //       .then(r => {})
+  //       .catch(e => {});
+  //   }
+  // }, [isDeviceConnected]);
+  //
+  // useEffect(() => {
+  //   _setTurboTransfer(1);
+  //
+  //   setTimeout(() => {
+  //     _getMediaList().then().catch();
+  //   }, 5000);
+  //
+  //   if (isHotspotConnected) {
+  //   }
+  // }, [isHotspotConnected]);
+
+  const _getMediaList = async () => {
+    try {
+      const mediaJson = await fetch(`${GOPRO_BASE_URL}gopro/media/list`);
+      const res = await mediaJson.json();
+      // const [{fs, d}, ...rest] = res.media;
+      console.log(res);
+    } catch (e) {
+      console.log('Unable to fetch media list', e);
+    }
+  };
+
+  const _connectToHotspot = () => {
+    _enableAndStartBluetooth()
+      .then(() => {
+        BleManager.getConnectedPeripherals([])
+          .then(peripheralsArr => {
+            let goProDevices = peripheralsArr.filter(peripheral =>
+              peripheral.name.includes('GoPro'),
+            );
+            if (goProDevices.length) {
+              setDeviceConnected(goProDevices[0]);
+            }
+          })
+          .catch(e => console.log('Unable to get connected peripherals'));
+      })
+      .catch(e => console.log('Unable to enable bluetooth', e));
+  };
+
+  const _enableAndStartBluetooth = async () => {
+    await BleManager.enableBluetooth();
+    await BleManager.start({showAlert: true, forceLegacy: true}).then(() => {
+      console.log('Module initialized');
+    });
+  };
+
+  const _getDeviceDetailsAndConnectHotspot = async () => {
+    const deviceId = isDeviceConnected.id;
+
+    try {
+      await BleManager.connect(deviceId);
+      await BleManager.retrieveServices(deviceId, []);
+      const ssid = await BleManager.read(
+        deviceId,
+        'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+        'b5f90002-aa8d-11e3-9046-0002a5d5c51b',
+      );
+
+      const password = await BleManager.read(
+        deviceId,
+        'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+        'b5f90003-aa8d-11e3-9046-0002a5d5c51b',
+      );
+
+      // await BleManager.write(
+      //   deviceId,
+      //   'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+      //   'b5f90004-aa8d-11e3-9046-0002a5d5c51b',
+      //   [0x03, 0x17, 0x01, 0x01],
+      // );
+
+      console.log(
+        String.fromCharCode(...ssid),
+        String.fromCharCode(...password),
+      );
+
+      await WifiManager.connectToProtectedSSID(
+        String.fromCharCode(...ssid).trim(),
+        String.fromCharCode(...password).trim(),
+        false,
+      );
+      setHotspotConnection(true);
+    } catch (e) {
+      console.log('Unable to fetch bluetooth details');
+    }
+  };
+
+  const _setTurboTransfer = flag => {
+    fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`)
+      .then(r => {
+        ToastAndroid.show('Turbotransfer on', ToastAndroid.CENTER);
+      })
+      .then(r => console.log('Camera State ====', r))
+      .catch(e => console.log('Camera State error', e));
+  };
+
   const _goToSessionWebview = url => {
     Linking.openURL(url);
   };
 
-  const _renderListOfSessions = ({item, index}) => (
-    <RightArrowBoxesWithDescription
-      pressed={_goToSessionWebview}
-      btnTitle={getDayMonthNameFromMillis(item.startTime)}
-      btnDesc={item.centreTitle ?? ''}
-      data={item.liveStreamUrl}
-    />
-  );
+  const _renderListOfSessions = ({item, index}) => {
+    return <View />;
+    // return (
+    //   <RightArrowBoxesWithDescription
+    //     pressed={_goToSessionWebview}
+    //     btnTitle={getDayMonthNameFromMillis(item.startTime)}
+    //     btnDesc={item.centreTitle ?? ''}
+    //     data={item.liveStreamUrl}
+    //   />
+    // );
+  };
+
+  if (isDeviceConnected == null) {
+    return <NoDevicesConnectedScreen />;
+  }
+
+  if (!isHotspotConnected) {
+    return (
+      <View
+        style={{
+          backgroundColor: '#000000',
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+        <Text
+          style={{
+            color: '#FFFFFF',
+            fontSize: 16,
+          }}>
+          Please wait while we connect to GoPro's hotspot
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.main}>
       <FlatList
-        data={sessionsList}
+        data={[]}
         renderItem={_renderListOfSessions}
         keyExtractor={(item, index) => item.startTime.toString() + index}
       />

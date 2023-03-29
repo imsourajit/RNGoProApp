@@ -44,6 +44,13 @@ const MainScreen = props => {
     });
   };
 
+  const goToGoProToRecordSession = () => {
+    props.navigation.navigate('BatchSelectionScreen', {
+      selectedDevice: 'GO_PRO',
+      toRecord: true,
+    });
+  };
+
   const _openSessionDetailsPage = () => {
     props.navigation.navigate('SessionListsScreen');
   };
@@ -57,11 +64,23 @@ const MainScreen = props => {
 
   return (
     <View style={styles.main}>
-      <View style={styles.arrowBoxes}>
-        <RightArrowBox
-          pressed={_openSessionDetailsPage}
-          btnTitle={'Sessions'}
+      <View style={{alignItems: 'center'}}>
+        <Image
+          source={require('./Assets/logo.png')}
+          style={{
+            width: 180,
+            height: 50,
+            marginTop: 20,
+          }}
         />
+      </View>
+      <View style={styles.arrowBoxes}>
+        {/*<RightArrowBox*/}
+        {/*  pressed={_openSessionDetailsPage}*/}
+        {/*  btnTitle={'Sessions'}*/}
+        {/*/>*/}
+        <RightArrowBox pressed={goToBackUpScreen} btnTitle={'Backup Files'} />
+
         <RightArrowBox pressed={_openBatchesPage} btnTitle={'Batches'} />
       </View>
 
@@ -83,7 +102,17 @@ const MainScreen = props => {
           </View>
         </Pressable>
 
-        <Pressable onPress={goToBackUpScreen}>
+        <Text
+          style={{
+            color: '#000000',
+            fontSize: 20,
+            fontWeight: 'bold',
+            marginVertical: 10,
+          }}>
+          or
+        </Text>
+
+        <Pressable onPress={goToGoProToRecordSession}>
           <View style={styles.box}>
             <Text style={styles.btnTxt}>Record Session</Text>
           </View>
@@ -127,7 +156,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 25,
     padding: 10,
-    marginVertical: 20,
+    // marginVertical: 20,
   },
   btnTxt: {
     fontSize: 28,
@@ -135,13 +164,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   sessionBtnBoxesTitle: {
-    fontSize: 33,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#000000',
   },
   goProImage: {
-    width: 400,
-    height: 300,
+    width: 300,
+    height: 200,
     resizeMode: 'cover',
   },
 });

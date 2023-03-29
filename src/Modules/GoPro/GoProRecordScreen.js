@@ -1,41 +1,101 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-  Dimensions,
-  Image,
   NativeAppEventEmitter,
   PermissionsAndroid,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   ToastAndroid,
   View,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
-import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import WifiManager from 'react-native-wifi-reborn';
 import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
-import DownloadMediaSection from './Components/DownloadMediaSection';
-import _ from 'lodash';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   setDirectoryNameToDownload,
+  setLastSessionDetails,
   storeGoProMediaFilesListLocally,
 } from './Redux/GoProActions';
-import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
+import QRBoxes from './Components/QRBoxes';
+import {
+  getSessionIdToTagInLiveVideo,
+  tagLiveUrlsToSession,
+} from '../CameraAPI/Redux/CameraApiActions';
 
-const BackupScreen = props => {
+const isProd = false;
+
+const BASE_URL = isProd ? 'https://ws.api.video' : 'https://sandbox.api.video';
+
+const API_KEY = isProd
+  ? 'b4nYqEu0r4AAYx22BHddr5bAAXWpMVyQaytYfP33xui'
+  : '3Nir7GCG0LrfUtZ7ELghM51iaOv0m7yU2vryHyaOKca';
+
+const getTwoDigits = digit => (digit >= 10 ? digit : '0' + digit);
+
+const GoProRecordScreen = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
   const [hotspotDetails, setHotspotDetails] = useState({});
 
   const [isDownloading, setIsDownloading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLastReached, setQRFlatListReachedEnd] = useState(false);
+  const [isGeneratingQR, setGeneratingQR] = useState(true);
 
   const dispatch = useDispatch();
   const {mediaList, downloadedMediaList, downloadedDirName, uploadedMediaList} =
     useSelector(st => st.GoProReducer);
+
+  const {
+    user: {userId},
+  } = useSelector(st => st.userReducer);
+
+  const {sessionDetails} = useSelector(st => st.GoProReducer);
+
+  const qrCodeFlatListRef = useRef(null);
+  let currentRefIndex = useRef(null).current;
+
+  const [QR_CODE_ARR, setQRCodeArr] = useState([]);
+
+  // const QR_CODE_ARR = [
+  //   '!MRTMP="rtmp://broadcast.api.video/s/aade8f26-2ed7-4250-8beb-312475042e1f"',
+  //   'oW1mVr1080!W!GLC',
+  // ];
+
+  let sessionStartedTime = '';
+
+  if (sessionDetails !== null) {
+    const date = new Date(sessionDetails.startTime);
+    sessionStartedTime =
+      getTwoDigits(date.getHours() % 12 || 12) +
+      ' : ' +
+      getTwoDigits(date.getMinutes()) +
+      ' ' +
+      (date.getHours() > 12 ? 'pm' : 'am');
+  }
+
+  useEffect(() => {
+    dispatch(
+      getSessionIdToTagInLiveVideo(
+        {
+          batchId: props.route.params.batchId,
+          coachId: userId,
+        },
+        res => {
+          dispatch(setLastSessionDetails(res));
+          setGeneratingQR(false);
+          setQRCodeArr(['mVr1080p60fSq1oR1CSL01']);
+        },
+        err =>
+          ToastAndroid.show(
+            'Oops!!! Something went wrong.',
+            ToastAndroid.CENTER,
+          ),
+      ),
+    );
+  }, []);
 
   useEffect(() => {
     async function GetAllPermissions() {
@@ -130,6 +190,17 @@ const BackupScreen = props => {
       getHotspotDetails();
     }
   }, [devicesConnected]);
+
+  const _scrollToNextItem = () => {
+    currentRefIndex = 1;
+    if (Math.abs(QR_CODE_ARR.length - currentRefIndex) === 1) {
+      setQRFlatListReachedEnd(true);
+    }
+    if (currentRefIndex < QR_CODE_ARR.length) {
+      qrCodeFlatListRef && qrCodeFlatListRef.current.scrollToIndex({index: 1});
+      currentRefIndex++;
+    }
+  };
 
   const testFFmpegCompression = _ => {
     // let RootDir = APP_DIR;
@@ -267,7 +338,6 @@ const BackupScreen = props => {
       const mediaJson = await fetch(`${GOPRO_BASE_URL}gopro/media/list`);
       const res = await mediaJson.json();
       const [{fs, d}, ...rest] = res.media;
-      console.log('@@@res', res);
       if (Array.isArray(fs) && fs.length) {
         const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
         dispatch(storeGoProMediaFilesListLocally(orderedArray));
@@ -328,6 +398,17 @@ const BackupScreen = props => {
       .catch(e => console.log('Camera State error', e));
   };
 
+  const _renderQRImages = ({item, index}) => {
+    return (
+      <QRBoxes
+        qrCommand={item}
+        isLastIndex={QR_CODE_ARR.length - 1 === index}
+        position={index + 1}
+        toRecord={true}
+      />
+    );
+  };
+
   const _sessionFilesBackup = async () => {
     await _goProHttpConnection();
   };
@@ -350,95 +431,105 @@ const BackupScreen = props => {
 
     if (yetToUploadFiles.length) {
       setIsDownloading(false);
+
       setIsUploading(true);
     } else {
       ToastAndroid.show('No media files found to upload', ToastAndroid.CENTER);
     }
   };
 
-  if (!Object.keys(devicesConnected).length) {
-    return <NoDevicesConnectedScreen />;
-  }
+  const handleAuthApi = async sessionId => {
+    setGeneratingQR(true);
+    const response = await fetch(BASE_URL + '/auth/api-key', {
+      body: '{"apiKey": "' + API_KEY + '"}',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    });
+
+    const resJson = await response.json();
+    const response2nd = await fetch(BASE_URL + '/live-streams', {
+      body: '{"record": true, "name": "My Live Stream","public": true}',
+      headers: {
+        Accept: 'application/json',
+        Authorization: 'Bearer ' + resJson.access_token,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    });
+    const streamDetailsJSON = await response2nd.json();
+    dispatch(
+      tagLiveUrlsToSession(
+        {
+          sessionId: sessionId,
+          liveStreamUrl: streamDetailsJSON?.assets?.hls,
+          ...streamDetailsJSON,
+        },
+        res => {
+          setQRCodeArr([
+            `!MRTMP="rtmp://broadcast.api.video/s/${streamDetailsJSON.streamKey}"`,
+            'oW1mVr1080!W!GLC',
+          ]);
+        },
+        err => {
+          ToastAndroid.show(
+            'Oops!!! Something went wrong',
+            ToastAndroid.CENTER,
+          );
+        },
+      ),
+    );
+
+    setGeneratingQR(false);
+  };
 
   return (
     <View style={styles.main}>
-      <View style={{marginHorizontal: 16}}>
-        <GoProDeviceDetails
-          deviceDetails={hotspotDetails}
-          id={devicesConnected.id}
-        />
-      </View>
-      {/*<View*/}
-      {/*  style={{marginVertical: 60, backgroundColor: '#FFFFFF', padding: 30}}>*/}
-      {/*  <QRCode value="oW1mVr1080!W!GLC" size={200} />*/}
-      {/*</View>*/}
-
+      <GoProDeviceDetails
+        deviceDetails={hotspotDetails}
+        id={devicesConnected.id}
+      />
       <View
         style={{
-          paddingHorizontal: 16,
+          flex: 1,
+          marginTop: 40,
+          justifyContent: 'center',
         }}>
-        {isDownloading ? (
-          <DownloadMediaSection
-            startUploadingProcess={_startUploadingProcess}
-          />
-        ) : null}
-        {isUploading ? (
-          <UploadMediaSection completeUploadProcess={_completeUploadProcess} />
-        ) : null}
+        <Text
+          style={{
+            fontSize: 32,
+            color: '#FFFFFF',
+            textAlign: 'center',
+          }}>
+          Session Has started at {'\n'}
+          <Text
+            style={{
+              color: 'red',
+            }}>
+            {sessionStartedTime} {'\n'}
+          </Text>
+          Please start recording on the GoPro
+        </Text>
+        {/*{isGeneratingQR ? (*/}
+        {/*  <ActivityIndicator size={'large'} color={'#FFFFFF'} />*/}
+        {/*) : (*/}
+        {/*  <FlatList*/}
+        {/*    ref={qrCodeFlatListRef}*/}
+        {/*    data={QR_CODE_ARR}*/}
+        {/*    renderItem={_renderQRImages}*/}
+        {/*    // keyExtractor={item => item.toString()}*/}
+        {/*    horizontal={true}*/}
+        {/*    scrollEnabled={false}*/}
+        {/*    showsHorizontalScrollIndicator={false}*/}
+        {/*    showsVerticalScrollIndicator={false}*/}
+        {/*    style={{*/}
+        {/*      // backgroundColor: 'red',*/}
+        {/*      height: 400,*/}
+        {/*    }}*/}
+        {/*  />*/}
+        {/*)}*/}
       </View>
-      <View style={styles.sessionBtnBoxes}>
-        <Text style={styles.sessionBtnBoxesTitle}>Backup Files</Text>
-
-        <Image
-          source={require('./Assets/goPro.png')}
-          style={styles.goProImage}
-        />
-        <Pressable onPress={_scanForFootagesToUploadToServer}>
-          <View style={styles.box}>
-            <Text style={[styles.btnTxt, {fontSize: 18}]}>
-              Scan for footages to upload
-            </Text>
-          </View>
-        </Pressable>
-
-        {!isDownloading && !isUploading ? (
-          <Pressable onPress={_sessionFilesBackup}>
-            <View style={styles.box}>
-              <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
-            </View>
-          </Pressable>
-        ) : null}
-      </View>
-
-      {/*<View*/}
-      {/*  style={{*/}
-      {/*    // flex: 1,*/}
-      {/*    marginTop: 400,*/}
-      {/*    alignItems: 'center',*/}
-      {/*  }}>*/}
-      {/*  <CustomBtn*/}
-      {/*    data={''}*/}
-      {/*    onPress={_scanForFootagesToUploadToServer}*/}
-      {/*    btnTxt={'Scan for footages to upload'}*/}
-      {/*  />*/}
-      {/*  {!isDownloading && !isUploading ? (*/}
-      {/*    <View style={{flex: 1, marginBottom: 100}}>*/}
-      {/*      <CustomBtn*/}
-      {/*        data={''}*/}
-      {/*        onPress={_sessionFilesBackup}*/}
-      {/*        btnTxt={'Take Backup'}*/}
-      {/*      />*/}
-      {/*    </View>*/}
-      {/*  ) : null}*/}
-      {/*  {isDownloading ? (*/}
-      {/*    <DownloadMediaSection*/}
-      {/*      startUploadingProcess={_startUploadingProcess}*/}
-      {/*    />*/}
-      {/*  ) : null}*/}
-      {/*  {isUploading ? (*/}
-      {/*    <UploadMediaSection completeUploadProcess={_completeUploadProcess} />*/}
-      {/*  ) : null}*/}
-      {/*</View>*/}
     </View>
   );
 };
@@ -446,57 +537,10 @@ const BackupScreen = props => {
 const styles = StyleSheet.create({
   main: {
     flex: 1,
-    // alignItems: 'center',
-    // // paddingHorizontal: 20,
-    paddingTop: 20,
-    backgroundColor: '#141414',
-    justifyContent: 'space-between',
-  },
-  arrowBoxes: {
-    // paddingHorizontal: 32,
-  },
-  sessionBtnBoxes: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: 'center',
     padding: 20,
-    alignItems: 'center',
-  },
-  question: {
-    fontSize: 25,
-    textAlign: 'center',
-  },
-  deviceLists: {
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginTop: 15,
-  },
-  box: {
-    width: Dimensions.get('window').width - 120,
-    // height: 100,
     backgroundColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 25,
-    padding: 10,
-    marginVertical: 20,
-  },
-  btnTxt: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  sessionBtnBoxesTitle: {
-    fontSize: 33,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  goProImage: {
-    width: 300,
-    height: 200,
-    resizeMode: 'cover',
   },
 });
 
-export default BackupScreen;
+export default GoProRecordScreen;

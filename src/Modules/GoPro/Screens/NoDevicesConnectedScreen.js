@@ -11,15 +11,30 @@ const NoDevicesConnectedScreen = props => {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.noDeviceConnectedTxt}>
-        No Go Pro devices connected. Please open Go Pro Quik app and connect
-        your device
-      </Text>
-      <CustomBtn
-        onPress={_btnPressed}
-        btnTxt={'Open Go Pro Quik App'}
-        data={''}
-      />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'flex-end',
+          alignSelf: 'stretch',
+        }}>
+        <Text style={styles.noDeviceConnectedTxt}>
+          No GoPro devices connected. Please open GoPro Quik app and connect
+          your device
+        </Text>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'flex-end',
+          alignSelf: 'stretch',
+          paddingBottom: 10,
+        }}>
+        <CustomBtn
+          onPress={_btnPressed}
+          btnTxt={'Open GoPro Quik App'}
+          data={''}
+        />
+      </View>
     </View>
   );
 };

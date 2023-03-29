@@ -3,6 +3,7 @@ import {
   SET_DOWNLOADED_COMPLETED,
   SET_DOWNLOADING_FILE,
   SET_GOPRO_FILES_TO_LOCAL_STORAGE,
+  SET_SESSION_DETAILS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
 } from './GoProActionTypes';
@@ -34,5 +35,10 @@ export const setUploadingFile = data => ({
 
 export const setUploadCompleted = data => ({
   type: SET_UPLOADEDED_COMPLETED,
+  data,
+});
+
+export const setLastSessionDetails = data => ({
+  type: SET_SESSION_DETAILS,
   data,
 });

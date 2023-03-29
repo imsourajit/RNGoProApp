@@ -3,6 +3,7 @@ import {
   SET_DOWNLOADED_COMPLETED,
   SET_DOWNLOADING_FILE,
   SET_GOPRO_FILES_TO_LOCAL_STORAGE,
+  SET_SESSION_DETAILS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
 } from './GoProActionTypes';
@@ -14,6 +15,7 @@ const initialState = {
   downloadingFile: null,
   uploadedMediaList: [],
   uploadingFile: null,
+  sessionDetails: null,
 };
 
 export const GoProReducer = (state = initialState, action) => {
@@ -52,6 +54,12 @@ export const GoProReducer = (state = initialState, action) => {
       return {
         ...state,
         uploadedMediaList: [...state.uploadedMediaList, action.data],
+      };
+
+    case SET_SESSION_DETAILS:
+      return {
+        ...state,
+        sessionDetails: action.data,
       };
 
     default:

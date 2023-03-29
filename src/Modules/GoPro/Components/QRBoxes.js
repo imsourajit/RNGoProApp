@@ -3,10 +3,18 @@ import {Dimensions, StyleSheet, Text, View} from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 const QRBoxes = props => {
-  const {qrCommand, isLastIndex, position} = props;
+  const {qrCommand, isLastIndex, position, toRecord} = props;
 
-  const positionTxt =
-    position === 1 ? 'Set your LIVE-Stream address' : 'Launch Your LIVE-Stream';
+  let positionTxt =
+    position +
+    '. ' +
+    (position === 1
+      ? 'Set your LIVE-Stream address'
+      : 'Launch Your LIVE-Stream');
+
+  if (toRecord) {
+    positionTxt = 'Start Recording Session';
+  }
 
   return (
     <View style={styles.main}>
@@ -21,7 +29,7 @@ const QRBoxes = props => {
           alignItems: 'center',
           marginBottom: 20,
         }}>
-        <Text style={styles.positionTxt}>{position + '. ' + positionTxt}</Text>
+        <Text style={styles.positionTxt}>{positionTxt}</Text>
       </View>
 
       <View
