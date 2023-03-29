@@ -26,7 +26,7 @@ const LoginScreen = props => {
           height: 100,
           width: 250,
           position: 'absolute',
-          top: (height - LOGO_HEIGHT) / 2,
+          top: 250,
           left: (width - LOGO_WIDTH) / 2,
         }}
       />
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   btnBorder: {
-    marginBottom: 100,
+    marginBottom: 60,
   },
 });
 
