@@ -9,8 +9,13 @@ import {
   View,
 } from 'react-native';
 import RightArrowBox from './Components/RightArrowBox';
+import PopupMenu from './Components/PopupMenu';
+import {useDispatch} from 'react-redux';
+import {logoutUser} from './Redux/UserActions';
 
 const MainScreen = props => {
+  const dispatch = useDispatch();
+
   useEffect(() => {
     requestCameraPermission();
   }, []);
@@ -62,9 +67,20 @@ const MainScreen = props => {
     props.navigation.navigate('BackupScreen');
   };
 
+  const onPopupEvent = (eventName, index) => {
+    if (eventName !== 'itemSelected') {
+      return;
+    }
+    onLogout();
+  };
+
+  const onLogout = () => {
+    dispatch(logoutUser());
+  };
+
   return (
     <View style={styles.main}>
-      <View style={{alignItems: 'center'}}>
+      <View style={{alignItems: 'center', justifyContent: 'center'}}>
         <Image
           source={require('./Assets/logo.png')}
           style={{
@@ -73,6 +89,14 @@ const MainScreen = props => {
             marginTop: 20,
           }}
         />
+        <View
+          style={{
+            position: 'absolute',
+            right: 20,
+            bottom: 10,
+          }}>
+          <PopupMenu actions={['Logout']} onPress={onPopupEvent} />
+        </View>
       </View>
       <View style={styles.arrowBoxes}>
         {/*<RightArrowBox*/}

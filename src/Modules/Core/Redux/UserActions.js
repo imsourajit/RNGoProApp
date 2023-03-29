@@ -2,6 +2,7 @@ import ApiService from '../../../Services/ApiService';
 import {
   ADD_CONTACTS,
   EMPTY_CONTACTS,
+  LOGOUT,
   REMOVE_CONTACTS,
   SET_USER_DETAILS,
   UPDATE_AUTH_TOKEN,
@@ -125,3 +126,7 @@ export const addStudentsToBatch = (params, onSuccess, onError) => dispatch =>
     onSuccess,
     onError,
   );
+
+export const logoutUser = () => ({
+  type: LOGOUT,
+});
