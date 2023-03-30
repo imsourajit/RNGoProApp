@@ -15,6 +15,7 @@ const UploadMediaSection = props => {
     downloadedDirName,
     uploadedMediaList,
     uploadingFile,
+    sessionDetails,
   } = useSelector(st => st.GoProReducer);
 
   const [filesToUpload, setFilesToUpload] = useState([]);
@@ -60,7 +61,14 @@ const UploadMediaSection = props => {
         'content-type': 'application/json',
         Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
       },
-      data: {collection_id: '63fe06f5b4ade3692e1bb407', format: 'HLS'},
+      data: {
+        collection_id: '63fe06f5b4ade3692e1bb407',
+        format: 'HLS',
+        metadata: {
+          session: sessionDetails?.id ?? 'DIRECT_CAMERA',
+          test: 'sourajit',
+        },
+      },
     };
 
     if (index < downloadedMedia.length) {
@@ -185,14 +193,15 @@ const UploadMediaSection = props => {
     xhr.upload.onprogress = function (evt) {
       if (evt.lengthComputable) {
         let percentComplete = (evt.loaded / evt.total) * 100;
-        dispatch(
-          setUploadingFile({
-            name: downloadedMedia[index].n,
-            psuedoName: downloadedMedia.psuedoName,
-            progress: percentComplete,
-            index: index,
-          }),
-        );
+        console.log('Upload percentage', percentageComplete);
+        // dispatch(
+        //   setUploadingFile({
+        //     name: downloadedMedia[index].n,
+        //     psuedoName: downloadedMedia.psuedoName,
+        //     progress: percentComplete,
+        //     index: index,
+        //   }),
+        // );
       }
     };
     xhr.open('PUT', uploadUrl);

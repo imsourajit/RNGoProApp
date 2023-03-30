@@ -45,6 +45,7 @@ const DownloadMediaSection = props => {
       background: true,
       discretionary: true,
       cacheable: true,
+      progressInterval: 2000,
       begin: r => {
         dispatch(
           setDownloadingFile({
@@ -58,7 +59,7 @@ const DownloadMediaSection = props => {
       },
       progress: r => {
         const percentile = (r.bytesWritten / r.contentLength) * 100;
-        // console.log(percentile, index);
+        console.log(percentile, index, r.bytesWritten, r.contentLength);
 
         dispatch(
           setDownloadingFile({
@@ -70,16 +71,16 @@ const DownloadMediaSection = props => {
           }),
         );
 
-        // if (percentile / 100 == 1) {
-        //   dispatch(
-        //     setDownloadCompleted({
-        //       name: filesToDownload[index].n,
-        //       psuedoName: fileNamePrefix + filesToDownload[index].n,
-        //       index: index,
-        //       ...filesToDownload[index],
-        //     }),
-        //   );
-        // }
+        if (percentile / 100 == 1) {
+          dispatch(
+            setDownloadCompleted({
+              name: filesToDownload[index].n,
+              psuedoName: fileNamePrefix + filesToDownload[index].n,
+              index: index,
+              ...filesToDownload[index],
+            }),
+          );
+        }
       },
     }).promise;
     dispatch(

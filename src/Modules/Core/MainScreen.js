@@ -29,7 +29,7 @@ const MainScreen = props => {
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
         // PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
-        // PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         // PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
       ]);
     } catch (err) {
