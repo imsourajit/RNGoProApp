@@ -12,7 +12,6 @@ import {
   View,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
-import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import WifiManager from 'react-native-wifi-reborn';
 import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
 import DownloadMediaSection from './Components/DownloadMediaSection';
@@ -25,6 +24,8 @@ import {
 import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
+import axios from 'axios';
+import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 
 const BackupScreen = props => {
   const [devicesConnected, setDevicesConnected] = useState({});
@@ -36,6 +37,10 @@ const BackupScreen = props => {
   const dispatch = useDispatch();
   const {mediaList, downloadedMediaList, downloadedDirName, uploadedMediaList} =
     useSelector(st => st.GoProReducer);
+
+  useEffect(() => {
+    _getGCPUrl();
+  });
 
   useEffect(() => {
     async function GetAllPermissions() {
@@ -354,6 +359,15 @@ const BackupScreen = props => {
     } else {
       ToastAndroid.show('No media files found to upload', ToastAndroid.CENTER);
     }
+  };
+
+  const _getGCPUrl = () => {
+    axios('https://dev-platform.thewagmi.app/platform/user/resumable-url')
+      .then(res => {
+        console.log(res.data.responseObject);
+        console.log('@gcp', res);
+      })
+      .catch(e => console.log('Error', e));
   };
 
   if (!Object.keys(devicesConnected).length) {

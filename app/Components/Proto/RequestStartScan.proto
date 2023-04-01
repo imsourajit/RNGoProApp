@@ -1,7 +1,0 @@
-syntax="proto2";
-message RequestStartScan{
-}
-message RequestConnectNew {
-    required string           ssid                      = 1; // AP SSID
-    required string           password                  = 2; // AP password
-}
