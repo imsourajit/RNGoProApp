@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import WifiManager from 'react-native-wifi-reborn';
-import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
+import {GOPRO_BASE_URL} from './Utility/Constants';
 import DownloadMediaSection from './Components/DownloadMediaSection';
 import _ from 'lodash';
 import {useDispatch, useSelector} from 'react-redux';
@@ -23,7 +23,6 @@ import {
 } from './Redux/GoProActions';
 import UploadMediaSection from './Components/UploadMediaSection';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
-import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 import axios from 'axios';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 
@@ -162,50 +161,6 @@ const BackupScreen = props => {
     //   type: 'video/mp4',
     //   name: 'jil.MP4',
     // });
-
-    FFmpegKit.executeAsync(
-      `-i file://${APP_DIR}/jil.MP4 -c:v mpeg4 file://${APP_DIR}/jil2.MP4`,
-      async session => {
-        const returnCode = await session.getReturnCode();
-
-        if (ReturnCode.isSuccess(returnCode)) {
-          console.log('Success Log');
-
-          let RootDir = APP_DIR;
-          const xhr = new XMLHttpRequest();
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-              if (xhr.status === 200) {
-                console.log('Upload success');
-              }
-            }
-          };
-          // xhr.upload.onprogress = function (evt) {
-          //   if (evt.lengthComputable) {
-          //     let percentComplete = (evt.loaded / evt.total) * 100;
-          //     console.log('P co', percentComplete);
-          //   }
-          // };
-          xhr.open(
-            'PUT',
-            'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/641067b292827199f9781323/origin-641067b292827199f9781323?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T122523Z&X-Amz-Expires=3600&X-Amz-Signature=94fdd4bbd5ccc473969152cddc310c396f431a160178ed2bb4f4a2914f52a310&X-Amz-SignedHeaders=host&x-id=PutObject',
-          );
-          xhr.setRequestHeader('Content-Type', 'video/mp4');
-          xhr.send({
-            uri: 'file://${APP_DIR}/jil2.MP4',
-            type: 'video/mp4',
-            name: 'jil.MP4',
-          });
-          // SUCCESS
-        } else if (ReturnCode.isCancel(returnCode)) {
-          // CANCEL
-          console.log('Cancel Log');
-        } else {
-          // ERROR
-          console.log('Error Log');
-        }
-      },
-    );
   };
 
   // const testCompress = async () => {
