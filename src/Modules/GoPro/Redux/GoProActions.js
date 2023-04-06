@@ -3,6 +3,7 @@ import {
   SET_DOWNLOADED_COMPLETED,
   SET_DOWNLOADING_FILE,
   SET_GOPRO_FILES_TO_LOCAL_STORAGE,
+  SET_GOPRO_MEDIA,
   SET_SESSION_DETAILS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
@@ -40,5 +41,10 @@ export const setUploadCompleted = data => ({
 
 export const setLastSessionDetails = data => ({
   type: SET_SESSION_DETAILS,
+  data,
+});
+
+export const setGoProMedia = data => ({
+  type: SET_GOPRO_MEDIA,
   data,
 });

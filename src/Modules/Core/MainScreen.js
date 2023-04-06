@@ -64,7 +64,7 @@ const MainScreen = props => {
   };
 
   const goToBackUpScreen = _ => {
-    props.navigation.navigate('BackupScreen');
+    props.navigation.navigate('SequentialBackupScreen');
   };
 
   const onPopupEvent = (eventName, index) => {

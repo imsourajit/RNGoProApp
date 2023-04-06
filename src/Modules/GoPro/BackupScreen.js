@@ -135,34 +135,6 @@ const BackupScreen = props => {
     }
   }, [devicesConnected]);
 
-  const testFFmpegCompression = _ => {
-    // let RootDir = APP_DIR;
-    // const xhr = new XMLHttpRequest();
-    // xhr.onreadystatechange = function () {
-    //   if (xhr.readyState === 4) {
-    //     if (xhr.status === 200) {
-    //       console.log('Upload success');
-    //     }
-    //   }
-    // };
-    // xhr.upload.onprogress = function (evt) {
-    //   if (evt.lengthComputable) {
-    //     let percentComplete = (evt.loaded / evt.total) * 100;
-    //     console.log('P co', percentComplete);
-    //   }
-    // };
-    // xhr.open(
-    //   'PUT',
-    //   'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/641067b292827199f9781323/origin-641067b292827199f9781323?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T122523Z&X-Amz-Expires=3600&X-Amz-Signature=94fdd4bbd5ccc473969152cddc310c396f431a160178ed2bb4f4a2914f52a310&X-Amz-SignedHeaders=host&x-id=PutObject',
-    // );
-    // xhr.setRequestHeader('Content-Type', 'video/mp4');
-    // xhr.send({
-    //   uri: 'file://${APP_DIR}/jil2.MP4',
-    //   type: 'video/mp4',
-    //   name: 'jil.MP4',
-    // });
-  };
-
   // const testCompress = async () => {
   //   try {
   //     const dstUrl = await Video.compress(
@@ -227,7 +199,6 @@ const BackupScreen = props => {
       const mediaJson = await fetch(`${GOPRO_BASE_URL}gopro/media/list`);
       const res = await mediaJson.json();
       const [{fs, d}, ...rest] = res.media;
-      console.log('@@@res', res);
       if (Array.isArray(fs) && fs.length) {
         const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
         dispatch(storeGoProMediaFilesListLocally(orderedArray));
@@ -240,17 +211,6 @@ const BackupScreen = props => {
       console.log('Unable to fetch media', e);
     }
   };
-
-  // const checkForPendingUploads = () => {
-  //   let yetFileToUpload = [];
-  //   downloadedMediaList.map((item, index) => {
-  //     const isDefined = _.find(downloadedMediaList, obj => obj.n == item.n);
-  //     if (isDefined == undefined) {
-  //       yetFileToUpload.push(item);
-  //     }
-  //   });
-  //   setFilesToDownload(yetFileToUpload);
-  // };
 
   const _startUploadingProcess = async () => {
     // await _setTurboTransfer(0);

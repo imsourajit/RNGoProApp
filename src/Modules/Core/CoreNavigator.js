@@ -9,6 +9,7 @@ import BatchSelectionScreen from './Screens/BatchSelectionScreen';
 import StudentListsScreen from './Screens/StudentListsScreen';
 import BackupScreen from '../GoPro/BackupScreen';
 import GoProRecordScreen from '../GoPro/GoProRecordScreen';
+import SequentialBackupScreen from '../GoPro/SequentialBackupScreen';
 
 const CoreStack = createStackNavigator();
 
@@ -116,6 +117,23 @@ const CoreStackNavigator = () => {
         }}
         name="BackupScreen"
         component={BackupScreen}
+      />
+
+      <CoreStack.Screen
+        options={{
+          headerShown: true,
+          title: 'Backup Files',
+          headerStyle: {
+            backgroundColor: '#000000',
+            elevation: 0,
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        name="SequentialBackupScreen"
+        component={SequentialBackupScreen}
       />
       <CoreStack.Screen
         name="StudentsListScreen"

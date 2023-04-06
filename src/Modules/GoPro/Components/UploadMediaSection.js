@@ -66,7 +66,6 @@ const UploadMediaSection = props => {
         format: 'HLS',
         metadata: {
           session: sessionDetails?.id ?? 'DIRECT_CAMERA',
-          test: 'sourajit',
         },
       },
     };

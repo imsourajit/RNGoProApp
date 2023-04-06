@@ -328,6 +328,7 @@ const GoProRecordScreen = props => {
 
   // Start download process
   const _startDownloadingProcess = () => {
+    8;
     _getMediaList();
   };
 
