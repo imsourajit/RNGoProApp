@@ -21,6 +21,7 @@ import {
 import RNFS from 'react-native-fs';
 import axios from 'axios';
 import {backgroundUpload} from 'react-native-compressor';
+import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgressBar';
 
 const SequentialBackupScreen = () => {
   const [connectedDevice, setConnectedDevice] = useState(null);
@@ -306,6 +307,13 @@ const SequentialBackupScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View
+        style={{
+          marginHorizontal: 16,
+          marginVertical: 20,
+        }}>
+        <DownloadAndUploadProgressBar />
+      </View>
       <Pressable onPress={takeBackupOfFiles}>
         <View style={styles.btn}>
           <Text style={styles.btnTxt}>Back up</Text>

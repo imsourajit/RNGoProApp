@@ -24,8 +24,8 @@ const initialState = {
   media: [],
   downloadedMedia: [],
   uploadedMedia: [],
-  downloadedMediaProgress: {},
-  uploadedMediaProgress: {},
+  downloadedMediaProgress: null,
+  uploadedMediaProgress: null,
 };
 
 export const GoProReducer = (state = initialState, action) => {
