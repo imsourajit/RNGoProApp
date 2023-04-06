@@ -1,16 +1,36 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Dimensions, StyleSheet, Text, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import * as Progress from 'react-native-progress';
+import _ from 'lodash';
 
 const DownloadAndUploadProgressBar = () => {
-  const {downloadedMediaProgress, uploadedMediaProgress} = useSelector(
+  const {downloadedMediaProgress, uploadedMediaProgress, media} = useSelector(
     st => st.GoProReducer,
   );
+
+  const [backupText, setBackupText] = useState('Taking backup');
+
+  useEffect(() => {
+    let allFiles = [];
+    media.map(item => {
+      allFiles = [...allFiles, ...item.fs];
+    });
+
+    const index = _.findIndex(allFiles, file =>
+      (file.n === downloadedMediaProgress) === null
+        ? uploadedMediaProgress?.fileName
+        : downloadedMediaProgress?.fileName,
+    );
+    if (index >= 0) {
+      setBackupText(`Taking backup of ${index + 1} of ${allFiles.length}`);
+    }
+  }, [media]);
 
   if (downloadedMediaProgress == null && uploadedMediaProgress == null) {
     return null;
   }
+
   const uploadedFileName = uploadedMediaProgress?.fileName ?? '';
   const uploadedProgress = uploadedMediaProgress?.percentile ?? 0;
   const downloadedFileName = downloadedMediaProgress?.fileName ?? '';
@@ -36,12 +56,7 @@ const DownloadAndUploadProgressBar = () => {
           // marginTop: 5,
           fontSize: 16,
         }}>
-        Sample Text
-        {/*{progressPercentile == 0*/}
-        {/*  ? 'Optimizing Video'*/}
-        {/*  : `Uploading ${index + 1} of ${*/}
-        {/*    totalFiles?.length ?? 0*/}
-        {/*  } files to Server`}*/}
+        {backupText}
       </Text>
       <View>
         <View

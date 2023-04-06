@@ -7,11 +7,13 @@ import {
   SET_DOWNLOADING_FILE,
   SET_GOPRO_FILES_TO_LOCAL_STORAGE,
   SET_GOPRO_MEDIA,
+  SET_SCHEDULED_SESSIONS,
   SET_SESSION_DETAILS,
   SET_UPLOAD_MEDIA_PROGRESS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
 } from './GoProActionTypes';
+import ApiService from '../../../Services/ApiService';
 
 export const storeGoProMediaFilesListLocally = files => ({
   type: SET_GOPRO_FILES_TO_LOCAL_STORAGE,
@@ -68,5 +70,23 @@ export const downloadedCompletedFile = data => ({
 });
 export const uploadedCompletedFile = data => ({
   type: COMPLETED_UPLOADED_FILE,
+  data,
+});
+
+export const getScheduledSessions = (params, onSuccess, onError) => dispatch =>
+  ApiService.get(
+    dispatch,
+    '',
+    'fcone/session/coach',
+    params,
+    null,
+    null,
+    null,
+    onSuccess,
+    onError,
+  );
+
+export const setScheduledSessions = data => ({
+  type: SET_SCHEDULED_SESSIONS,
   data,
 });

@@ -92,7 +92,7 @@ const ApiService = {
           success && dispatch(success(res?.data ?? []));
         })
         .catch(e => {
-          console.log('Api error', JSON.stringify(e));
+          console.log('Api error', JSON.stringify(e), e.message);
           if (failureCallback) {
             failureCallback(e.response?.data);
           }

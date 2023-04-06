@@ -33,7 +33,7 @@ const SequentialBackupScreen = () => {
   const [downloadDirectory, setDownloadDirectory] = useState(null);
 
   const dispatch = useDispatch();
-  const {media} = useSelector(st => st.GoProReducer);
+  const {media, scheduledSessions} = useSelector(st => st.GoProReducer);
   const {user: {userId} = {}} = useSelector(st => st.userReducer);
 
   const {ssid, password} = hotspotDetails;
@@ -155,6 +155,17 @@ const SequentialBackupScreen = () => {
     }, 5000);
   };
 
+  const setMetaDataForGumlet = file => {
+    const {mod = new Date().getTime()} = file;
+
+    const filteredArray = scheduledSessions.filter(itm => itm <= mod);
+
+    if (filteredArray.length) {
+      return filteredArray[0];
+    }
+    return {};
+  };
+
   const _getPreSignedUrlForGumlet = async (
     media,
     mediaIndex,
@@ -162,6 +173,8 @@ const SequentialBackupScreen = () => {
     filePath,
     fileName,
   ) => {
+    const currentFile = media[mediaIndex]?.fs[listIndex];
+
     const options = {
       method: 'POST',
       url: 'https://api.gumlet.com/v1/video/assets/upload',
@@ -175,6 +188,7 @@ const SequentialBackupScreen = () => {
         format: 'HLS',
         metadata: {
           userId: userId ?? 'Anonymous',
+          ...setMetaDataForGumlet(currentFile),
         },
       },
     };
@@ -288,11 +302,11 @@ const SequentialBackupScreen = () => {
   };
 
   const connectToWifiAndGetMediaLists = async () => {
-    // let list = await WifiManager.reScanAndLoadWifiList();
-    // await WifiManager.disconnect();
     await WifiManager.connectToProtectedSSID(ssid, password, true);
-    _enableTurboTransfer();
-    _getMediaListToDownloadAndUpload();
+    setTimeout(() => {
+      _enableTurboTransfer();
+      _getMediaListToDownloadAndUpload();
+    }, 1000);
   };
 
   const _getMediaListToDownloadAndUpload = async () => {
@@ -302,6 +316,7 @@ const SequentialBackupScreen = () => {
       const [{fs, d}, ...rest] = res.media;
       if (Array.isArray(res.media) && res.media.length) {
         dispatch(setGoProMedia(res.media));
+
         // const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
         // setMediaList(orderedArray);
         console.log('Media list', res.media);

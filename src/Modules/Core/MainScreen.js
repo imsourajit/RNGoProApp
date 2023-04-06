@@ -6,6 +6,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  ToastAndroid,
   View,
 } from 'react-native';
 import RightArrowBox from './Components/RightArrowBox';
@@ -13,7 +14,9 @@ import PopupMenu from './Components/PopupMenu';
 import {useDispatch} from 'react-redux';
 import {logoutUser} from './Redux/UserActions';
 import {
+  getScheduledSessions,
   setDownloadingProgressOfMedia,
+  setScheduledSessions,
   setUploadingProgressOfMedia,
 } from '../GoPro/Redux/GoProActions';
 
@@ -22,6 +25,28 @@ const MainScreen = props => {
 
   useEffect(() => {
     requestCameraPermission();
+  }, []);
+
+  useEffect(() => {
+    dispatch(
+      getScheduledSessions(
+        {
+          startTime: new Date().getTime(),
+          size: 20,
+          start: 0,
+        },
+        resp => {
+          console.log(resp);
+          dispatch(setScheduledSessions(resp));
+        },
+        err => {
+          ToastAndroid.show(
+            'Unable to fetch scheduled sessions',
+            ToastAndroid.CENTER,
+          );
+        },
+      ),
+    );
   }, []);
 
   const requestCameraPermission = async () => {
