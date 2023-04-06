@@ -22,6 +22,7 @@ import RNFS from 'react-native-fs';
 import axios from 'axios';
 import {backgroundUpload} from 'react-native-compressor';
 import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgressBar';
+import GoProDeviceDetails from './Components/GoProDeviceDetails';
 
 const SequentialBackupScreen = () => {
   const [connectedDevice, setConnectedDevice] = useState(null);
@@ -308,6 +309,12 @@ const SequentialBackupScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={{marginHorizontal: 16}}>
+        <GoProDeviceDetails
+          deviceDetails={hotspotDetails}
+          id={connectedDevice.id}
+        />
+      </View>
       <View
         style={{
           marginHorizontal: 16,

@@ -12,6 +12,10 @@ import RightArrowBox from './Components/RightArrowBox';
 import PopupMenu from './Components/PopupMenu';
 import {useDispatch} from 'react-redux';
 import {logoutUser} from './Redux/UserActions';
+import {
+  setDownloadingProgressOfMedia,
+  setUploadingProgressOfMedia,
+} from '../GoPro/Redux/GoProActions';
 
 const MainScreen = props => {
   const dispatch = useDispatch();
@@ -64,6 +68,8 @@ const MainScreen = props => {
   };
 
   const goToBackUpScreen = _ => {
+    dispatch(setDownloadingProgressOfMedia(null));
+    dispatch(setUploadingProgressOfMedia(null));
     props.navigation.navigate('SequentialBackupScreen');
   };
 
