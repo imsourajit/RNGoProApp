@@ -122,6 +122,7 @@ const SequentialBackupScreen = () => {
         }).promise;
         dispatch(downloadedCompletedFile(fileName));
         dispatch(setDownloadingProgressOfMedia(null));
+        _disableTurboTransfer();
         _startUploadingProcess(
           media,
           mediaIndex,
@@ -226,17 +227,17 @@ const SequentialBackupScreen = () => {
     _startBackupProcess(media, mediaIndex, listIndex + 1);
   };
 
-  const _startDownloadFromGoPro = async index => {
-    if (mediaList.length <= index) {
-      return;
-    }
-    const date = new Date();
-    const fileNamePrefix = date.getTime();
-  };
-
   const _enableTurboTransfer = async () => {
     try {
       await fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=1`);
+    } catch (e) {
+      console.log('camera state error', e);
+    }
+  };
+
+  const _disableTurboTransfer = async () => {
+    try {
+      await fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=0`);
     } catch (e) {
       console.log('camera state error', e);
     }
