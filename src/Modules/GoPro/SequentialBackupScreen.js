@@ -11,7 +11,13 @@ import WifiManager from 'react-native-wifi-reborn';
 import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
 import BleManager from 'react-native-ble-manager';
 import {useDispatch, useSelector} from 'react-redux';
-import {setGoProMedia} from './Redux/GoProActions';
+import {
+  downloadedCompletedFile,
+  setDownloadingProgressOfMedia,
+  setGoProMedia,
+  setUploadingProgressOfMedia,
+  uploadedCompletedFile,
+} from './Redux/GoProActions';
 import RNFS from 'react-native-fs';
 import axios from 'axios';
 import {backgroundUpload} from 'react-native-compressor';
@@ -88,6 +94,12 @@ const SequentialBackupScreen = () => {
           progressInterval: 2000,
           begin: r => {
             console.log('Directory : ', goProDirectory, ' File : ', fileName);
+            dispatch(
+              setDownloadingProgressOfMedia({
+                fileName: fileName,
+                percentile: 0,
+              }),
+            );
           },
           progress: r => {
             const percentile = (r.bytesWritten / r.contentLength) * 100;
@@ -99,9 +111,23 @@ const SequentialBackupScreen = () => {
               fileName,
               percentile,
             );
+            dispatch(
+              setDownloadingProgressOfMedia({
+                fileName: fileName,
+                percentile: percentile,
+              }),
+            );
           },
         }).promise;
-        _startUploadingProcess(APP_DIR + '/' + fileNamePrefix + fileName);
+        dispatch(downloadedCompletedFile(fileName));
+        dispatch(setDownloadingProgressOfMedia(null));
+        _startUploadingProcess(
+          media,
+          mediaIndex,
+          listIndex,
+          APP_DIR + '/' + fileNamePrefix + fileName,
+          fileName,
+        );
       } else {
         //   Go to next directory
         _startBackupProcess(media, mediaIndex + 1, 0);
@@ -116,11 +142,18 @@ const SequentialBackupScreen = () => {
     mediaIndex,
     listIndex,
     filePath,
+    fileName,
   ) => {
     await WifiManager.disconnect();
 
     setTimeout(() => {
-      _getPreSignedUrlForGumlet(media, mediaIndex, listIndex, filePath);
+      _getPreSignedUrlForGumlet(
+        media,
+        mediaIndex,
+        listIndex,
+        filePath,
+        fileName,
+      );
     }, 5000);
   };
 
@@ -129,6 +162,7 @@ const SequentialBackupScreen = () => {
     mediaIndex,
     listIndex,
     filePath,
+    fileName,
   ) => {
     const options = {
       method: 'POST',
@@ -146,7 +180,12 @@ const SequentialBackupScreen = () => {
         },
       },
     };
-
+    dispatch(
+      setUploadingProgressOfMedia({
+        fileName: fileName,
+        percentile: 0,
+      }),
+    );
     axios
       .request(options)
       .then(async resp => {
@@ -162,9 +201,16 @@ const SequentialBackupScreen = () => {
           },
           (written, total) => {
             console.log('Uploading ', filePath, written, total);
+            dispatch(
+              setUploadingProgressOfMedia({
+                fileName: fileName,
+                percentile: (written / total) * 100,
+              }),
+            );
 
             if (written == total) {
-              //   Todo connect hotspot and ddownload
+              dispatch(setUploadingProgressOfMedia(null));
+              dispatch(uploadedCompletedFile(fileName));
               _connectAgainAndDownload(media, mediaIndex, listIndex);
             }
           },

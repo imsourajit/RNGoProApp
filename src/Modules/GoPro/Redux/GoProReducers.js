@@ -1,10 +1,14 @@
 import {
+  COMPLETED_DOWNLOADED_FILE,
+  COMPLETED_UPLOADED_FILE,
   SET_DIR_NAME_TO_DOWNLOAD,
+  SET_DOWNLOAD_MEDIA_PROGRESS,
   SET_DOWNLOADED_COMPLETED,
   SET_DOWNLOADING_FILE,
   SET_GOPRO_FILES_TO_LOCAL_STORAGE,
   SET_GOPRO_MEDIA,
   SET_SESSION_DETAILS,
+  SET_UPLOAD_MEDIA_PROGRESS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
 } from './GoProActionTypes';
@@ -20,6 +24,8 @@ const initialState = {
   media: [],
   downloadedMedia: [],
   uploadedMedia: [],
+  downloadedMediaProgress: {},
+  uploadedMediaProgress: {},
 };
 
 export const GoProReducer = (state = initialState, action) => {
@@ -71,6 +77,34 @@ export const GoProReducer = (state = initialState, action) => {
         ...state,
         media: action.data,
       };
+
+    case SET_DOWNLOAD_MEDIA_PROGRESS: {
+      return {
+        ...state,
+        downloadedMediaProgress: action.data,
+      };
+    }
+
+    case SET_UPLOAD_MEDIA_PROGRESS: {
+      return {
+        ...state,
+        uploadedMediaProgress: action.data,
+      };
+    }
+
+    case COMPLETED_DOWNLOADED_FILE: {
+      return {
+        ...state,
+        downloadedMedia: [...state.downloadedMedia, action.data],
+      };
+    }
+
+    case COMPLETED_UPLOADED_FILE: {
+      return {
+        ...state,
+        uploadedMedia: [...state.uploadedMedia, action.data],
+      };
+    }
 
     default:
       return state;
