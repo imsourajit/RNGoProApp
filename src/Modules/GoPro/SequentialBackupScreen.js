@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -64,13 +66,6 @@ const SequentialBackupScreen = () => {
       getHotspotDetailToConnect();
     }
   }, [connectedDevice]);
-
-  // useEffect(() => {
-  //   if (Array.isArray(mediaList)) {
-  //     startBackupProcess();
-  //   }
-  // }, [mediaList]);
-  //
 
   useEffect(() => {
     if (Array.isArray(media) && media.length) {
@@ -214,6 +209,7 @@ const SequentialBackupScreen = () => {
             if (written == total) {
               dispatch(setUploadingProgressOfMedia(null));
               dispatch(uploadedCompletedFile(fileName));
+              deleteFile(filePath);
               _connectAgainAndDownload(media, mediaIndex, listIndex);
             }
           },
@@ -222,6 +218,24 @@ const SequentialBackupScreen = () => {
       .catch(err => console.error(err));
   };
 
+  const deleteFile = filepath => {
+    RNFS.exists(filepath)
+      .then(result => {
+        console.log('file exists: ', result);
+        if (result) {
+          return RNFS.unlink(filepath)
+            .then(() => {
+              console.log('FILE DELETED');
+            })
+            .catch(err => {
+              console.log(err.message);
+            });
+        }
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
   const _connectAgainAndDownload = async (media, mediaIndex, listIndex) => {
     await WifiManager.connectToProtectedSSID(ssid, password, false);
     _enableTurboTransfer();
@@ -322,11 +336,25 @@ const SequentialBackupScreen = () => {
         }}>
         <DownloadAndUploadProgressBar />
       </View>
-      <Pressable onPress={takeBackupOfFiles}>
-        <View style={styles.btn}>
-          <Text style={styles.btnTxt}>Back up</Text>
-        </View>
-      </Pressable>
+      {/*<Pressable onPress={takeBackupOfFiles}>*/}
+      {/*  <View style={styles.btn}>*/}
+      {/*    <Text style={styles.btnTxt}>Back up</Text>*/}
+      {/*  </View>*/}
+      {/*</Pressable>*/}
+      <View style={styles.sessionBtnBoxes}>
+        <Text style={styles.sessionBtnBoxesTitle}>Backup Files</Text>
+
+        <Image
+          source={require('./Assets/goPro.png')}
+          style={styles.goProImage}
+        />
+
+        <Pressable onPress={takeBackupOfFiles}>
+          <View style={styles.box}>
+            <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -335,6 +363,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#000000',
     flex: 1,
+    justifyContent: 'space-between',
   },
   btn: {
     backgroundColor: 'red',
@@ -343,10 +372,47 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 6,
   },
+  sessionBtnBoxes: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: 20,
+    alignItems: 'center',
+  },
+  question: {
+    fontSize: 25,
+    textAlign: 'center',
+  },
+  deviceLists: {
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 15,
+  },
+  box: {
+    width: Dimensions.get('window').width - 120,
+    // height: 100,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 25,
+    padding: 10,
+    marginVertical: 20,
+  },
   btnTxt: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#FFFFFF',
+  },
+  sessionBtnBoxesTitle: {
+    fontSize: 33,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  goProImage: {
+    width: 300,
+    height: 200,
+    resizeMode: 'cover',
   },
 });
 
