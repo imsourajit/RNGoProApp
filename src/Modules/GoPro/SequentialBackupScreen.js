@@ -133,7 +133,7 @@ const SequentialBackupScreen = (callback, deps) => {
             APP_DIR + '/' + fileNamePrefix + fileName,
             fileName,
           );
-        }, 3000);
+        }, 6000);
       } else {
         //   Go to next directory
         _startBackupProcess(media, mediaIndex + 1, 0);
@@ -484,8 +484,9 @@ const SequentialBackupScreen = (callback, deps) => {
             )
               .uploadProgress({interval: 250}, (written, total) => {
                 const percentile =
-                  index * (100 / chunks.length) +
-                  ((written / total) * 100 * 100) / chunks.length;
+                  (index * 100 +
+                    ((written / total) * 100) / (chunks.length * 100)) *
+                  100;
 
                 dispatch(
                   setUploadingProgressOfMedia({
@@ -556,6 +557,7 @@ const SequentialBackupScreen = (callback, deps) => {
         .request(options2)
         .then(res => {
           dispatch(uploadedCompletedFile(fileName));
+          deleteFile(filePath);
           _connectAgainAndDownload(media, mediaIndex, listIndex);
           console.log('__GUMLET__  multipart complete api res', res);
         })
