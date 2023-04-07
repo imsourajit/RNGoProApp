@@ -102,6 +102,10 @@ const MainScreen = props => {
     if (eventName !== 'itemSelected') {
       return;
     }
+    if (index == 1) {
+      props.navigation.navigate('NetworkLogRequestsScreen');
+      return;
+    }
     onLogout();
   };
 
@@ -126,7 +130,10 @@ const MainScreen = props => {
             right: 20,
             bottom: 10,
           }}>
-          <PopupMenu actions={['Logout']} onPress={onPopupEvent} />
+          <PopupMenu
+            actions={['Logout', 'Network Logs']}
+            onPress={onPopupEvent}
+          />
         </View>
       </View>
       <View style={styles.arrowBoxes}>

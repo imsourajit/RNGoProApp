@@ -10,6 +10,7 @@ import StudentListsScreen from './Screens/StudentListsScreen';
 import BackupScreen from '../GoPro/BackupScreen';
 import GoProRecordScreen from '../GoPro/GoProRecordScreen';
 import SequentialBackupScreen from '../GoPro/SequentialBackupScreen';
+import NetworkLogRequestsScreen from './Screens/NetworkLogRequestsScreen';
 
 const CoreStack = createStackNavigator();
 
@@ -141,6 +142,22 @@ const CoreStackNavigator = () => {
         options={{
           headerShown: true,
           title: 'Students',
+          headerStyle: {
+            backgroundColor: '#000000',
+            elevation: 0,
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <CoreStack.Screen
+        name="NetworkLogRequestsScreen"
+        component={NetworkLogRequestsScreen}
+        options={{
+          headerShown: true,
+          title: 'Network requests',
           headerStyle: {
             backgroundColor: '#000000',
             elevation: 0,
