@@ -75,6 +75,58 @@ const SequentialBackupScreen = (callback, deps) => {
     }
   }, [_startBackupProcess, media]);
 
+  const uploadChunkedVideo = async (filePath, uploadUrl) => {
+    try {
+      // Get the file size
+      const {size} = await RNFetchBlob.fs.stat(filePath);
+
+      // Calculate the total number of chunks
+      const totalChunks = Math.ceil(size / CHUNK_SIZE);
+
+      // Loop through each chunk and upload it
+      for (let i = 0; i < totalChunks; i++) {
+        // Calculate the start and end positions of the chunk
+        const start = i * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, size);
+
+        // Read the chunk data from the file
+        const chunkData = await RNFetchBlob.fs.readStream(
+          filePath,
+          start,
+          end - start,
+        );
+
+        // Convert the chunk data to base64
+        const base64ChunkData = chunkData.toString('base64');
+
+        // Create the payload for the chunk upload
+        const payload = {
+          chunkData: base64ChunkData,
+          totalChunks,
+          currentChunk: i + 1,
+          fileName: 'video.mp4', // Update with your actual file name
+        };
+
+        // Send the chunk payload to the server for upload
+        await RNFetchBlob.fetch(
+          'POST',
+          uploadUrl,
+          {
+            'Content-Type': 'application/json',
+          },
+          JSON.stringify(payload),
+        );
+
+        // Update progress or do other operations related to chunk upload
+      }
+
+      // All chunks uploaded successfully
+      console.log('Chunked video upload complete');
+    } catch (error) {
+      console.error('Error uploading chunked video:', error);
+    }
+  };
+
   const _startBackupProcess = async (media, mediaIndex, listIndex) => {
     if (mediaIndex < media.length) {
       const {fs, d: goProDirectory} = media[mediaIndex];
@@ -141,26 +193,6 @@ const SequentialBackupScreen = (callback, deps) => {
     } else {
       ToastAndroid.show('Successfully backup completed', ToastAndroid.SHORT);
     }
-  };
-
-  const _startUploadingProcess = async (
-    media,
-    mediaIndex,
-    listIndex,
-    filePath,
-    fileName,
-  ) => {
-    await WifiManager.disconnect();
-
-    setTimeout(() => {
-      _getPreSignedUrlForGumlet(
-        media,
-        mediaIndex,
-        listIndex,
-        filePath,
-        fileName,
-      );
-    }, 5000);
   };
 
   const setMetaDataForGumlet = file => {

@@ -2,6 +2,7 @@ import React, {useEffect} from 'react';
 import {
   Dimensions,
   Image,
+  NativeModules,
   PermissionsAndroid,
   Pressable,
   StyleSheet,
@@ -79,10 +80,13 @@ const MainScreen = props => {
   };
 
   const goToGoProToRecordSession = () => {
-    props.navigation.navigate('BatchSelectionScreen', {
-      selectedDevice: 'GO_PRO',
-      toRecord: true,
-    });
+    const {CameraModule} = NativeModules;
+    console.log('__MUNNA__', NativeModules);
+    NativeModules.CameraModule.openCamera();
+    // props.navigation.navigate('BatchSelectionScreen', {
+    //   selectedDevice: 'GO_PRO',
+    //   toRecord: true,
+    // });
   };
 
   const _openSessionDetailsPage = () => {
