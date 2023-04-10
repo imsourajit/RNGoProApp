@@ -90,3 +90,23 @@ export const setScheduledSessions = data => ({
   type: SET_SCHEDULED_SESSIONS,
   data,
 });
+
+export const setUploadingAssetId = data => ({
+  type: 'SET_ASSET_ID',
+  data,
+});
+
+export const setETagForAssetId = data => ({
+  type: 'SET_ETAG',
+  data,
+});
+
+export const setFilePath = data => ({
+  type: 'SET_FILE_PATH',
+  data,
+});
+
+export const setChunkUploaded = data => ({
+  type: 'CHUNK_UPLOADED',
+  data,
+});
