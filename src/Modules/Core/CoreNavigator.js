@@ -135,7 +135,7 @@ const CoreStackNavigator = () => {
           },
         }}
         name="SequentialBackupScreen"
-        component={BackupAndUploadScreen}
+        component={SequentialBackupScreen}
       />
       <CoreStack.Screen
         name="StudentsListScreen"

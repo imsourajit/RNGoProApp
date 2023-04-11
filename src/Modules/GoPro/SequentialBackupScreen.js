@@ -42,6 +42,8 @@ const SequentialBackupScreen = (callback, deps) => {
 
   const {ssid, password} = hotspotDetails;
 
+  let parts = [];
+
   useEffect(() => {
     BleManager.enableBluetooth();
     BleManager.getConnectedPeripherals([])
@@ -641,6 +643,125 @@ const SequentialBackupScreen = (callback, deps) => {
     }
   };
 
+  const getFileSize = async filePath => {
+    try {
+      const fileDetails = await RNFetchBlob.fs.stat(filePath);
+      return fileDetails.size;
+    } catch (error) {
+      ToastAndroid.show('Unable to get file details');
+    }
+  };
+
+  const getAssetId = async () => {
+    const options = {
+      method: 'POST',
+      url: 'https://api.gumlet.com/v1/video/assets/upload',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
+      },
+      data: {
+        collection_id: '63fe06f5b4ade3692e1bb407',
+        format: 'HLS',
+        metadata: {
+          // userId: userId ?? 'Anonymous',
+        },
+      },
+    };
+
+    const resp = await axios.request(options);
+    return resp.data.asset_id;
+  };
+
+  const getPreSignedUrlForUpload = async (assetId, partNumber) => {
+    let chunkUploadsOptions = {
+      method: 'GET',
+      url: `https://api.gumlet.com/v1/video/assets/${assetId}/multipartupload/${partNumber}/sign`,
+      headers: {
+        'content-type': 'application/json',
+        Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
+      },
+    };
+    const preSignedUrlData = await axios.request(chunkUploadsOptions);
+    return preSignedUrlData.data.part_upload_url;
+  };
+
+  const uploadChunkToGumlet = async (
+    assetId,
+    filePath,
+    totalNoOfChunks,
+    bytesRead,
+    partNumber,
+  ) => {
+    console.log('total chunks remaining', totalNoOfChunks);
+    if (totalNoOfChunks < 0) {
+      const multipartCompleteOptions = {
+        method: 'POST',
+        url: `https://api.gumlet.com/v1/video/assets/${assetId}/multipartupload/complete`,
+        headers: {
+          'content-type': 'application/json',
+          Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
+        },
+        data: {
+          parts: parts,
+        },
+      };
+
+      axios
+        .request(multipartCompleteOptions)
+        .then(res => console.log('Upload Completed'))
+        .catch(err => console.log('Multipart upload error', err));
+      return;
+    }
+
+    const chunkData = await RNFS.read(
+      filePath,
+      CHUNK_SIZE,
+      bytesRead,
+      'base64',
+    );
+    bytesRead += CHUNK_SIZE;
+    const chunkFilePath = APP_DIR + `/fconechunk${partNumber}.MP4`;
+    await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
+    const preSignedUrl = await getPreSignedUrlForUpload(assetId, partNumber);
+
+    await RNFetchBlob.fetch(
+      'PUT',
+      preSignedUrl, // S3 upload URL
+      {
+        'Content-Type': 'video/mp4',
+      },
+      RNFetchBlob.wrap(chunkFilePath),
+    )
+      // .uploadProgress({interval: 250}, (written, total) => {
+      //   console.log(written / total);
+      // })
+      .then(async res => {
+        parts.push({
+          PartNumber: partNumber,
+          ETag: res.respInfo.headers.ETag,
+        });
+        deleteFile(chunkFilePath);
+        await uploadChunkToGumlet(
+          assetId,
+          filePath,
+          totalNoOfChunks - 1,
+          bytesRead,
+          partNumber + 1,
+        );
+      })
+      .catch(err => console.log('Unable to upload chunk', err));
+  };
+
+  const chunkWiseUploadToGumlet = async filePath => {
+    const fileSize = await getFileSize(filePath);
+    const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
+    const assetId = await getAssetId();
+
+    uploadChunkToGumlet(assetId, filePath, totalNoOfChunks, 0, 1);
+  };
+
   if (connectedDevice == null && !Object.keys(hotspotDetails).length) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -679,13 +800,7 @@ const SequentialBackupScreen = (callback, deps) => {
 
         <Pressable
           onPress={() => {
-            _uploadLargeFileToGumlet(
-              [],
-              0,
-              0,
-              APP_DIR + '/' + 'lg.MP4',
-              'lg.MP4',
-            );
+            chunkWiseUploadToGumlet(APP_DIR + '/' + 'lg.MP4');
           }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
