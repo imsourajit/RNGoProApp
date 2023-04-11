@@ -11,6 +11,7 @@ import BackupScreen from '../GoPro/BackupScreen';
 import GoProRecordScreen from '../GoPro/GoProRecordScreen';
 import SequentialBackupScreen from '../GoPro/SequentialBackupScreen';
 import NetworkLogRequestsScreen from './Screens/NetworkLogRequestsScreen';
+import BackupAndUploadScreen from '../GoPro/Screens/BackupAndUploadScreen';
 
 const CoreStack = createStackNavigator();
 
@@ -134,7 +135,7 @@ const CoreStackNavigator = () => {
           },
         }}
         name="SequentialBackupScreen"
-        component={SequentialBackupScreen}
+        component={BackupAndUploadScreen}
       />
       <CoreStack.Screen
         name="StudentsListScreen"

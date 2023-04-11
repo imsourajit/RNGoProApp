@@ -28,6 +28,8 @@ import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
 import _ from 'lodash';
 
+let CHUNK_SIZE = 10 * 1024 * 1024;
+
 const SequentialBackupScreen = (callback, deps) => {
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [hotspotDetails, setHotspotDetails] = useState({});
@@ -407,6 +409,38 @@ const SequentialBackupScreen = (callback, deps) => {
     }
   };
 
+  const readLargeFile = async videoFilePath => {
+    const fileDetails = await RNFetchBlob.fs.stat(videoFilePath);
+
+    const fileSize = fileDetails.size;
+    let video = '';
+    let i = 0;
+
+    let totalChunks = Math.ceil(fileSize / CHUNK_SIZE);
+    let bytesRead = 0;
+
+    // let chunkData = [];
+
+    while (totalChunks) {
+      const videoData = await RNFS.read(
+        videoFilePath,
+        CHUNK_SIZE,
+        bytesRead,
+        'base64',
+      );
+
+      // chunkData.push(videoData);
+      video = video + videoData;
+      bytesRead += CHUNK_SIZE;
+      i++;
+      totalChunks--;
+      console.log('__GUMLET totalchunks', totalChunks);
+    }
+    if (totalChunks <= 0) {
+      return video;
+    }
+  };
+
   const _uploadLargeFileToGumlet = async (
     media,
     mediaIndex,
@@ -451,7 +485,7 @@ const SequentialBackupScreen = (callback, deps) => {
 
       // Read file data
 
-      const videoData = await RNFS.readFile(filePath, 'base64');
+      const videoData = await readLargeFile(filePath);
       console.log('__GUMLET video data chunk', videoData);
 
       const totalChunks = Math.ceil(videoData.length / chunkSize);
@@ -643,7 +677,16 @@ const SequentialBackupScreen = (callback, deps) => {
           style={styles.goProImage}
         />
 
-        <Pressable onPress={takeBackupOfFiles}>
+        <Pressable
+          onPress={() => {
+            _uploadLargeFileToGumlet(
+              [],
+              0,
+              0,
+              APP_DIR + '/' + 'lg.MP4',
+              'lg.MP4',
+            );
+          }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
           </View>
