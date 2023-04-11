@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
-import {APP_DIR} from '../Utility/Constants';
+import {APP_DIR, CAMERA_DIR} from '../Utility/Constants';
 import RNFS, {unlink} from 'react-native-fs';
 import RNFetchBlob from 'rn-fetch-blob';
 import axios from 'axios';
@@ -10,6 +10,29 @@ let bytesRead = 0;
 let parts = [];
 
 const BackupAndUploadScreen = props => {
+  useEffect(() => {
+    fetchVideosFromGallery();
+  }, []);
+
+  const fetchVideosFromGallery = async () => {
+    try {
+      const galleryPath = CAMERA_DIR;
+      const files = await RNFS.readDir(galleryPath);
+      const ff = await RNFS.readDir(files[1].path);
+      console.log('Fetched videos from gallery:', files);
+      const videos = ff.filter(
+        file => file.isFile() && file.name.endsWith('.mp4'),
+      );
+      console.log(
+        'Fetched videos from gallery:',
+        new Date(videos.reverse()[0].mtime).getTime(),
+      );
+      // You can now use the 'videos' array to access and display the videos
+    } catch (error) {
+      console.error('Error fetching videos from gallery:', error);
+    }
+  };
+
   const createChunk = async (i, chunkData) => {};
 
   const deleteFile = filepath => {
@@ -31,14 +54,44 @@ const BackupAndUploadScreen = props => {
       });
   };
 
+  const getFileSize = async filePath => {
+    const fileDetails = await RNFetchBlob.fs.stat(filePath);
+    return fileDetails.size;
+  };
+
+  const readFileintoChunks = async filePath => {
+    let video = '';
+    let i = 0;
+
+    let totalChunks = Math.ceil(getFileSize(filePath) / CHUNK_SIZE);
+
+    let chunkData = [];
+
+    while (totalChunks) {
+      const videoData = await RNFS.read(
+        filePath,
+        CHUNK_SIZE,
+        bytesRead,
+        'base64',
+      );
+
+      chunkData.push(videoData);
+      //  video = video + videoData;
+      bytesRead += CHUNK_SIZE;
+      i++;
+      totalChunks--;
+      console.log('__GUMLET totalchunks', totalChunks);
+    }
+  };
+
   const readVideoFileInChunks = async videoFilePath => {
     try {
       console.log(videoFilePath);
       // await unlink('/storage/emulated/0/Pictures/fconee/video_chunkkkk3.mp4');
       // return;
-      const fileDetails = await RNFetchBlob.fs.stat(videoFilePath);
+      // const fileDetails = await RNFetchBlob.fs.stat(videoFilePath);
 
-      const fileSize = fileDetails.size;
+      const fileSize = await getFileSize(videoFilePath);
 
       let video = '';
       let i = 0;

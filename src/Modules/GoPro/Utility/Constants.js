@@ -9,3 +9,4 @@ export const GOPRO_BASE_URL = `http://${GOPRO_IP}:${GOPRO_PORT}/`;
 
 const {config, fs} = RNFetchBlob;
 export const APP_DIR = fs.dirs.PictureDir;
+export const CAMERA_DIR = fs.dirs.DCIMDir;
