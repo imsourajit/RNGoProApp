@@ -12,6 +12,12 @@ import {
   SET_UPLOAD_MEDIA_PROGRESS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
+  SET_ASSET_ID,
+  SET_FILE_PATH,
+  SET_ETAG,
+  SET_BYTES_READ,
+  SET_COMPLETED_UPLOADING_SEQUENTIAL_UPLOAD,
+  SET_PART_UPLOAD_URL,
 } from './GoProActionTypes';
 
 const initialState = {
@@ -28,6 +34,7 @@ const initialState = {
   downloadedMediaProgress: null,
   uploadedMediaProgress: null,
   scheduledSessions: [],
+  uploadedChunkMedia: {},
 };
 
 export const GoProReducer = (state = initialState, action) => {
@@ -112,6 +119,68 @@ export const GoProReducer = (state = initialState, action) => {
       return {
         ...state,
         scheduledSessions: action.data,
+      };
+    }
+
+    case SET_ASSET_ID: {
+      return {
+        ...state,
+        uploadedChunkMedia: {
+          ...state.uploadedChunkMedia,
+          assetId: action.data,
+          eTag: [],
+        },
+      };
+    }
+
+    case SET_FILE_PATH: {
+      return {
+        ...state,
+        uploadedChunkMedia: {
+          ...state.uploadedChunkMedia,
+          filePath: action.data,
+        },
+      };
+    }
+
+    case SET_ETAG: {
+      let eTag = [action.data];
+      if (Array.isArray(state.uploadedChunkMedia?.eTag)) {
+        eTag = [...state.uploadedChunkMedia.eTag, action.data];
+      }
+      return {
+        ...state,
+        uploadedChunkMedia: {
+          ...state.uploadedChunkMedia,
+          eTag,
+        },
+      };
+    }
+
+    case SET_BYTES_READ: {
+      return {
+        ...state,
+        uploadedChunkMedia: {
+          ...state.uploadedChunkMedia,
+          bytesRead: action.data,
+        },
+      };
+    }
+
+    case SET_PART_UPLOAD_URL: {
+      return {
+        ...state,
+        uploadedChunkMedia: {
+          ...state.uploadedChunkMedia,
+          partDetails: action.data,
+        },
+      };
+    }
+
+    case SET_COMPLETED_UPLOADING_SEQUENTIAL_UPLOAD: {
+      return {
+        ...state,
+        uploadedChunkMedia: {},
       };
     }
 

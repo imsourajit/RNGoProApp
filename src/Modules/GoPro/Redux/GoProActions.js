@@ -12,6 +12,12 @@ import {
   SET_UPLOAD_MEDIA_PROGRESS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
+  SET_ASSET_ID,
+  SET_FILE_PATH,
+  SET_ETAG,
+  SET_BYTES_READ,
+  SET_COMPLETED_UPLOADING_SEQUENTIAL_UPLOAD,
+  SET_PART_UPLOAD_URL,
 } from './GoProActionTypes';
 import ApiService from '../../../Services/ApiService';
 
@@ -92,21 +98,35 @@ export const setScheduledSessions = data => ({
 });
 
 export const setUploadingAssetId = data => ({
-  type: 'SET_ASSET_ID',
+  type: SET_ASSET_ID,
   data,
 });
 
 export const setETagForAssetId = data => ({
-  type: 'SET_ETAG',
+  type: SET_ETAG,
   data,
 });
 
 export const setFilePath = data => ({
-  type: 'SET_FILE_PATH',
+  type: SET_FILE_PATH,
   data,
 });
 
 export const setChunkUploaded = data => ({
   type: 'CHUNK_UPLOADED',
+  data,
+});
+
+export const setBytesRead = data => ({
+  type: SET_BYTES_READ,
+  data,
+});
+
+export const setCompletedUploading = data => ({
+  type: SET_COMPLETED_UPLOADING_SEQUENTIAL_UPLOAD,
+});
+
+export const setPartUploadUrl = data => ({
+  type: SET_PART_UPLOAD_URL,
   data,
 });

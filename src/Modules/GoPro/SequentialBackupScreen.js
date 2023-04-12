@@ -15,8 +15,14 @@ import BleManager from 'react-native-ble-manager';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   downloadedCompletedFile,
+  setBytesRead,
+  setCompletedUploading,
   setDownloadingProgressOfMedia,
+  setETagForAssetId,
+  setFilePath,
   setGoProMedia,
+  setPartUploadUrl,
+  setUploadingAssetId,
   setUploadingProgressOfMedia,
   uploadedCompletedFile,
 } from './Redux/GoProActions';
@@ -37,7 +43,9 @@ const SequentialBackupScreen = (callback, deps) => {
   const [downloadDirectory, setDownloadDirectory] = useState(null);
 
   const dispatch = useDispatch();
-  const {media, scheduledSessions} = useSelector(st => st.GoProReducer);
+  const {media, scheduledSessions, uploadedChunkMedia} = useSelector(
+    st => st.GoProReducer,
+  );
   const {user: {userId} = {}} = useSelector(st => st.userReducer);
 
   const {ssid, password} = hotspotDetails;
@@ -675,6 +683,12 @@ const SequentialBackupScreen = (callback, deps) => {
   };
 
   const getPreSignedUrlForUpload = async (assetId, partNumber) => {
+    const {partDetails} = uploadedChunkMedia;
+
+    if (partDetails != undefined && partDetails.partNumber === partNumber) {
+      return partDetails?.signedUrl;
+    }
+
     let chunkUploadsOptions = {
       method: 'GET',
       url: `https://api.gumlet.com/v1/video/assets/${assetId}/multipartupload/${partNumber}/sign`,
@@ -684,6 +698,12 @@ const SequentialBackupScreen = (callback, deps) => {
       },
     };
     const preSignedUrlData = await axios.request(chunkUploadsOptions);
+    dispatch(
+      setPartUploadUrl({
+        partNumber: partNumber,
+        signedUrl: preSignedUrlData.data.part_upload_url,
+      }),
+    );
     return preSignedUrlData.data.part_upload_url;
   };
 
@@ -694,7 +714,15 @@ const SequentialBackupScreen = (callback, deps) => {
     bytesRead,
     partNumber,
   ) => {
-    console.log('total chunks remaining', totalNoOfChunks);
+    console.log(
+      'total chunks remaining',
+      assetId,
+      filePath,
+      totalNoOfChunks,
+      bytesRead,
+      partNumber,
+    );
+
     if (totalNoOfChunks < 0) {
       const multipartCompleteOptions = {
         method: 'POST',
@@ -710,7 +738,12 @@ const SequentialBackupScreen = (callback, deps) => {
 
       axios
         .request(multipartCompleteOptions)
-        .then(res => console.log('Upload Completed'))
+        .then(res => {
+          dispatch(setPartUploadUrl(undefined));
+          dispatch(setCompletedUploading());
+          dispatch(setUploadingProgressOfMedia(null));
+          console.log('Upload Completed');
+        })
         .catch(err => console.log('Multipart upload error', err));
       return;
     }
@@ -721,11 +754,18 @@ const SequentialBackupScreen = (callback, deps) => {
       bytesRead,
       'base64',
     );
+    dispatch(setBytesRead(bytesRead));
     bytesRead += CHUNK_SIZE;
-    const chunkFilePath = APP_DIR + `/fconechunk${partNumber}.MP4`;
+
+    const chunkFilePath = APP_DIR + `/fc${new Date().getTime()}.MP4`;
+
+    console.log('Chunkfilepath', chunkFilePath);
     await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
     const preSignedUrl = await getPreSignedUrlForUpload(assetId, partNumber);
 
+    RNFetchBlob.config({
+      fileCache: false,
+    });
     await RNFetchBlob.fetch(
       'PUT',
       preSignedUrl, // S3 upload URL
@@ -734,14 +774,28 @@ const SequentialBackupScreen = (callback, deps) => {
       },
       RNFetchBlob.wrap(chunkFilePath),
     )
-      // .uploadProgress({interval: 250}, (written, total) => {
-      //   console.log(written / total);
-      // })
+      .uploadProgress({interval: 550}, (written, total) => {
+        const uploadProgressPercentage =
+          ((partNumber - 1 + written / total) /
+            (totalNoOfChunks - 1 + partNumber)) *
+          100;
+        dispatch(
+          setUploadingProgressOfMedia({
+            fileName: 'ls.MP4',
+            percentile: uploadProgressPercentage,
+          }),
+        );
+        console.log('Upload Progress Percentage', uploadProgressPercentage);
+      })
       .then(async res => {
-        parts.push({
+        const eTagPart = {
           PartNumber: partNumber,
           ETag: res.respInfo.headers.ETag,
-        });
+        };
+
+        parts.push(eTagPart);
+
+        dispatch(setETagForAssetId(eTagPart));
         deleteFile(chunkFilePath);
         await uploadChunkToGumlet(
           assetId,
@@ -758,8 +812,27 @@ const SequentialBackupScreen = (callback, deps) => {
     const fileSize = await getFileSize(filePath);
     const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
     const assetId = await getAssetId();
-
+    dispatch(setUploadingAssetId(assetId));
+    dispatch(setFilePath(filePath));
     uploadChunkToGumlet(assetId, filePath, totalNoOfChunks, 0, 1);
+  };
+
+  const checkIfAnyUploadingIsPending = async () => {
+    const {eTag, assetId, filePath, bytesRead = 0} = uploadedChunkMedia ?? {};
+
+    if (assetId) {
+      const fileSize = await getFileSize(filePath);
+      const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
+      uploadChunkToGumlet(
+        assetId,
+        filePath,
+        totalNoOfChunks - eTag.length,
+        bytesRead,
+        eTag.length + 1,
+      );
+    } else {
+      chunkWiseUploadToGumlet(APP_DIR + '/' + 'ls.MP4');
+    }
   };
 
   if (connectedDevice == null && !Object.keys(hotspotDetails).length) {
@@ -800,7 +873,7 @@ const SequentialBackupScreen = (callback, deps) => {
 
         <Pressable
           onPress={() => {
-            chunkWiseUploadToGumlet(APP_DIR + '/' + 'lg.MP4');
+            checkIfAnyUploadingIsPending();
           }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
