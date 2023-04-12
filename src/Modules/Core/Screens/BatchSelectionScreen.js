@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   FlatList,
+  NativeModules,
   Pressable,
   StyleSheet,
   Text,
@@ -10,6 +11,8 @@ import {
 import RadioButtonSelectionBox from '../Components/RadioButtonSelectionBox';
 import {listBatchesByCoachId} from '../Redux/UserActions';
 import {useDispatch, useSelector} from 'react-redux';
+import {getFreeSpaceInGB} from '../../../Utility/helpers';
+import RNFS from 'react-native-fs';
 
 const BatchSelectionScreen = props => {
   const [batchSelected, selectBatch] = useState(null);
@@ -56,9 +59,22 @@ const BatchSelectionScreen = props => {
     }
 
     const {selectedDevice, toRecord} = props.route.params;
+
+    console.log('Selected Device');
+
     if (selectedDevice === 'CAMERA') {
-      props.navigation.navigate('Camera', {
-        batchId: batches[batchSelected]?.id,
+      RNFS.getFSInfo().then(info => {
+        const availableSpace = (info.freeSpace / (1024 * 1024 * 1024)).toFixed(
+          2,
+        );
+        if (availableSpace > 5) {
+          NativeModules.CameraModule.openCamera();
+        } else {
+          ToastAndroid.show(
+            'Oops!!! Free space not available!',
+            ToastAndroid.CENTER,
+          );
+        }
       });
       return;
     }
@@ -71,9 +87,9 @@ const BatchSelectionScreen = props => {
         return;
       }
 
-      props.navigation.navigate('GoPro', {
-        batchId: batches[batchSelected]?.id,
-      });
+      // props.navigation.navigate('GoPro', {
+      //   batchId: batches[batchSelected]?.id,
+      // });
       return;
     }
   };

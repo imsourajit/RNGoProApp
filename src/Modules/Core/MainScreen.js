@@ -1,5 +1,6 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+  Alert,
   Dimensions,
   Image,
   NativeModules,
@@ -20,9 +21,30 @@ import {
   setScheduledSessions,
   setUploadingProgressOfMedia,
 } from '../GoPro/Redux/GoProActions';
+import RNFS from 'react-native-fs';
+import {getFreeSpaceInGB} from '../../Utility/helpers';
+import SelectionPopupModal from './Screens/SelectionPopupModal';
+import ConfirmModal from './Screens/ConfirmModal';
+
+const deviceList = [
+  {
+    type: 'GO_PRO',
+    label: 'GoPro',
+  },
+  {
+    type: 'CAMERA',
+    label: 'Camera',
+  },
+];
 
 const MainScreen = props => {
   const dispatch = useDispatch();
+
+  const [deviceSelectionPopup, setDeviceSelectionPopup] = useState(false);
+  const [isConfirmationModalVisible, setConfirmationModalVisibility] =
+    useState(false);
+
+  const [device, selectedDevice] = useState(null);
 
   useEffect(() => {
     requestCameraPermission();
@@ -40,7 +62,7 @@ const MainScreen = props => {
           console.log(resp);
           dispatch(setScheduledSessions(resp));
         },
-        err => {
+        () => {
           ToastAndroid.show(
             'Unable to fetch scheduled sessions',
             ToastAndroid.CENTER,
@@ -48,7 +70,7 @@ const MainScreen = props => {
         },
       ),
     );
-  }, []);
+  }, [dispatch]);
 
   const requestCameraPermission = async () => {
     try {
@@ -61,6 +83,7 @@ const MainScreen = props => {
         // PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         // PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
       ]);
     } catch (err) {
       console.warn(err);
@@ -80,8 +103,9 @@ const MainScreen = props => {
   };
 
   const goToGoProToRecordSession = () => {
+    console.log(getFreeSpaceInGB());
     const {CameraModule} = NativeModules;
-    console.log('__MUNNA__', NativeModules);
+
     NativeModules.CameraModule.openCamera();
     // props.navigation.navigate('BatchSelectionScreen', {
     //   selectedDevice: 'GO_PRO',
@@ -117,23 +141,57 @@ const MainScreen = props => {
     dispatch(logoutUser());
   };
 
+  const openDeviceSelectionPopup = () => {
+    setDeviceSelectionPopup(true);
+  };
+
+  const closeDeviceSelectionPopup = () => {
+    setDeviceSelectionPopup(false);
+  };
+
+  const selectedItem = item => {
+    selectedDevice(item);
+
+    closeDeviceSelectionPopup();
+    setConfirmationModalVisibility(true);
+  };
+
+  const onConfirm = () => {
+    switch (device.type) {
+      case 'GO_PRO': {
+        goToGoPro();
+        break;
+      }
+      case 'CAMERA': {
+        goToCamera();
+        break;
+      }
+    }
+  };
+
+  const onCancel = () => {
+    setConfirmationModalVisibility(false);
+  };
+
   return (
     <View style={styles.main}>
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        <Image
-          source={require('./Assets/logo.png')}
-          style={{
-            width: 180,
-            height: 50,
-            marginTop: 20,
-          }}
+      <View>
+        <ConfirmModal
+          visible={isConfirmationModalVisible}
+          message="Shall we proceed to start recording"
+          onConfirm={onConfirm}
+          onCancel={onCancel}
         />
-        <View
-          style={{
-            position: 'absolute',
-            right: 20,
-            bottom: 10,
-          }}>
+        <SelectionPopupModal
+          visible={deviceSelectionPopup}
+          data={deviceList}
+          onSelect={selectedItem}
+          onCancel={closeDeviceSelectionPopup}
+        />
+      </View>
+      <View style={styles.subContainer}>
+        <Image source={require('./Assets/logo.png')} style={styles.img} />
+        <View style={styles.childContainer}>
           <PopupMenu
             actions={['Logout', 'Network Logs']}
             onPress={onPopupEvent}
@@ -172,17 +230,9 @@ const MainScreen = props => {
           </View>
         </Pressable>
 
-        <Text
-          style={{
-            color: '#000000',
-            fontSize: 20,
-            fontWeight: 'bold',
-            marginVertical: 10,
-          }}>
-          or
-        </Text>
+        <Text style={styles.txtStyles}>or</Text>
 
-        <Pressable onPress={goToGoProToRecordSession}>
+        <Pressable onPress={openDeviceSelectionPopup}>
           <View style={styles.box}>
             <Text style={styles.btnTxt}>Record Session</Text>
           </View>
@@ -200,6 +250,12 @@ const styles = StyleSheet.create({
   },
   arrowBoxes: {
     paddingHorizontal: 32,
+  },
+  txtStyles: {
+    color: '#000000',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 10,
   },
   sessionBtnBoxes: {
     borderTopLeftRadius: 20,
@@ -243,6 +299,17 @@ const styles = StyleSheet.create({
     height: 200,
     resizeMode: 'cover',
   },
+  childContainer: {
+    position: 'absolute',
+    right: 20,
+    bottom: 10,
+  },
+  img: {
+    width: 180,
+    height: 50,
+    marginTop: 20,
+  },
+  subContainer: {alignItems: 'center', justifyContent: 'center'},
 });
 
 export default MainScreen;
