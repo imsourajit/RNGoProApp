@@ -14,6 +14,7 @@ import BleManager from 'react-native-ble-manager';
 import NoDevicesConnectedScreen from '../../GoPro/Screens/NoDevicesConnectedScreen';
 import WifiManager from 'react-native-wifi-reborn';
 import {GOPRO_BASE_URL} from '../../GoPro/Utility/Constants';
+import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDescription';
 
 const SessionListScreens = props => {
   const [sessionsList, setSessionsList] = useState([]);
@@ -39,7 +40,11 @@ const SessionListScreens = props => {
           size: 20,
         },
         suc => {
-          setSessionsList(suc.filter(itm => itm.liveStreamUrl !== null));
+          setSessionsList(
+            suc.filter(
+              itm => itm.liveStreamUrl !== null && itm.creationTime !== null,
+            ),
+          );
         },
         err =>
           ToastAndroid.show('Oops!! Something went wrong', ToastAndroid.SHORT),
@@ -161,22 +166,21 @@ const SessionListScreens = props => {
   };
 
   const _renderListOfSessions = ({item, index}) => {
-    return <View />;
-    // return (
-    //   <RightArrowBoxesWithDescription
-    //     pressed={_goToSessionWebview}
-    //     btnTitle={getDayMonthNameFromMillis(item.startTime)}
-    //     btnDesc={item.centreTitle ?? ''}
-    //     data={item.liveStreamUrl}
-    //   />
-    // );
+    return (
+      <RightArrowBoxesWithDescription
+        pressed={_goToSessionWebview}
+        btnTitle={getDayMonthNameFromMillis(item.startTime)}
+        btnDesc={item.centreTitle ?? ''}
+        data={item.liveStreamUrl}
+      />
+    );
   };
 
-  if (isDeviceConnected == null) {
-    return <NoDevicesConnectedScreen />;
-  }
+  // if (isDeviceConnected == null) {
+  //   return <NoDevicesConnectedScreen />;
+  // }
 
-  if (!isHotspotConnected) {
+  if (Array.isArray(sessionsList) && !sessionsList.length) {
     return (
       <View
         style={{
@@ -191,7 +195,7 @@ const SessionListScreens = props => {
             color: '#FFFFFF',
             fontSize: 16,
           }}>
-          Please wait while we connect to GoPro's hotspot
+          Please wait while we fetch all sessions
         </Text>
       </View>
     );
@@ -200,7 +204,7 @@ const SessionListScreens = props => {
   return (
     <View style={styles.main}>
       <FlatList
-        data={[]}
+        data={sessionsList}
         renderItem={_renderListOfSessions}
         keyExtractor={(item, index) => item.startTime.toString() + index}
       />
