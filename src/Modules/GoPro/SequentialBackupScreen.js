@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -33,6 +34,7 @@ import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgress
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
 import _ from 'lodash';
+import {CAMERA_DIR} from './Utility/Constants';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -156,7 +158,7 @@ const SequentialBackupScreen = (callback, deps) => {
           discretionary: true,
           cacheable: true,
           progressInterval: 2000,
-          begin: r => {
+          begin: () => {
             console.log('Directory : ', goProDirectory, ' File : ', fileName);
             dispatch(
               setDownloadingProgressOfMedia({
@@ -190,7 +192,7 @@ const SequentialBackupScreen = (callback, deps) => {
         await WifiManager.disconnect();
 
         setTimeout(() => {
-          _uploadLargeFileToGumlet(
+          startUploadingFile(
             media,
             mediaIndex,
             listIndex,
@@ -216,6 +218,14 @@ const SequentialBackupScreen = (callback, deps) => {
       return filteredArray[0];
     }
     return {};
+  };
+
+  const getLastString = (str, delimiter) => {
+    // Split the input string by the specified delimiter
+    const arr = str.split(delimiter);
+
+    // Return the last element of the array
+    return arr[arr.length - 1];
   };
 
   const _getPreSignedUrlForGumlet = async (
@@ -288,7 +298,6 @@ const SequentialBackupScreen = (callback, deps) => {
   const deleteFile = filepath => {
     RNFS.exists(filepath)
       .then(result => {
-        console.log('file exists: ', result);
         if (result) {
           return RNFS.unlink(filepath)
             .then(() => {
@@ -723,7 +732,7 @@ const SequentialBackupScreen = (callback, deps) => {
       partNumber,
     );
 
-    if (totalNoOfChunks < 0) {
+    if (totalNoOfChunks <= 0) {
       const multipartCompleteOptions = {
         method: 'POST',
         url: `https://api.gumlet.com/v1/video/assets/${assetId}/multipartupload/complete`,
@@ -781,7 +790,7 @@ const SequentialBackupScreen = (callback, deps) => {
           100;
         dispatch(
           setUploadingProgressOfMedia({
-            fileName: 'ls.MP4',
+            fileName: getLastString(filePath, '/'),
             percentile: uploadProgressPercentage,
           }),
         );
@@ -823,7 +832,7 @@ const SequentialBackupScreen = (callback, deps) => {
     if (assetId) {
       const fileSize = await getFileSize(filePath);
       const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
-      uploadChunkToGumlet(
+      await uploadChunkToGumlet(
         assetId,
         filePath,
         totalNoOfChunks - eTag.length,
@@ -834,6 +843,40 @@ const SequentialBackupScreen = (callback, deps) => {
       chunkWiseUploadToGumlet(APP_DIR + '/' + 'ls.MP4');
     }
   };
+
+  const startUploadingFile = async (
+    media,
+    mediaIndex,
+    listIndex,
+    filePath,
+    fileName,
+  ) => {
+    await chunkWiseUploadToGumlet(filePath);
+    _connectAgainAndDownload(media, mediaIndex, listIndex);
+  };
+
+  const fetchVideosFromGallery = async () => {
+    try {
+      const galleryPath = CAMERA_DIR;
+      const files = await RNFS.readDir(galleryPath);
+      const ff = await RNFS.readDir(files[1].path);
+      console.log('Fetched videos from gallery:', files);
+      const videos = ff.filter(
+        file => file.isFile() && file.name.endsWith('.mp4'),
+      );
+      await chunkWiseUploadToGumlet(videos.reverse()[0].path);
+      console.log(
+        'Fetched videos from gallery:',
+        videos.reverse(),
+        new Date(videos.reverse()[0].mtime).getTime(),
+      );
+      // You can now use the 'videos' array to access and display the videos
+    } catch (error) {
+      console.error('Error fetching videos from gallery:', error);
+    }
+  };
+
+  const takeFilesFromGallery = () => {};
 
   if (connectedDevice == null && !Object.keys(hotspotDetails).length) {
     return (
@@ -877,6 +920,18 @@ const SequentialBackupScreen = (callback, deps) => {
           }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            // checkIfAnyUploadingIsPending();
+            fetchVideosFromGallery();
+          }}>
+          <View style={styles.box}>
+            <Text style={[styles.btnTxt, {fontSize: 18}]}>
+              Take Backup from Gallery
+            </Text>
           </View>
         </Pressable>
       </View>
