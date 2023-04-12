@@ -148,6 +148,10 @@ const MainScreen = props => {
         <RightArrowBox pressed={goToBackUpScreen} btnTitle={'Backup Files'} />
 
         <RightArrowBox pressed={_openBatchesPage} btnTitle={'Batches'} />
+        <RightArrowBox
+          pressed={_openSessionDetailsPage}
+          btnTitle={'Session Listing'}
+        />
       </View>
 
       <View style={styles.sessionBtnBoxes}>
