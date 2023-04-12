@@ -158,6 +158,10 @@ const SequentialBackupScreen = (callback, deps) => {
   };
 
   const setMetaDataForGumlet = file => {
+    if (!file) {
+      return;
+    }
+
     const {mod = new Date().getTime()} = file;
 
     const filteredArray = scheduledSessions.filter(itm => itm <= mod);
@@ -630,7 +634,8 @@ const SequentialBackupScreen = (callback, deps) => {
         collection_id: '63fe06f5b4ade3692e1bb407',
         format: 'HLS',
         metadata: {
-          // userId: userId ?? 'Anonymous',
+          userId: userId ?? 'Anonymous',
+          // ...setMetaDataForGumlet(currentFile),
         },
       },
     };
