@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -37,14 +38,20 @@ import _ from 'lodash';
 import {CAMERA_DIR} from './Utility/Constants';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
+import {useIsFocused} from '@react-navigation/native';
+import ConfirmModal from '../Core/Screens/ConfirmModal';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
-const SequentialBackupScreen = (callback, deps) => {
+const SequentialBackupScreen = props => {
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [hotspotDetails, setHotspotDetails] = useState({});
   const [mediaList, setMediaList] = useState(null);
   const [downloadDirectory, setDownloadDirectory] = useState(null);
+
+  const [isPopupVisibile, setPopupVisibility] = useState(false);
+
+  const isFocused = useIsFocused();
 
   const dispatch = useDispatch();
   const {media, scheduledSessions, uploadedChunkMedia} = useSelector(
@@ -68,16 +75,16 @@ const SequentialBackupScreen = (callback, deps) => {
           setConnectedDevice(goProDevices[0]);
         } else {
           // setConnectedDevice({});
-          ToastAndroid.show(
-            'GoPro device is not connected',
-            ToastAndroid.CENTER,
-          );
+          // ToastAndroid.show(
+          //   'GoPro device is not connected',
+          //   ToastAndroid.CENTER,
+          // );
         }
       })
       .catch(e => {
         console.log('Unable to get connected peripheral details');
       });
-  }, []);
+  }, [isFocused]);
 
   useEffect(() => {
     if (connectedDevice !== null) {
@@ -776,6 +783,11 @@ const SequentialBackupScreen = (callback, deps) => {
   const checkIfAnyUploadingIsPending = async () => {
     const {eTag, assetId, filePath, bytesRead = 0} = uploadedChunkMedia ?? {};
 
+    if (connectedDevice == null) {
+      setPopupVisibility(true);
+      return;
+    }
+
     if (assetId) {
       const fileSize = await getFileSize(filePath);
       const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
@@ -870,22 +882,47 @@ const SequentialBackupScreen = (callback, deps) => {
     }
   };
 
-  if (connectedDevice == null && !Object.keys(hotspotDetails).length) {
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size={'large'} color={'#FFFFFF'} />
-      </View>
+  const onConfirm = () => {
+    setPopupVisibility(false);
+    Linking.openURL(
+      'https://play.google.com/store/apps/details?id=com.gopro.smarty',
     );
-  }
+
+    props.navigation.goBack();
+  };
+
+  const onCancel = () => {
+    setPopupVisibility(false);
+  };
+
+  // if (connectedDevice == null && !Object.keys(hotspotDetails).length) {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         justifyContent: 'center',
+  //         alignItems: 'center',
+  //         backgroundColor: '#000000',
+  //       }}>
+  //       <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+  //     </View>
+  //   );
+  // }
 
   console.log('Connected device', connectedDevice, connectedDevice == null);
 
   return (
     <View style={styles.container}>
+      <ConfirmModal
+        visible={isPopupVisibile}
+        message="Shall we proceed to start recording"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />
       <View style={{marginHorizontal: 16}}>
         <GoProDeviceDetails
           deviceDetails={hotspotDetails}
-          id={connectedDevice.id}
+          id={connectedDevice?.id}
         />
       </View>
       <View
@@ -896,15 +933,6 @@ const SequentialBackupScreen = (callback, deps) => {
         <DownloadAndUploadProgressBar />
       </View>
 
-      {connectedDevice == null ? (
-        <View
-          style={{
-            marginHorizontal: 16,
-            marginVertical: 20,
-          }}>
-          <NoDevicesConnectedScreen />
-        </View>
-      ) : null}
       {/*<Pressable onPress={takeBackupOfFiles}>*/}
       {/*  <View style={styles.btn}>*/}
       {/*    <Text style={styles.btnTxt}>Back up</Text>*/}
