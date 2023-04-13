@@ -518,10 +518,10 @@ const SequentialBackupScreen = props => {
   const checkIfAnyUploadingIsPending = async () => {
     const {eTag, assetId, filePath, bytesRead = 0} = uploadedChunkMedia ?? {};
 
-    // if (connectedDevice == null) {
-    //   setPopupVisibility(true);
-    //   return;
-    // }
+    if (connectedDevice == null) {
+      setPopupVisibility(true);
+      return;
+    }
 
     console.log(
       'eTag, assetId, filePath, bytesRead',
@@ -579,12 +579,44 @@ const SequentialBackupScreen = props => {
     }
   };
 
-  const pickVideo = () => {
+  const pickVideo = async () => {
     const options = {
       mediaType: 'video', // Only pick videos
       videoQuality: 'high', // Set video quality (high, medium, low)
       selectionLimit: 0,
     };
+
+    const {eTag, assetId, filePath, bytesRead = 0} = uploadedChunkMedia ?? {};
+
+    // if (connectedDevice == null) {
+    //   setPopupVisibility(true);
+    //   return;
+    // }
+
+    console.log(
+      'eTag, assetId, filePath, bytesRead',
+      eTag,
+      assetId,
+      filePath,
+      bytesRead,
+    );
+
+    if (assetId) {
+      const fileSize = await getFileSize(filePath);
+      const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
+      ToastAndroid.show(
+        'Please wait there is pending upload',
+        ToastAndroid.CENTER,
+      );
+      await uploadChunkToGumlet(
+        assetId,
+        filePath,
+        totalNoOfChunks - eTag.length,
+        eTag.length * CHUNK_SIZE,
+        eTag.length + 1,
+      );
+      return;
+    }
 
     launchImageLibrary(options, async response => {
       if (response.didCancel) {
