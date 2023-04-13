@@ -40,11 +40,7 @@ const SessionListScreens = props => {
           size: 20,
         },
         suc => {
-          setSessionsList(
-            suc.filter(
-              itm => itm.liveStreamUrl !== null && itm.creationTime !== null,
-            ),
-          );
+          setSessionsList(suc.filter(itm => itm.liveStreamUrl !== null));
         },
         err =>
           ToastAndroid.show('Oops!! Something went wrong', ToastAndroid.SHORT),

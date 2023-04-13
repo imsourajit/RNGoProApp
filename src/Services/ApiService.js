@@ -49,12 +49,13 @@ const ApiService = {
         if (!isConnected) {
           ToastAndroid.show(
             'Oops!!! No internet connection. Please connect to internet',
+            ToastAndroid.BOTTOM,
           );
         }
         return isConnected;
       })
       .catch(err => {
-        ToastAndroid.show(err);
+        ToastAndroid.show(JSON.stringify(err), ToastAndroid.BOTTOM);
         return false;
       }),
 

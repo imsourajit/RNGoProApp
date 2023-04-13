@@ -35,6 +35,7 @@ import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
 import _ from 'lodash';
 import {CAMERA_DIR} from './Utility/Constants';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -617,7 +618,7 @@ const SequentialBackupScreen = (callback, deps) => {
       const fileDetails = await RNFetchBlob.fs.stat(filePath);
       return fileDetails.size;
     } catch (error) {
-      ToastAndroid.show('Unable to get file details');
+      ToastAndroid.show('Unable to get file details', ToastAndroid.BOTTOM);
     }
   };
 
@@ -676,15 +677,6 @@ const SequentialBackupScreen = (callback, deps) => {
     bytesRead,
     partNumber,
   ) => {
-    console.log(
-      'total chunks remaining',
-      assetId,
-      filePath,
-      totalNoOfChunks,
-      bytesRead,
-      partNumber,
-    );
-
     if (totalNoOfChunks <= 0) {
       const multipartCompleteOptions = {
         method: 'POST',
@@ -776,7 +768,8 @@ const SequentialBackupScreen = (callback, deps) => {
     const assetId = await getAssetId();
     dispatch(setUploadingAssetId(assetId));
     dispatch(setFilePath(filePath));
-    uploadChunkToGumlet(assetId, filePath, totalNoOfChunks, 0, 1);
+    await uploadChunkToGumlet(assetId, filePath, totalNoOfChunks, 0, 1);
+    return;
   };
 
   const checkIfAnyUploadingIsPending = async () => {
@@ -793,7 +786,7 @@ const SequentialBackupScreen = (callback, deps) => {
         eTag.length + 1,
       );
     } else {
-      chunkWiseUploadToGumlet(APP_DIR + '/' + 'ls.MP4');
+      await chunkWiseUploadToGumlet(APP_DIR + '/' + 'ls.MP4');
     }
   };
 
@@ -829,7 +822,52 @@ const SequentialBackupScreen = (callback, deps) => {
     }
   };
 
-  const takeFilesFromGallery = () => {};
+  const pickVideo = () => {
+    const options = {
+      mediaType: 'video', // Only pick videos
+      videoQuality: 'high', // Set video quality (high, medium, low)
+      selectionLimit: 0,
+    };
+
+    launchImageLibrary(options, async response => {
+      if (response.didCancel) {
+        console.log('User cancelled video picker');
+      } else if (response.error) {
+        console.log('Error while picking video:', response.error);
+      } else {
+        if (Array.isArray(response?.assets) && response?.assets?.length) {
+          uploadSelectedAssetsToGumlet(response?.assets, 0);
+        } else {
+          ToastAndroid.show('Oops! Something went wrong!', ToastAndroid.BOTTOM);
+        }
+
+        // await Promise.all(
+        //   response.assets.map(
+        //     async item =>
+        //       await chunkWiseUploadToGumlet(item.uri.replace('file://', '')),
+        //   ),
+        // );
+        // Handle selected video here
+        // console.log('Selected video:', response);
+        // You can access the video file path using response.path
+      }
+    });
+  };
+
+  const uploadSelectedAssetsToGumlet = async (assets, assetIndex) => {
+    if (assetIndex >= assets.length) {
+      ToastAndroid.show(
+        'Selected videos backup completed successfully',
+        ToastAndroid.CENTER,
+      );
+      return;
+    } else {
+      await chunkWiseUploadToGumlet(
+        assets[assetIndex].uri.replace('file://', ''),
+      );
+      await uploadSelectedAssetsToGumlet(assets, assetIndex + 1);
+    }
+  };
 
   if (connectedDevice == null && !Object.keys(hotspotDetails).length) {
     return (
@@ -879,7 +917,7 @@ const SequentialBackupScreen = (callback, deps) => {
         <Pressable
           onPress={() => {
             // checkIfAnyUploadingIsPending();
-            fetchVideosFromGallery();
+            pickVideo();
           }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>

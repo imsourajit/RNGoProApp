@@ -41,7 +41,11 @@ const StudentListsScreen = props => {
           batchId,
         },
         res => setStudentsList(res.students),
-        err => ToastAndroid.show('Oops!!! Something  went wrong'),
+        err =>
+          ToastAndroid.show(
+            'Oops!!! Something  went wrong',
+            ToastAndroid.BOTTOM,
+          ),
       ),
     );
   };

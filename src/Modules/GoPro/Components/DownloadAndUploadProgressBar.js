@@ -13,7 +13,7 @@ const DownloadAndUploadProgressBar = () => {
 
   useEffect(() => {
     let allFiles = [];
-    media.map(item => {
+    media?.map(item => {
       allFiles = [...allFiles, ...item.fs];
     });
 
@@ -65,7 +65,7 @@ const DownloadAndUploadProgressBar = () => {
             justifyContent: 'space-between',
             // marginRight: 10,
           }}>
-          <Text>{fileName ?? ''}</Text>
+          <Text>{fileName.slice(0, 35) ?? ''}</Text>
           <Text style={{color: '#F6F6F6', fontSize: 12}}>
             {progressPercentile.toFixed(2)} %
           </Text>
