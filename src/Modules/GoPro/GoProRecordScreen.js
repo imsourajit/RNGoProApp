@@ -190,44 +190,44 @@ const GoProRecordScreen = props => {
     }
   }, [devicesConnected]);
 
-  const _scrollToNextItem = () => {
-    currentRefIndex = 1;
-    if (Math.abs(QR_CODE_ARR.length - currentRefIndex) === 1) {
-      setQRFlatListReachedEnd(true);
-    }
-    if (currentRefIndex < QR_CODE_ARR.length) {
-      qrCodeFlatListRef && qrCodeFlatListRef.current.scrollToIndex({index: 1});
-      currentRefIndex++;
-    }
-  };
+  // const _scrollToNextItem = () => {
+  //   currentRefIndex = 1;
+  //   if (Math.abs(QR_CODE_ARR.length - currentRefIndex) === 1) {
+  //     setQRFlatListReachedEnd(true);
+  //   }
+  //   if (currentRefIndex < QR_CODE_ARR.length) {
+  //     qrCodeFlatListRef && qrCodeFlatListRef.current.scrollToIndex({index: 1});
+  //     currentRefIndex++;
+  //   }
+  // };
 
-  const testFFmpegCompression = _ => {
-    // let RootDir = APP_DIR;
-    // const xhr = new XMLHttpRequest();
-    // xhr.onreadystatechange = function () {
-    //   if (xhr.readyState === 4) {
-    //     if (xhr.status === 200) {
-    //       console.log('Upload success');
-    //     }
-    //   }
-    // };
-    // xhr.upload.onprogress = function (evt) {
-    //   if (evt.lengthComputable) {
-    //     let percentComplete = (evt.loaded / evt.total) * 100;
-    //     console.log('P co', percentComplete);
-    //   }
-    // };
-    // xhr.open(
-    //   'PUT',
-    //   'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/641067b292827199f9781323/origin-641067b292827199f9781323?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T122523Z&X-Amz-Expires=3600&X-Amz-Signature=94fdd4bbd5ccc473969152cddc310c396f431a160178ed2bb4f4a2914f52a310&X-Amz-SignedHeaders=host&x-id=PutObject',
-    // );
-    // xhr.setRequestHeader('Content-Type', 'video/mp4');
-    // xhr.send({
-    //   uri: 'file://${APP_DIR}/jil2.MP4',
-    //   type: 'video/mp4',
-    //   name: 'jil.MP4',
-    // });
-  };
+  // const testFFmpegCompression = _ => {
+  // let RootDir = APP_DIR;
+  // const xhr = new XMLHttpRequest();
+  // xhr.onreadystatechange = function () {
+  //   if (xhr.readyState === 4) {
+  //     if (xhr.status === 200) {
+  //       console.log('Upload success');
+  //     }
+  //   }
+  // };
+  // xhr.upload.onprogress = function (evt) {
+  //   if (evt.lengthComputable) {
+  //     let percentComplete = (evt.loaded / evt.total) * 100;
+  //     console.log('P co', percentComplete);
+  //   }
+  // };
+  // xhr.open(
+  //   'PUT',
+  //   'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/641067b292827199f9781323/origin-641067b292827199f9781323?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230314%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230314T122523Z&X-Amz-Expires=3600&X-Amz-Signature=94fdd4bbd5ccc473969152cddc310c396f431a160178ed2bb4f4a2914f52a310&X-Amz-SignedHeaders=host&x-id=PutObject',
+  // );
+  // xhr.setRequestHeader('Content-Type', 'video/mp4');
+  // xhr.send({
+  //   uri: 'file://${APP_DIR}/jil2.MP4',
+  //   type: 'video/mp4',
+  //   name: 'jil.MP4',
+  // });
+  // };
 
   // const testCompress = async () => {
   //   try {
@@ -288,23 +288,23 @@ const GoProRecordScreen = props => {
   //   }
   // };
 
-  const _getMediaList = async () => {
-    try {
-      const mediaJson = await fetch(`${GOPRO_BASE_URL}gopro/media/list`);
-      const res = await mediaJson.json();
-      const [{fs, d}, ...rest] = res.media;
-      if (Array.isArray(fs) && fs.length) {
-        const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
-        dispatch(storeGoProMediaFilesListLocally(orderedArray));
-        dispatch(setDirectoryNameToDownload(d));
-        setIsDownloading(true);
-      } else {
-        ToastAndroid.show('No media files found', ToastAndroid.CENTER);
-      }
-    } catch (e) {
-      console.log('Unable to fetch media', e);
-    }
-  };
+  // const _getMediaList = async () => {
+  //   try {
+  //     const mediaJson = await fetch(`${GOPRO_BASE_URL}gopro/media/list`);
+  //     const res = await mediaJson.json();
+  //     const [{fs, d}, ...rest] = res.media;
+  //     if (Array.isArray(fs) && fs.length) {
+  //       const orderedArray = _.orderBy(fs, ['mod'], ['desc']);
+  //       dispatch(storeGoProMediaFilesListLocally(orderedArray));
+  //       dispatch(setDirectoryNameToDownload(d));
+  //       setIsDownloading(true);
+  //     } else {
+  //       ToastAndroid.show('No media files found', ToastAndroid.CENTER);
+  //     }
+  //   } catch (e) {
+  //     console.log('Unable to fetch media', e);
+  //   }
+  // };
 
   // const checkForPendingUploads = () => {
   //   let yetFileToUpload = [];
@@ -317,128 +317,128 @@ const GoProRecordScreen = props => {
   //   setFilesToDownload(yetFileToUpload);
   // };
 
-  const _startUploadingProcess = async () => {
-    // await _setTurboTransfer(0);
-    await WifiManager.disconnect();
-    setTimeout(() => {
-      setIsDownloading(false);
-      setIsUploading(true);
-    }, 5000);
-  };
+  // const _startUploadingProcess = async () => {
+  //   // await _setTurboTransfer(0);
+  //   await WifiManager.disconnect();
+  //   setTimeout(() => {
+  //     setIsDownloading(false);
+  //     setIsUploading(true);
+  //   }, 5000);
+  // };
 
-  // Start download process
-  const _startDownloadingProcess = () => {
-    8;
-    _getMediaList();
-  };
+  // // Start download process
+  // const _startDownloadingProcess = () => {
+  //   8;
+  //   _getMediaList();
+  // };
 
   // Turn hotspot and connect to gopro
-  const _goProHttpConnection = async () => {
-    console.log('Hotspot details', hotspotDetails);
+  // const _goProHttpConnection = async () => {
+  //   console.log('Hotspot details', hotspotDetails);
 
-    await WifiManager.connectToProtectedSSID(
-      hotspotDetails.ssid,
-      hotspotDetails.password,
-      false,
-    );
-    _setTurboTransfer(1); //Turn on turbo transfer for faster download
-    _startDownloadingProcess();
-  };
+  //   await WifiManager.connectToProtectedSSID(
+  //     hotspotDetails.ssid,
+  //     hotspotDetails.password,
+  //     false,
+  //   );
+  //   _setTurboTransfer(1); //Turn on turbo transfer for faster download
+  //   _startDownloadingProcess();
+  // };
 
-  const _setTurboTransfer = flag => {
-    fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`)
-      .then(r => {
-        ToastAndroid.show('Turbotransfer on', ToastAndroid.CENTER);
-      })
-      .then(r => console.log('Camera State ====', r))
-      .catch(e => console.log('Camera State error', e));
-  };
+  // const _setTurboTransfer = flag => {
+  //   fetch(`${GOPRO_BASE_URL}gopro/media/turbo_transfer?p=${flag}`)
+  //     .then(r => {
+  //       ToastAndroid.show('Turbotransfer on', ToastAndroid.CENTER);
+  //     })
+  //     .then(r => console.log('Camera State ====', r))
+  //     .catch(e => console.log('Camera State error', e));
+  // };
 
-  const _renderQRImages = ({item, index}) => {
-    return (
-      <QRBoxes
-        qrCommand={item}
-        isLastIndex={QR_CODE_ARR.length - 1 === index}
-        position={index + 1}
-        toRecord={true}
-      />
-    );
-  };
+  // const _renderQRImages = ({item, index}) => {
+  //   return (
+  //     <QRBoxes
+  //       qrCommand={item}
+  //       isLastIndex={QR_CODE_ARR.length - 1 === index}
+  //       position={index + 1}
+  //       toRecord={true}
+  //     />
+  //   );
+  // };
 
-  const _sessionFilesBackup = async () => {
-    await _goProHttpConnection();
-  };
+  // const _sessionFilesBackup = async () => {
+  //   await _goProHttpConnection();
+  // };
 
-  const _completeUploadProcess = () => {
-    setIsUploading(false);
-    ToastAndroid.show('Backup completed', ToastAndroid.CENTER);
-  };
+  // const _completeUploadProcess = () => {
+  //   setIsUploading(false);
+  //   ToastAndroid.show('Backup completed', ToastAndroid.CENTER);
+  // };
 
   // To make sure on load the take backup button should be visible even if there are pending uploads
-  const _scanForFootagesToUploadToServer = () => {
-    let yetToUploadFiles = [];
+  // const _scanForFootagesToUploadToServer = () => {
+  //   let yetToUploadFiles = [];
 
-    downloadedMediaList.map((item, index) => {
-      const isDefined = _.find(uploadedMediaList, obj => obj.n == item.n);
-      if (isDefined == undefined) {
-        yetToUploadFiles.push(item);
-      }
-    });
+  //   downloadedMediaList.map((item, index) => {
+  //     const isDefined = _.find(uploadedMediaList, obj => obj.n == item.n);
+  //     if (isDefined == undefined) {
+  //       yetToUploadFiles.push(item);
+  //     }
+  //   });
 
-    if (yetToUploadFiles.length) {
-      setIsDownloading(false);
+  //   if (yetToUploadFiles.length) {
+  //     setIsDownloading(false);
 
-      setIsUploading(true);
-    } else {
-      ToastAndroid.show('No media files found to upload', ToastAndroid.CENTER);
-    }
-  };
+  //     setIsUploading(true);
+  //   } else {
+  //     ToastAndroid.show('No media files found to upload', ToastAndroid.CENTER);
+  //   }
+  // };
 
-  const handleAuthApi = async sessionId => {
-    setGeneratingQR(true);
-    const response = await fetch(BASE_URL + '/auth/api-key', {
-      body: '{"apiKey": "' + API_KEY + '"}',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    });
+  // const handleAuthApi = async sessionId => {
+  //   setGeneratingQR(true);
+  //   const response = await fetch(BASE_URL + '/auth/api-key', {
+  //     body: '{"apiKey": "' + API_KEY + '"}',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     method: 'POST',
+  //   });
 
-    const resJson = await response.json();
-    const response2nd = await fetch(BASE_URL + '/live-streams', {
-      body: '{"record": true, "name": "My Live Stream","public": true}',
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer ' + resJson.access_token,
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    });
-    const streamDetailsJSON = await response2nd.json();
-    dispatch(
-      tagLiveUrlsToSession(
-        {
-          sessionId: sessionId,
-          liveStreamUrl: streamDetailsJSON?.assets?.hls,
-          ...streamDetailsJSON,
-        },
-        res => {
-          setQRCodeArr([
-            `!MRTMP="rtmp://broadcast.api.video/s/${streamDetailsJSON.streamKey}"`,
-            'oW1mVr1080!W!GLC',
-          ]);
-        },
-        err => {
-          ToastAndroid.show(
-            'Oops!!! Something went wrong',
-            ToastAndroid.CENTER,
-          );
-        },
-      ),
-    );
+  //   const resJson = await response.json();
+  //   const response2nd = await fetch(BASE_URL + '/live-streams', {
+  //     body: '{"record": true, "name": "My Live Stream","public": true}',
+  //     headers: {
+  //       Accept: 'application/json',
+  //       Authorization: 'Bearer ' + resJson.access_token,
+  //       'Content-Type': 'application/json',
+  //     },
+  //     method: 'POST',
+  //   });
+  //   const streamDetailsJSON = await response2nd.json();
+  //   dispatch(
+  //     tagLiveUrlsToSession(
+  //       {
+  //         sessionId: sessionId,
+  //         liveStreamUrl: streamDetailsJSON?.assets?.hls,
+  //         ...streamDetailsJSON,
+  //       },
+  //       res => {
+  //         setQRCodeArr([
+  //           `!MRTMP="rtmp://broadcast.api.video/s/${streamDetailsJSON.streamKey}"`,
+  //           'oW1mVr1080!W!GLC',
+  //         ]);
+  //       },
+  //       err => {
+  //         ToastAndroid.show(
+  //           'Oops!!! Something went wrong',
+  //           ToastAndroid.CENTER,
+  //         );
+  //       },
+  //     ),
+  //   );
 
-    setGeneratingQR(false);
-  };
+  //   setGeneratingQR(false);
+  // };
 
   return (
     <View style={styles.main}>

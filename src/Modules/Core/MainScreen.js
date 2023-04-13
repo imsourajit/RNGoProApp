@@ -157,6 +157,8 @@ const MainScreen = props => {
   };
 
   const onConfirm = () => {
+    closeDeviceSelectionPopup();
+    setConfirmationModalVisibility(false);
     switch (device.type) {
       case 'GO_PRO': {
         goToGoPro();
@@ -172,6 +174,8 @@ const MainScreen = props => {
   const onCancel = () => {
     setConfirmationModalVisibility(false);
   };
+
+  console.log('__MAINSCREEN__', isConfirmationModalVisible);
 
   return (
     <View style={styles.main}>
@@ -198,45 +202,52 @@ const MainScreen = props => {
           />
         </View>
       </View>
-      <View style={styles.arrowBoxes}>
-        {/*<RightArrowBox*/}
-        {/*  pressed={_openSessionDetailsPage}*/}
-        {/*  btnTitle={'Sessions'}*/}
-        {/*/>*/}
-        <RightArrowBox pressed={goToBackUpScreen} btnTitle={'Backup Files'} />
+      <View
+        style={{
+          justifyContent: 'space-between',
+          flex: 1,
+          // backgroundColor: 'red',
+        }}>
+        <View style={styles.arrowBoxes}>
+          {/*<RightArrowBox*/}
+          {/*  pressed={_openSessionDetailsPage}*/}
+          {/*  btnTitle={'Sessions'}*/}
+          {/*/>*/}
+          <RightArrowBox pressed={goToBackUpScreen} btnTitle={'Backup Files'} />
 
-        <RightArrowBox pressed={_openBatchesPage} btnTitle={'Batches'} />
-        <RightArrowBox
-          pressed={_openSessionDetailsPage}
-          btnTitle={'Session Listing'}
-        />
-      </View>
+          <RightArrowBox pressed={_openBatchesPage} btnTitle={'Batches'} />
+          <RightArrowBox
+            pressed={_openSessionDetailsPage}
+            btnTitle={'Session Listing'}
+          />
+        </View>
 
-      <View style={styles.sessionBtnBoxes}>
-        <Text style={styles.sessionBtnBoxesTitle}>Start Session</Text>
+        <View style={styles.sessionBtnBoxes}>
+          <Text style={styles.sessionBtnBoxesTitle}>Start Session</Text>
 
-        <Image
-          source={require('../GoPro/Assets/goPro.png')}
-          style={styles.goProImage}
-        />
-        {/*<Pressable onPress={goToCamera}>*/}
-        {/*  <View style={styles.box}>*/}
-        {/*    <Text style={styles.btnTxt}>Camera</Text>*/}
-        {/*  </View>*/}
-        {/*</Pressable>*/}
-        <Pressable onPress={goToGoPro}>
+          <Image
+            source={require('../GoPro/Assets/goPro.png')}
+            style={styles.goProImage}
+          />
+          {/*<Pressable onPress={goToCamera}>*/}
+          {/*  <View style={styles.box}>*/}
+          {/*    <Text style={styles.btnTxt}>Camera</Text>*/}
+          {/*  </View>*/}
+          {/*</Pressable>*/}
+          {/* <Pressable onPress={goToGoPro}>
           <View style={styles.box}>
             <Text style={styles.btnTxt}>Go LIVE</Text>
           </View>
         </Pressable>
 
-        <Text style={styles.txtStyles}>or</Text>
+        <Text style={styles.txtStyles}>or</Text> */}
 
-        <Pressable onPress={openDeviceSelectionPopup}>
-          <View style={styles.box}>
-            <Text style={styles.btnTxt}>Record Session</Text>
-          </View>
-        </Pressable>
+          <Pressable onPress={openDeviceSelectionPopup}>
+            <View style={styles.box}>
+              <Text style={styles.btnTxt}>Record Session</Text>
+            </View>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -246,7 +257,7 @@ const styles = StyleSheet.create({
   main: {
     backgroundColor: '#000000',
     flex: 1,
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
   },
   arrowBoxes: {
     paddingHorizontal: 32,
@@ -309,7 +320,10 @@ const styles = StyleSheet.create({
     height: 50,
     marginTop: 20,
   },
-  subContainer: {alignItems: 'center', justifyContent: 'center'},
+  subContainer: {
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
 });
 
 export default MainScreen;

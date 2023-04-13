@@ -36,6 +36,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 import _ from 'lodash';
 import {CAMERA_DIR} from './Utility/Constants';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -66,7 +67,7 @@ const SequentialBackupScreen = (callback, deps) => {
         if (goProDevices.length) {
           setConnectedDevice(goProDevices[0]);
         } else {
-          setConnectedDevice({});
+          // setConnectedDevice({});
           ToastAndroid.show(
             'GoPro device is not connected',
             ToastAndroid.CENTER,
@@ -877,6 +878,8 @@ const SequentialBackupScreen = (callback, deps) => {
     );
   }
 
+  console.log('Connected device', connectedDevice, connectedDevice == null);
+
   return (
     <View style={styles.container}>
       <View style={{marginHorizontal: 16}}>
@@ -892,6 +895,16 @@ const SequentialBackupScreen = (callback, deps) => {
         }}>
         <DownloadAndUploadProgressBar />
       </View>
+
+      {connectedDevice == null ? (
+        <View
+          style={{
+            marginHorizontal: 16,
+            marginVertical: 20,
+          }}>
+          <NoDevicesConnectedScreen />
+        </View>
+      ) : null}
       {/*<Pressable onPress={takeBackupOfFiles}>*/}
       {/*  <View style={styles.btn}>*/}
       {/*    <Text style={styles.btnTxt}>Back up</Text>*/}

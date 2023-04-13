@@ -79,13 +79,14 @@ const BatchSelectionScreen = props => {
       return;
     }
 
+    console.log('__BATCHSELECTION__', props.route.params);
     if (selectedDevice === 'GO_PRO') {
-      if (toRecord) {
-        props.navigation.navigate('GoProRecordScreen', {
-          batchId: batches[batchSelected]?.id,
-        });
-        return;
-      }
+      // if (toRecord) {
+      props.navigation.navigate('GoProRecordScreen', {
+        batchId: batches[batchSelected]?.id,
+      });
+      return;
+      // }
 
       // props.navigation.navigate('GoPro', {
       //   batchId: batches[batchSelected]?.id,

@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     flex: 1,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#3164F4',
     borderRadius: 5,
     paddingVertical: 12,
     alignItems: 'center',
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ababab',
     borderRadius: 5,
     paddingVertical: 12,
     alignItems: 'center',
