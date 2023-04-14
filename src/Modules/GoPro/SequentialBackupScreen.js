@@ -403,7 +403,7 @@ const SequentialBackupScreen = props => {
         format: 'HLS',
         metadata: {
           userId: userId ?? 'Anonymous',
-          // ...setMetaDataForGumlet(currentFile),
+          ...setMetaDataForGumlet(currentFile),
         },
       },
     };
@@ -438,6 +438,25 @@ const SequentialBackupScreen = props => {
     return preSignedUrlData.data.part_upload_url;
   };
 
+  const _getParts = () => {
+    const {eTag} = uploadedChunkMedia ?? {};
+    let eTagTemp = [];
+
+    Array.isArray(eTag) &&
+      eTag.map(tag => {
+        let found = _.findIndex(
+          parts,
+          part => part.PartNumber == tag.PartNumber,
+        );
+
+        if (found < 0) {
+          eTagTemp.push(tag);
+        }
+      });
+
+    return [...eTagTemp, ...parts];
+  };
+
   const uploadChunkToGumlet = async (
     assetId,
     filePath,
@@ -445,7 +464,7 @@ const SequentialBackupScreen = props => {
     bytesRead,
     partNumber,
   ) => {
-    const {eTag} = uploadedChunkMedia ?? {};
+    // const {eTag} = uploadedChunkMedia ?? {};
 
     if (totalNoOfChunks <= 0) {
       const multipartCompleteOptions = {
@@ -456,7 +475,7 @@ const SequentialBackupScreen = props => {
           Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
         },
         data: {
-          parts: eTag ? [...eTag, ...parts] : parts,
+          parts: _getParts(),
         },
       };
 
@@ -468,7 +487,12 @@ const SequentialBackupScreen = props => {
           dispatch(setUploadingProgressOfMedia(null));
           console.log('Upload Completed');
         })
-        .catch(err => console.log('Multipart upload error', err));
+        .catch(err => {
+          dispatch(setPartUploadUrl(undefined));
+          dispatch(setCompletedUploading());
+          dispatch(setUploadingProgressOfMedia(null));
+          console.log('Multipart upload error', err);
+        });
       return;
     }
 

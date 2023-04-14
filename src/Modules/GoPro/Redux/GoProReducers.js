@@ -98,7 +98,7 @@ export const GoProReducer = (state = initialState, action) => {
 
       if (action.data?.percentile > state.analyticsProgressRange + 25) {
         logLoadEvent('app_backup_progress', {
-          progress: analyticsProgressRange + 25,
+          progress: analyticsProgressRange,
           type: 'download',
         });
       }
@@ -124,7 +124,7 @@ export const GoProReducer = (state = initialState, action) => {
 
       if (action.data?.percentile > state.analyticsProgressRangeUpload + 25) {
         logLoadEvent('app_backup_progress', {
-          progress: analyticsProgressRangeUpload + 25,
+          progress: analyticsProgressRangeUpload,
           type: 'upload',
         });
       }
