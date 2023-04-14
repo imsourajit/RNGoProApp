@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import RightArrowBox from './Components/RightArrowBox';
 import PopupMenu from './Components/PopupMenu';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {logoutUser} from './Redux/UserActions';
 import {
   getScheduledSessions,
@@ -47,6 +47,10 @@ const MainScreen = props => {
   const [deviceSelectionPopup, setDeviceSelectionPopup] = useState(false);
   const [isConfirmationModalVisible, setConfirmationModalVisibility] =
     useState(false);
+
+  const {
+    user: {firstName},
+  } = useSelector(st => st.userReducer);
 
   const [device, selectedDevice] = useState(null);
 
@@ -174,6 +178,7 @@ const MainScreen = props => {
     logClickEvent('app_record_popup_action', {
       action: 'cancel',
     });
+    closeDeviceSelectionPopup();
   };
 
   const closeDeviceSelectionPopup = () => {
@@ -246,15 +251,23 @@ const MainScreen = props => {
       </View>
       <View
         style={{
+          marginHorizontal: 16,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 10,
+          marginBottom: 20,
+        }}>
+        <Text style={styles.fullName}>
+          Hey <Text style={{fontWeight: 700}}>{firstName}</Text>
+        </Text>
+      </View>
+      <View
+        style={{
           justifyContent: 'space-between',
           flex: 1,
           // backgroundColor: 'red',
         }}>
         <View style={styles.arrowBoxes}>
-          {/*<RightArrowBox*/}
-          {/*  pressed={_openSessionDetailsPage}*/}
-          {/*  btnTitle={'Sessions'}*/}
-          {/*/>*/}
           <RightArrowBox pressed={goToBackUpScreen} btnTitle={'Backup Files'} />
 
           <RightArrowBox pressed={_openBatchesPage} btnTitle={'Batches'} />
@@ -271,18 +284,6 @@ const MainScreen = props => {
             source={require('../GoPro/Assets/goPro.png')}
             style={styles.goProImage}
           />
-          {/*<Pressable onPress={goToCamera}>*/}
-          {/*  <View style={styles.box}>*/}
-          {/*    <Text style={styles.btnTxt}>Camera</Text>*/}
-          {/*  </View>*/}
-          {/*</Pressable>*/}
-          {/* <Pressable onPress={goToGoPro}>
-          <View style={styles.box}>
-            <Text style={styles.btnTxt}>Go LIVE</Text>
-          </View>
-        </Pressable>
-
-        <Text style={styles.txtStyles}>or</Text> */}
 
           <Pressable onPress={openDeviceSelectionPopup}>
             <View style={styles.box}>
@@ -365,6 +366,12 @@ const styles = StyleSheet.create({
   subContainer: {
     alignItems: 'center',
     justifyContent: 'flex-start',
+  },
+  fullName: {
+    fontSize: 24,
+    color: '#85C1E9',
+    fontWeight: '500',
+    justifyContent: 'center',
   },
 });
 
