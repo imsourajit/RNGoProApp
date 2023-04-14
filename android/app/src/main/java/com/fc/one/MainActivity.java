@@ -1,4 +1,4 @@
-package com.goprohero10;
+package com.fc.one;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

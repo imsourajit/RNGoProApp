@@ -93,9 +93,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.goprohero10"
+    namespace "com.fc.one"
     defaultConfig {
-        applicationId "com.goprohero10"
+        applicationId "com.fc.one"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

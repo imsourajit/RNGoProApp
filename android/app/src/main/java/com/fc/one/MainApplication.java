@@ -1,4 +1,4 @@
-package com.goprohero10;
+package com.fc.one;
 
 import android.app.Application;
 import com.facebook.react.PackageList;
@@ -8,11 +8,11 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
-import com.goprohero10.nativecamera.CameraPackage;
+import com.fc.one.BuildConfig;
+import com.fc.one.ReactNativeFlipper;
+import com.fc.one.nativecamera.CameraPackage;
 
 import java.util.List;
-
-import org.wonday.orientation.OrientationActivityLifecycle;
 
 public class MainApplication extends Application implements ReactApplication {
 
