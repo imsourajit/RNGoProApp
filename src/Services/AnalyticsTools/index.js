@@ -1,5 +1,6 @@
 import {getConfigs} from '../../Config';
 import {ALL} from '../../Config/firebaseConfiguration';
+import {isEmpty} from '../../Utility/helpers';
 import AnalyticsService from './AnalyticsService';
 
 import analytics from '@react-native-firebase/analytics';
@@ -88,23 +89,27 @@ const _setUserPropertiesInFirebase = async data => {
 
   const {latitude, longitude} = gpsInfo ?? {};
 
-  // await analytics().setUserId(userId);
-  // !isEmpty(fullName) && analytics().setUserProperty('fullName', fullName);
-  // !isEmpty(email) && analytics().setUserProperty('email', email);
-  // !isEmpty(firstName) && analytics().setUserProperty('firstName', firstName);
-  // !isEmpty(lastName) && analytics().setUserProperty('lastName', lastName);
-  // !isEmpty(role) && analytics().setUserProperty('role', role);
-  // !isEmpty(latitude) && analytics().setUserProperty('latitude', latitude);
-  // !isEmpty(longitude) && analytics().setUserProperty('longitude', longitude);
-  // !isEmpty(grade) && analytics().setUserProperty('grade', grade);
-  // !isEmpty(gender) && analytics().setUserProperty('grade', gender);
-  // !isEmpty(city) && analytics().setUserProperty('city', city);
-  // !isEmpty(country) && analytics().setUserProperty('country', country);
-  // !isEmpty(district) && analytics().setUserProperty('district', district);
-  // !isEmpty(phoneNumber) &&
-  //   analytics().setUserProperty('phoneNumber', phoneNumber);
-  // analytics().setUserProperty('appVersion', RNDeviceInfo.getVersion());
-  // analytics().setUserProperty('appCode', RNDeviceInfo.getBuildNumber());
+  await analytics().setUserId(userId);
+  !isEmpty(fullName) &&
+    (await analytics().setUserProperty('fullName', fullName));
+  !isEmpty(email) && (await analytics().setUserProperty('email', email));
+  !isEmpty(firstName) &&
+    (await analytics().setUserProperty('firstName', firstName));
+  !isEmpty(lastName) &&
+    (await analytics().setUserProperty('lastName', lastName));
+  !isEmpty(role) && (await analytics().setUserProperty('role', role));
+  !isEmpty(latitude) &&
+    (await analytics().setUserProperty('latitude', latitude));
+  !isEmpty(longitude) &&
+    (await analytics().setUserProperty('longitude', longitude));
+  !isEmpty(grade) && (await analytics().setUserProperty('grade', grade));
+  !isEmpty(gender) && (await analytics().setUserProperty('grade', gender));
+  !isEmpty(city) && (await analytics().setUserProperty('city', city));
+  !isEmpty(country) && (await analytics().setUserProperty('country', country));
+  !isEmpty(district) &&
+    (await analytics().setUserProperty('district', district));
+  !isEmpty(phoneNumber) &&
+    (await analytics().setUserProperty('phoneNumber', phoneNumber));
 };
 
 export const _setUserPropertiesInAllAnalyticsTools = data => {

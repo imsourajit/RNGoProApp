@@ -1,3 +1,4 @@
+import {logLoadEvent} from '../../../Services/AnalyticsTools';
 import {
   COMPLETED_DOWNLOADED_FILE,
   COMPLETED_UPLOADED_FILE,
@@ -35,6 +36,8 @@ const initialState = {
   uploadedMediaProgress: null,
   scheduledSessions: [],
   uploadedChunkMedia: {},
+  analyticsProgressRange: 0,
+  analyticsProgressRangeUpload: 0,
 };
 
 export const GoProReducer = (state = initialState, action) => {
@@ -88,16 +91,47 @@ export const GoProReducer = (state = initialState, action) => {
       };
 
     case SET_DOWNLOAD_MEDIA_PROGRESS: {
+      let analyticsProgressRange =
+        action.data?.percentile > state.analyticsProgressRange + 25
+          ? state.analyticsProgressRange + 25
+          : state.analyticsProgressRange;
+
+      if (action.data?.percentile > state.analyticsProgressRange + 25) {
+        logLoadEvent('app_backup_progress', {
+          progress: analyticsProgressRange + 25,
+          type: 'download',
+        });
+      }
+
+      if (action.data?.percentile <= 25 && analyticsProgressRange == 0) {
+        // progress for 25
+      } else if (action.data?.percentile > 25 && analyticsProgressRange == 50) {
+        // progress for 50
+      }
+
       return {
         ...state,
         downloadedMediaProgress: action.data,
+        analyticsProgressRange: analyticsProgressRange,
       };
     }
 
     case SET_UPLOAD_MEDIA_PROGRESS: {
+      let analyticsProgressRangeUpload =
+        action.data?.percentile > state.analyticsProgressRangeUpload + 25
+          ? state.analyticsProgressRangeUpload + 25
+          : state.analyticsProgressRangeUpload;
+
+      if (action.data?.percentile > state.analyticsProgressRangeUpload + 25) {
+        logLoadEvent('app_backup_progress', {
+          progress: analyticsProgressRangeUpload + 25,
+          type: 'upload',
+        });
+      }
       return {
         ...state,
         uploadedMediaProgress: action.data,
+        analyticsProgressRangeUpload: analyticsProgressRangeUpload,
       };
     }
 
@@ -105,6 +139,7 @@ export const GoProReducer = (state = initialState, action) => {
       return {
         ...state,
         downloadedMedia: [...state.downloadedMedia, action.data],
+        analyticsProgressRange: 0,
       };
     }
 

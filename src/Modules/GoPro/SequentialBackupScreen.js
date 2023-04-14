@@ -40,7 +40,11 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import {useIsFocused} from '@react-navigation/native';
 import ConfirmModal from '../Core/Screens/ConfirmModal';
-import {logClickEvent, logLoadEvent} from '../../Services/AnalyticsTools';
+import {
+  logClickEvent,
+  logEvent,
+  logLoadEvent,
+} from '../../Services/AnalyticsTools';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -119,40 +123,54 @@ const SequentialBackupScreen = props => {
       const fileNamePrefix = date.getTime();
 
       if (listIndex < listOfFiles.length) {
-        await RNFS.downloadFile({
-          fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${goProDirectory}/${fileName}`,
-          toFile: APP_DIR + '/' + fileNamePrefix + fileName,
-          background: true,
-          discretionary: true,
-          cacheable: true,
-          progressInterval: 2000,
-          begin: () => {
-            console.log('Directory : ', goProDirectory, ' File : ', fileName);
-            dispatch(
-              setDownloadingProgressOfMedia({
-                fileName: fileName,
-                percentile: 0,
-              }),
-            );
-          },
-          progress: r => {
-            const percentile = (r.bytesWritten / r.contentLength) * 100;
-            // console.log(percentile, index, r.bytesWritten, r.contentLength);
-            console.log(
-              'Directory : ',
-              goProDirectory,
-              ' File : ',
-              fileName,
-              percentile,
-            );
-            dispatch(
-              setDownloadingProgressOfMedia({
-                fileName: fileName,
-                percentile: percentile,
-              }),
-            );
-          },
-        }).promise;
+        try {
+          await RNFS.downloadFile({
+            fromUrl: `${GOPRO_BASE_URL}videos/DCIM/${goProDirectory}/${fileName}`,
+            toFile: APP_DIR + '/' + fileNamePrefix + fileName,
+            background: true,
+            discretionary: true,
+            cacheable: true,
+            progressInterval: 2000,
+            begin: () => {
+              console.log('Directory : ', goProDirectory, ' File : ', fileName);
+              logLoadEvent('app_backup_progress', {
+                progress: 0,
+                type: 'download',
+              });
+              dispatch(
+                setDownloadingProgressOfMedia({
+                  fileName: fileName,
+                  percentile: 0,
+                }),
+              );
+            },
+            progress: r => {
+              const percentile = (r.bytesWritten / r.contentLength) * 100;
+              // console.log(percentile, index, r.bytesWritten, r.contentLength);
+              console.log(
+                'Directory : ',
+                goProDirectory,
+                ' File : ',
+                fileName,
+                percentile,
+              );
+              dispatch(
+                setDownloadingProgressOfMedia({
+                  fileName: fileName,
+                  percentile: percentile,
+                }),
+              );
+            },
+          }).promise;
+        } catch (error) {
+          logEvent('FrontEnd', 'app_backup_error', {
+            error: JSON.stringify(error),
+          });
+        }
+        logLoadEvent('app_backup_progress', {
+          progress: 100,
+          type: 'download',
+        });
         dispatch(downloadedCompletedFile(fileName));
         dispatch(setDownloadingProgressOfMedia(null));
         _disableTurboTransfer();
@@ -474,6 +492,7 @@ const SequentialBackupScreen = props => {
     RNFetchBlob.config({
       fileCache: false,
     });
+
     await RNFetchBlob.fetch(
       'PUT',
       preSignedUrl,
@@ -522,6 +541,10 @@ const SequentialBackupScreen = props => {
     const assetId = await getAssetId();
     dispatch(setUploadingAssetId(assetId));
     dispatch(setFilePath(filePath));
+    logLoadEvent('app_backup_progress', {
+      progress: 0,
+      type: 'upload',
+    });
     await uploadChunkToGumlet(assetId, filePath, totalNoOfChunks, 0, 1);
     return;
   };
@@ -566,6 +589,10 @@ const SequentialBackupScreen = props => {
     fileName,
   ) => {
     await chunkWiseUploadToGumlet(filePath);
+    logLoadEvent('app_backup_progress', {
+      progress: 100,
+      type: 'upload',
+    });
     _connectAgainAndDownload(media, mediaIndex, listIndex);
   };
 
