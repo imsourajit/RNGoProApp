@@ -15,6 +15,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Contacts from 'react-native-contacts';
 import {useDispatch, useSelector} from 'react-redux';
 import {addBatchByCoachId, listBatchesByCoachId} from '../Redux/UserActions';
+import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
 
 const BatchesListScreen = props => {
   const dispatch = useDispatch();
@@ -26,6 +27,10 @@ const BatchesListScreen = props => {
   const {
     user: {userId},
   } = useSelector(st => st.userReducer);
+
+  useEffect(() => {
+    logLoadEvent('app_batch_screen');
+  }, []);
 
   useEffect(() => {
     getListOfBatches();
@@ -47,6 +52,9 @@ const BatchesListScreen = props => {
   };
 
   const _goToStudentsListPage = bId => {
+    logClickEvent('app_batch_select', {
+      batch: bId,
+    });
     props.navigation.navigate('StudentsListScreen', {
       batchId: bId,
     });

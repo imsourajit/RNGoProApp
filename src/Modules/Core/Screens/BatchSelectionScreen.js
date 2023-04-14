@@ -13,6 +13,7 @@ import {listBatchesByCoachId} from '../Redux/UserActions';
 import {useDispatch, useSelector} from 'react-redux';
 import {getFreeSpaceInGB} from '../../../Utility/helpers';
 import RNFS from 'react-native-fs';
+import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
 
 const BatchSelectionScreen = props => {
   const [batchSelected, selectBatch] = useState(null);
@@ -22,6 +23,14 @@ const BatchSelectionScreen = props => {
   const {
     user: {userId},
   } = useSelector(st => st.userReducer);
+
+  useEffect(() => {
+    logLoadEvent('app_record_batch_screen', {
+      pageSource: props.route.params?.selectedDevice
+        ?.replace('_', '')
+        ?.toLowerCase(),
+    });
+  }, []);
 
   useEffect(() => {
     dispatch(
@@ -38,13 +47,16 @@ const BatchSelectionScreen = props => {
     );
   }, []);
 
-  const _goToStudentsListPage = batchIndex => {
+  const _onSelectingBatch = batchIndex => {
+    logClickEvent('app_record_batch_select', {
+      batch: batches[batchIndex]?.id,
+    });
     selectBatch(batchIndex);
   };
 
   const _renderListOfSessions = ({item, index}) => (
     <RadioButtonSelectionBox
-      pressed={_goToStudentsListPage}
+      pressed={_onSelectingBatch}
       btnTitle={item.title}
       btnDesc={item.desc}
       batchSelected={batchSelected}
@@ -60,7 +72,9 @@ const BatchSelectionScreen = props => {
 
     const {selectedDevice, toRecord} = props.route.params;
 
-    console.log('Selected Device');
+    logClickEvent('app_record_start', {
+      pageSource: selectedDevice?.replaceAll('_', '')?.toLowerCase(),
+    });
 
     if (selectedDevice === 'CAMERA') {
       RNFS.getFSInfo().then(info => {
@@ -79,7 +93,6 @@ const BatchSelectionScreen = props => {
       return;
     }
 
-    console.log('__BATCHSELECTION__', props.route.params);
     if (selectedDevice === 'GO_PRO') {
       // if (toRecord) {
       props.navigation.navigate('GoProRecordScreen', {

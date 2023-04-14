@@ -25,15 +25,19 @@ import RNFS from 'react-native-fs';
 import {getFreeSpaceInGB} from '../../Utility/helpers';
 import SelectionPopupModal from './Screens/SelectionPopupModal';
 import ConfirmModal from './Screens/ConfirmModal';
+import {logClickEvent, logLoadEvent} from '../../Services/AnalyticsTools';
+import AnalyticsServices from '../../Services/AnalyticsTools/AnalyticsService';
 
 const deviceList = [
   {
     type: 'GO_PRO',
     label: 'GoPro',
+    analytics: 'gopro',
   },
   {
     type: 'CAMERA',
     label: 'Camera',
+    analytics: 'camera',
   },
 ];
 
@@ -45,6 +49,22 @@ const MainScreen = props => {
     useState(false);
 
   const [device, selectedDevice] = useState(null);
+
+  useEffect(() => {
+    if (deviceSelectionPopup) {
+      logLoadEvent('app_record_popup');
+    }
+  }, [deviceSelectionPopup]);
+
+  useEffect(() => {
+    if (isConfirmationModalVisible) {
+      logLoadEvent('app_record_confirm_popup');
+    }
+  }, [isConfirmationModalVisible]);
+
+  useEffect(() => {
+    logLoadEvent('app_screen_open', {});
+  }, []);
 
   useEffect(() => {
     requestCameraPermission();
@@ -114,13 +134,16 @@ const MainScreen = props => {
   };
 
   const _openSessionDetailsPage = () => {
+    logClickEvent('app_session');
     props.navigation.navigate('SessionListsScreen');
   };
   const _openBatchesPage = () => {
+    logClickEvent('app_batch');
     props.navigation.navigate('BatchesListScreen');
   };
 
   const goToBackUpScreen = _ => {
+    logClickEvent('app_backup', {});
     dispatch(setDownloadingProgressOfMedia(null));
     dispatch(setUploadingProgressOfMedia(null));
     props.navigation.navigate('SequentialBackupScreen');
@@ -134,6 +157,7 @@ const MainScreen = props => {
       props.navigation.navigate('NetworkLogRequestsScreen');
       return;
     }
+    logClickEvent('app_logout');
     onLogout();
   };
 
@@ -142,7 +166,14 @@ const MainScreen = props => {
   };
 
   const openDeviceSelectionPopup = () => {
+    logClickEvent('app_record');
     setDeviceSelectionPopup(true);
+  };
+
+  const onCancelPress = () => {
+    logClickEvent('app_record_popup_action', {
+      action: 'cancel',
+    });
   };
 
   const closeDeviceSelectionPopup = () => {
@@ -152,11 +183,19 @@ const MainScreen = props => {
   const selectedItem = item => {
     selectedDevice(item);
 
+    logClickEvent('app_record_popup_action', {
+      action: item?.analytics ?? '',
+    });
+
     closeDeviceSelectionPopup();
     setConfirmationModalVisibility(true);
   };
 
   const onConfirm = () => {
+    logClickEvent('app_record_confirm_popup_action', {
+      action: 'confirm',
+    });
+
     closeDeviceSelectionPopup();
     setConfirmationModalVisibility(false);
     switch (device.type) {
@@ -172,6 +211,9 @@ const MainScreen = props => {
   };
 
   const onCancel = () => {
+    logClickEvent('app_record_confirm_popup_action', {
+      action: 'cancel',
+    });
     setConfirmationModalVisibility(false);
   };
 
@@ -190,7 +232,7 @@ const MainScreen = props => {
           visible={deviceSelectionPopup}
           data={deviceList}
           onSelect={selectedItem}
-          onCancel={closeDeviceSelectionPopup}
+          onCancel={onCancelPress}
         />
       </View>
       <View style={styles.subContainer}>

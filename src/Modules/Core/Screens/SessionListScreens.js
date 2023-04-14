@@ -15,6 +15,7 @@ import NoDevicesConnectedScreen from '../../GoPro/Screens/NoDevicesConnectedScre
 import WifiManager from 'react-native-wifi-reborn';
 import {GOPRO_BASE_URL} from '../../GoPro/Utility/Constants';
 import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDescription';
+import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
 
 const SessionListScreens = props => {
   const [sessionsList, setSessionsList] = useState([]);
@@ -30,6 +31,10 @@ const SessionListScreens = props => {
     const month = date.toLocaleString('en-US', {month: 'long'});
     return `${day} ${month}`;
   }
+
+  useEffect(() => {
+    logLoadEvent('app_session_screen');
+  }, []);
 
   useEffect(() => {
     dispatch(
@@ -158,6 +163,9 @@ const SessionListScreens = props => {
   };
 
   const _goToSessionWebview = url => {
+    logClickEvent('app_session_select', {
+      url,
+    });
     Linking.openURL(url);
   };
 

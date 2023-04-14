@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {findNodeHandle, TouchableOpacity, UIManager, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {logClickEvent} from '../../../Services/AnalyticsTools';
 
 const ICON_SIZE = 24;
 
@@ -17,6 +18,7 @@ export default class PopupMenu extends Component {
   }
 
   onPress = () => {
+    logClickEvent('app_options');
     if (this.state.icon) {
       UIManager.showPopupMenu(
         findNodeHandle(this.state.icon),

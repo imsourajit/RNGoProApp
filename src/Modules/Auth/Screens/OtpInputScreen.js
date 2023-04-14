@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {setUserDetails, validateOtp} from '../../Core/Redux/UserActions';
+import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
 
 const OtpInputScreen = props => {
   const [otpCode, setOtpCode] = useState('');
@@ -11,6 +12,10 @@ const OtpInputScreen = props => {
 
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    logLoadEvent('app_otp_screen');
+  }, []);
+
   const validateOtpBtnPressed = () => {
     dispatch(
       validateOtp(
@@ -19,10 +24,18 @@ const OtpInputScreen = props => {
           phoneNumber: phoneNumber,
         },
         res => {
+          logClickEvent('app_otp_submit', {
+            otp: otpCode,
+            status: 'success',
+          });
           dispatch(setUserDetails(res.user));
           console.log('Otp Verification response', res);
         },
         err => {
+          logClickEvent('app_otp_submit', {
+            otp: otpCode,
+            status: 'failure',
+          });
           setOtpValidationError(err.errorMessage);
           console.log('Otp Verification error', err);
         },

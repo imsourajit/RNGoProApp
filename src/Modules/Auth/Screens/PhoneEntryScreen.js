@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import {useDispatch} from 'react-redux';
 import {sendOtpForValidation} from '../../Core/Redux/UserActions';
+import AnalyticsServices from '../../../Services/AnalyticsTools/AnalyticsService';
+import {logClickEvent} from '../../../Services/AnalyticsTools';
 
 const PhoneEntryScreen = props => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -17,8 +19,15 @@ const PhoneEntryScreen = props => {
 
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    AnalyticsServices.logEvent('load', 'app_phone_screen', {});
+  }, []);
+
   const proceedBtnPressed = () => {
     if (_checkPhoneNumberValidation()) {
+      logClickEvent('app_phone_submit', {
+        phone: phoneNumber,
+      });
       dispatch(
         sendOtpForValidation(
           {

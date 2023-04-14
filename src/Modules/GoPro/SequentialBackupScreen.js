@@ -40,6 +40,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
 import {useIsFocused} from '@react-navigation/native';
 import ConfirmModal from '../Core/Screens/ConfirmModal';
+import {logClickEvent, logLoadEvent} from '../../Services/AnalyticsTools';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -62,6 +63,16 @@ const SequentialBackupScreen = props => {
   const {ssid, password} = hotspotDetails;
 
   let parts = [];
+
+  useEffect(() => {
+    logLoadEvent('app_backup_screen');
+  }, []);
+
+  useEffect(() => {
+    if (isPopupVisibile) {
+      logLoadEvent('app_backup_popup');
+    }
+  }, [isPopupVisibile]);
 
   useEffect(() => {
     BleManager.enableBluetooth();
@@ -659,6 +670,9 @@ const SequentialBackupScreen = props => {
   };
 
   const onConfirm = () => {
+    logClickEvent('app_backup_popup_action', {
+      action: 'confirm',
+    });
     setPopupVisibility(false);
     Linking.openURL(
       'https://play.google.com/store/apps/details?id=com.gopro.smarty',
@@ -668,6 +682,9 @@ const SequentialBackupScreen = props => {
   };
 
   const onCancel = () => {
+    logClickEvent('app_backup_popup_action', {
+      action: 'cancel',
+    });
     setPopupVisibility(false);
   };
 
@@ -675,7 +692,7 @@ const SequentialBackupScreen = props => {
     <View style={styles.container}>
       <ConfirmModal
         visible={isPopupVisibile}
-        message="Shall we proceed to start recording"
+        message="Please connect gopro and comeback"
         onConfirm={onConfirm}
         onCancel={onCancel}
       />
@@ -708,6 +725,9 @@ const SequentialBackupScreen = props => {
 
         <Pressable
           onPress={() => {
+            logClickEvent('app_backup_click', {
+              type: 'gopro',
+            });
             checkIfAnyUploadingIsPending();
           }}>
           <View style={styles.box}>
@@ -718,6 +738,9 @@ const SequentialBackupScreen = props => {
         <Pressable
           onPress={() => {
             // checkIfAnyUploadingIsPending();
+            logClickEvent('app_backup_click', {
+              type: 'gallery',
+            });
             pickVideo();
           }}>
           <View style={styles.box}>

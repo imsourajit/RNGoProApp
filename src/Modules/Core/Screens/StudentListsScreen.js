@@ -19,6 +19,7 @@ import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDes
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Contacts from 'react-native-contacts';
 import ContactSelectionBox from '../Components/ContactSelectionBox';
+import {logLoadEvent} from '../../../Services/AnalyticsTools';
 
 const StudentListsScreen = props => {
   const dispatch = useDispatch();
@@ -29,6 +30,10 @@ const StudentListsScreen = props => {
   const [contacts, setContacts] = useState([]);
 
   const {selectedContacs} = useSelector(st => st.userReducer);
+
+  useEffect(() => {
+    logLoadEvent('app_batch_details_screen');
+  }, []);
 
   useEffect(() => {
     _getListofStudents();

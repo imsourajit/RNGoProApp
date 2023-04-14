@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   Dimensions,
   Image,
@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import {logLoadEvent} from '../../../Services/AnalyticsTools';
 
 const LOGO_HEIGHT = 100,
   LOGO_WIDTH = 250;
@@ -14,6 +15,10 @@ const LOGO_HEIGHT = 100,
 const {height, width} = Dimensions.get('window');
 
 const LoginScreen = props => {
+  useEffect(() => {
+    logLoadEvent('app_splash_screen');
+  }, []);
+
   const goToLoginScreen = () => {
     props.navigation.navigate('PhoneEntryScreen');
   };
