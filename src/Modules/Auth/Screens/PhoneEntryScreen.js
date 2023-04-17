@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -6,11 +6,17 @@ import {
   TextInput,
   ToastAndroid,
   View,
+  Image,
+  Dimensions,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
 import {sendOtpForValidation} from '../../Core/Redux/UserActions';
 import AnalyticsServices from '../../../Services/AnalyticsTools/AnalyticsService';
 import {logClickEvent} from '../../../Services/AnalyticsTools';
+
+const {width, height} = Dimensions.get('window');
+const LOGO_HEIGHT = 100,
+  LOGO_WIDTH = 250;
 
 const PhoneEntryScreen = props => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -18,9 +24,13 @@ const PhoneEntryScreen = props => {
   const [otp, setOtp] = useState('');
 
   const dispatch = useDispatch();
+  const txtInputRef = useRef(null);
 
   useEffect(() => {
     AnalyticsServices.logEvent('load', 'app_phone_screen', {});
+    setTimeout(() => {
+      txtInputRef.current.focus();
+    }, 10);
   }, []);
 
   const proceedBtnPressed = () => {
@@ -58,8 +68,20 @@ const PhoneEntryScreen = props => {
 
   return (
     <View style={styles.main}>
-      <View>
-        <Text style={{color: '#FFFFFF'}}>Enter your mobile number</Text>
+      <Image
+        source={require('../Assets/FC1_logo.png')}
+        style={{
+          height: 50,
+          width: 120,
+          alignSelf: 'center',
+          marginBottom: 30,
+          // position: 'absolute',
+          // top: 250,
+          // left: (width - LOGO_WIDTH) / 2,
+        }}
+      />
+      <View style={{flex: 1}}>
+        <Text style={styles.label}>Enter your mobile number</Text>
         <TextInput
           style={styles.inputBox}
           value={phoneNumber}
@@ -68,6 +90,7 @@ const PhoneEntryScreen = props => {
           onChangeText={setPhoneNumber}
           readOnly={isOtpSent}
           keyboardType={'phone-pad'}
+          ref={txtInputRef}
         />
       </View>
 
@@ -85,8 +108,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
     paddingHorizontal: 32,
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     paddingVertical: 30,
+  },
+  label: {
+    color: '#FFFFFF',
+    fontSize: 20,
   },
   inputBox: {
     borderWidth: 0.3,

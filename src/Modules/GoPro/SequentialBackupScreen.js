@@ -148,13 +148,13 @@ const SequentialBackupScreen = props => {
             progress: r => {
               const percentile = (r.bytesWritten / r.contentLength) * 100;
               // console.log(percentile, index, r.bytesWritten, r.contentLength);
-              console.log(
-                'Directory : ',
-                goProDirectory,
-                ' File : ',
-                fileName,
-                percentile,
-              );
+              // console.log(
+              //   'Directory : ',
+              //   goProDirectory,
+              //   ' File : ',
+              //   fileName,
+              //   percentile,
+              // );
               dispatch(
                 setDownloadingProgressOfMedia({
                   fileName: fileName,
@@ -163,16 +163,17 @@ const SequentialBackupScreen = props => {
               );
             },
           }).promise;
+          logLoadEvent('app_backup_progress', {
+            progress: 100,
+            type: 'download',
+            filename: fileName,
+          });
         } catch (error) {
           logEvent('FrontEnd', 'app_backup_error', {
             error: JSON.stringify(error),
           });
         }
-        logLoadEvent('app_backup_progress', {
-          progress: 100,
-          type: 'download',
-          filename: fileName,
-        });
+
         dispatch(downloadedCompletedFile(fileName));
         dispatch(setDownloadingProgressOfMedia(null));
         _disableTurboTransfer();
@@ -471,6 +472,15 @@ const SequentialBackupScreen = props => {
     partNumber,
   ) => {
     // const {eTag} = uploadedChunkMedia ?? {};
+
+    console.log(
+      '__GUMLET_UPLOAD',
+      assetId,
+      filePath,
+      totalNoOfChunks,
+      bytesRead,
+      partNumber,
+    );
 
     if (totalNoOfChunks <= 0) {
       const multipartCompleteOptions = {
@@ -812,11 +822,13 @@ const SequentialBackupScreen = props => {
             checkIfAnyUploadingIsPending();
           }}>
           <View style={styles.box}>
-            <Text style={[styles.btnTxt, {fontSize: 18}]}>Take Backup</Text>
+            <Text style={[styles.btnTxt, {fontSize: 18}]}>
+              Upload files to cloud
+            </Text>
           </View>
         </Pressable>
 
-        <Pressable
+        {/* <Pressable
           onPress={() => {
             checkIfAnyUploadingIsPending(true);
             logClickEvent('app_backup_click', {
@@ -828,7 +840,7 @@ const SequentialBackupScreen = props => {
               Take Backup from Gallery
             </Text>
           </View>
-        </Pressable>
+        </Pressable> */}
       </View>
     </View>
   );

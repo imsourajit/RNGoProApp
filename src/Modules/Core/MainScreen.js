@@ -157,12 +157,21 @@ const MainScreen = props => {
     if (eventName !== 'itemSelected') {
       return;
     }
-    if (index == 1) {
-      props.navigation.navigate('NetworkLogRequestsScreen');
-      return;
+
+    switch (index) {
+      case 0:
+        logClickEvent('app_support_click', {
+          screen: 'homepage',
+        });
+        break;
+      case 1:
+        logClickEvent('app_logout');
+        onLogout();
+        break;
+      case 2:
+        props.navigation.navigate('NetworkLogRequestsScreen');
+        break;
     }
-    logClickEvent('app_logout');
-    onLogout();
   };
 
   const onLogout = () => {
@@ -222,7 +231,10 @@ const MainScreen = props => {
     setConfirmationModalVisibility(false);
   };
 
-  console.log('__MAINSCREEN__', isConfirmationModalVisible);
+  const startGoProRecording = () => {
+    selectedItem(deviceList[0]);
+    setConfirmationModalVisibility(true);
+  };
 
   return (
     <View style={styles.main}>
@@ -244,7 +256,7 @@ const MainScreen = props => {
         <Image source={require('./Assets/logo.png')} style={styles.img} />
         <View style={styles.childContainer}>
           <PopupMenu
-            actions={['Logout', 'Network Logs']}
+            actions={['Support', 'Logout', 'Network Logs']}
             onPress={onPopupEvent}
           />
         </View>
@@ -257,9 +269,7 @@ const MainScreen = props => {
           marginTop: 10,
           marginBottom: 20,
         }}>
-        <Text style={styles.fullName}>
-          Hey <Text style={{fontWeight: 700}}>{firstName}</Text>
-        </Text>
+        <Text style={styles.fullName}>Hey, {firstName}</Text>
       </View>
       <View
         style={{
@@ -285,7 +295,7 @@ const MainScreen = props => {
             style={styles.goProImage}
           />
 
-          <Pressable onPress={openDeviceSelectionPopup}>
+          <Pressable onPress={startGoProRecording}>
             <View style={styles.box}>
               <Text style={styles.btnTxt}>Record Session</Text>
             </View>

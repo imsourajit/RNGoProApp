@@ -8,11 +8,11 @@ const ConfirmModal = ({visible, message, onConfirm, onCancel}) => {
         <View style={styles.modalContent}>
           <Text style={styles.messageText}>{message}</Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
-              <Text style={styles.buttonText}>Confirm</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
               <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
+              <Text style={styles.buttonText}>Proceed</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingVertical: 12,
     alignItems: 'center',
-    marginRight: 8,
+    marginLeft: 8,
   },
   cancelButton: {
     flex: 1,
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingVertical: 12,
     alignItems: 'center',
-    marginLeft: 8,
+    marginRight: 8,
   },
   buttonText: {
     fontSize: 16,
