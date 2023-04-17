@@ -8,6 +8,8 @@ import {
   View,
   Image,
   Dimensions,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
 import {sendOtpForValidation} from '../../Core/Redux/UserActions';
@@ -19,9 +21,33 @@ const {width, height} = Dimensions.get('window');
 const LOGO_HEIGHT = 100,
   LOGO_WIDTH = 250;
 
+const PopupWithButton = ({visible, onClose}) => {
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}>
+      <View style={styles.container}>
+        <View style={styles.popup}>
+          <Text style={styles.popupText}>
+            You are not registered with us. Please click below button to have
+            chat with our support team.{' '}
+          </Text>
+          <TouchableOpacity style={styles.button} onPress={onClose}>
+            <Text style={styles.buttonText}>Support</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 const PhoneEntryScreen = props => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isOtpSent, setOtpSentStatus] = useState(false);
+  const [isSupportPopup, setSupportPopup] = useState(false);
+
   const [otp, setOtp] = useState('');
 
   const dispatch = useDispatch();
@@ -51,8 +77,14 @@ const PhoneEntryScreen = props => {
             console.log('Send otp response', response);
           },
           error => {
-            console.log('Otp send api error', error);
-            ToastAndroid.show(error.errorMessage, ToastAndroid.CENTER);
+            console.log(error.message);
+            if (error.errorCode == 'USER_NOT_FOUND') {
+              setSupportPopup(true);
+              return;
+            }
+
+            // console.log('Otp send api error', error);
+            // ToastAndroid.show(error.errorMessage, ToastAndroid.CENTER);
           },
         ),
       );
@@ -67,8 +99,13 @@ const PhoneEntryScreen = props => {
     return true;
   };
 
+  const _goToSupport = _ => {
+    setSupportPopup(false);
+  };
+
   return (
     <View style={styles.main}>
+      <PopupWithButton visible={isSupportPopup} onClose={_goToSupport} />
       <Image
         source={require('../Assets/FC1_logo.png')}
         style={{
@@ -140,6 +177,35 @@ const styles = StyleSheet.create({
   },
   btnBorder: {
     marginBottom: 100,
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  popup: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  popupText: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#000000',
+  },
+  button: {
+    backgroundColor: btnBgColor,
+    padding: 10,
+    borderRadius: 5,
+    minWidth: 100,
+  },
+  buttonText: {
+    color: 'black',
+    textAlign: 'center',
+    fontSize: 18,
   },
 });
 
