@@ -136,6 +136,7 @@ const SequentialBackupScreen = props => {
               logLoadEvent('app_backup_progress', {
                 progress: 0,
                 type: 'download',
+                filename: fileName,
               });
               dispatch(
                 setDownloadingProgressOfMedia({
@@ -170,6 +171,7 @@ const SequentialBackupScreen = props => {
         logLoadEvent('app_backup_progress', {
           progress: 100,
           type: 'download',
+          filename: fileName,
         });
         dispatch(downloadedCompletedFile(fileName));
         dispatch(setDownloadingProgressOfMedia(null));
@@ -573,6 +575,7 @@ const SequentialBackupScreen = props => {
     listIndex,
     fileName,
   ) => {
+    console.log('Chunkwise upload', filePath, med, mediaIndex, listIndex);
     const fileSize = await getFileSize(filePath);
     const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
     const assetId = await getAssetId(med, mediaIndex, listIndex, fileName);
@@ -581,15 +584,16 @@ const SequentialBackupScreen = props => {
     logLoadEvent('app_backup_progress', {
       progress: 0,
       type: 'upload',
+      filename: fileName,
     });
     await uploadChunkToGumlet(assetId, filePath, totalNoOfChunks, 0, 1);
     return;
   };
 
-  const checkIfAnyUploadingIsPending = async () => {
+  const checkIfAnyUploadingIsPending = async (isGallery = false) => {
     const {eTag, assetId, filePath, bytesRead = 0} = uploadedChunkMedia ?? {};
 
-    if (connectedDevice == null) {
+    if (connectedDevice == null && !isGallery) {
       setPopupVisibility(true);
       return;
     }
@@ -613,6 +617,10 @@ const SequentialBackupScreen = props => {
         eTag.length + 1,
       );
     } else {
+      if (isGallery) {
+        pickVideo();
+        return;
+      }
       takeBackupOfFiles();
       // await chunkWiseUploadToGumlet(APP_DIR + '/' + 'ls.MP4');
     }
@@ -635,6 +643,7 @@ const SequentialBackupScreen = props => {
     logLoadEvent('app_backup_progress', {
       progress: 100,
       type: 'upload',
+      filename: fileName,
     });
     _connectAgainAndDownload(med, mediaIndex, listIndex);
   };
@@ -700,6 +709,8 @@ const SequentialBackupScreen = props => {
     }
 
     launchImageLibrary(options, async response => {
+      console.log('@response', response?.assets);
+
       if (response.didCancel) {
         console.log('User cancelled video picker');
       } else if (response.error) {
@@ -807,11 +818,10 @@ const SequentialBackupScreen = props => {
 
         <Pressable
           onPress={() => {
-            checkIfAnyUploadingIsPending();
+            checkIfAnyUploadingIsPending(true);
             logClickEvent('app_backup_click', {
               type: 'gallery',
             });
-            pickVideo();
           }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>

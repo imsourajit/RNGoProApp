@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import MainScreen from './MainScreen';
 import CameraAPI from '../CameraAPI';
@@ -13,9 +13,21 @@ import SequentialBackupScreen from '../GoPro/SequentialBackupScreen';
 import NetworkLogRequestsScreen from './Screens/NetworkLogRequestsScreen';
 import BackupAndUploadScreen from '../GoPro/Screens/BackupAndUploadScreen';
 
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {logClickEvent} from '../../Services/AnalyticsTools';
+
 const CoreStack = createStackNavigator();
 
 const CoreStackNavigator = () => {
+  const onBackPress = useCallback((props, screen) => {
+    // props.navigation.goBack();
+    logClickEvent('app_back', {
+      screen,
+    });
+    props.onPress();
+    // return false;
+    console.log(props);
+  }, []);
   return (
     <CoreStack.Navigator
       screenOptions={{
@@ -37,6 +49,14 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'session')}
+              size={35}
+            />
+          ),
         }}
       />
       <CoreStack.Screen
@@ -53,6 +73,14 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'batch_details')}
+              size={35}
+            />
+          ),
         }}
       />
       <CoreStack.Screen
@@ -69,6 +97,14 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'batch')}
+              size={35}
+            />
+          ),
         }}
       />
       <CoreStack.Screen name="Camera" component={CameraAPI} />
@@ -133,6 +169,14 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'backup')}
+              size={35}
+            />
+          ),
         }}
         name="SequentialBackupScreen"
         component={SequentialBackupScreen}

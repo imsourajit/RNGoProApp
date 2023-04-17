@@ -100,6 +100,7 @@ export const GoProReducer = (state = initialState, action) => {
         logLoadEvent('app_backup_progress', {
           progress: analyticsProgressRange,
           type: 'download',
+          filename: action.data.fileName,
         });
       }
 
@@ -126,6 +127,7 @@ export const GoProReducer = (state = initialState, action) => {
         logLoadEvent('app_backup_progress', {
           progress: analyticsProgressRangeUpload,
           type: 'upload',
+          filename: action.data.fileName,
         });
       }
       return {
