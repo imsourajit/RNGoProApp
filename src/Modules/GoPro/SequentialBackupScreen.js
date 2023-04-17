@@ -204,6 +204,8 @@ const SequentialBackupScreen = props => {
 
     const filteredArray = scheduledSessions.filter(itm => itm <= mod);
 
+    console.log('_GUMLET', scheduledSessions);
+
     if (filteredArray.length) {
       return filteredArray[0];
     }
@@ -389,7 +391,9 @@ const SequentialBackupScreen = props => {
     }
   };
 
-  const getAssetId = async () => {
+  const getAssetId = async (med, mediaIndex, listIndex, fileName) => {
+    const currentFile = med[mediaIndex]?.fs[listIndex];
+
     const options = {
       method: 'POST',
       url: 'https://api.gumlet.com/v1/video/assets/upload',
@@ -485,7 +489,9 @@ const SequentialBackupScreen = props => {
           dispatch(setPartUploadUrl(undefined));
           dispatch(setCompletedUploading());
           dispatch(setUploadingProgressOfMedia(null));
+          deleteFile(filePath);
           console.log('Upload Completed');
+          return;
         })
         .catch(err => {
           dispatch(setPartUploadUrl(undefined));
@@ -493,6 +499,7 @@ const SequentialBackupScreen = props => {
           dispatch(setUploadingProgressOfMedia(null));
           console.log('Multipart upload error', err);
         });
+      deleteFile(filePath);
       return;
     }
 
@@ -559,10 +566,16 @@ const SequentialBackupScreen = props => {
       .catch(err => console.log('Unable to upload chunk', err));
   };
 
-  const chunkWiseUploadToGumlet = async filePath => {
+  const chunkWiseUploadToGumlet = async (
+    filePath,
+    med,
+    mediaIndex,
+    listIndex,
+    fileName,
+  ) => {
     const fileSize = await getFileSize(filePath);
     const totalNoOfChunks = Math.ceil(fileSize / CHUNK_SIZE);
-    const assetId = await getAssetId();
+    const assetId = await getAssetId(med, mediaIndex, listIndex, fileName);
     dispatch(setUploadingAssetId(assetId));
     dispatch(setFilePath(filePath));
     logLoadEvent('app_backup_progress', {
@@ -600,24 +613,30 @@ const SequentialBackupScreen = props => {
         eTag.length + 1,
       );
     } else {
-      // takeBackupOfFiles();
-      await chunkWiseUploadToGumlet(APP_DIR + '/' + 'ls.MP4');
+      takeBackupOfFiles();
+      // await chunkWiseUploadToGumlet(APP_DIR + '/' + 'ls.MP4');
     }
   };
 
   const startUploadingFile = async (
-    media,
+    med,
     mediaIndex,
     listIndex,
     filePath,
     fileName,
   ) => {
-    await chunkWiseUploadToGumlet(filePath);
+    await chunkWiseUploadToGumlet(
+      filePath,
+      med,
+      mediaIndex,
+      listIndex,
+      fileName,
+    );
     logLoadEvent('app_backup_progress', {
       progress: 100,
       type: 'upload',
     });
-    _connectAgainAndDownload(media, mediaIndex, listIndex);
+    _connectAgainAndDownload(med, mediaIndex, listIndex);
   };
 
   const fetchVideosFromGallery = async () => {
@@ -788,7 +807,7 @@ const SequentialBackupScreen = props => {
 
         <Pressable
           onPress={() => {
-            // checkIfAnyUploadingIsPending();
+            checkIfAnyUploadingIsPending();
             logClickEvent('app_backup_click', {
               type: 'gallery',
             });
