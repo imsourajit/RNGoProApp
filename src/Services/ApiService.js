@@ -4,6 +4,7 @@ import axios from 'axios';
 import {ToastAndroid} from 'react-native';
 import {updateAuthToken} from '../Modules/Core/Redux/UserActions';
 import store from '../Store/store';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 const STAGING_END_POINT = 'https://qa-platform.thewagmi.app/platform';
 const PRODUCTION_END_POINT = 'https://platform.thewagmi.app/platform';
@@ -98,6 +99,7 @@ const ApiService = {
             failureCallback(e.response?.data);
           }
           failure && dispatch(failure(e.response?.data));
+          crashlytics().recordError(e);
         });
     }
   },
@@ -134,6 +136,7 @@ const ApiService = {
             failureCallback(e.response.data);
           }
           failure && dispatch(failure(e.response.data));
+          crashlytics().recordError(e);
         });
     }
   },

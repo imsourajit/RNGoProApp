@@ -1,4 +1,4 @@
-package com.fc.one;
+package coach.fc.one;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

@@ -1,4 +1,4 @@
-package com.fc.one.nativecamera; // replace your-apps-package-name with your app’s package name
+package coach.fc.one.nativecamera; // replace your-apps-package-name with your app’s package name
 import android.content.Context;
 import android.content.Intent;
 import android.provider.MediaStore;

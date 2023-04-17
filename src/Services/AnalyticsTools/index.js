@@ -4,6 +4,7 @@ import {isEmpty} from '../../Utility/helpers';
 import AnalyticsService from './AnalyticsService';
 
 import analytics from '@react-native-firebase/analytics';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 const {apiEndPoint, mixPanelToken} = getConfigs();
 
@@ -110,9 +111,19 @@ const _setUserPropertiesInFirebase = async data => {
     (await analytics().setUserProperty('district', district));
   !isEmpty(phoneNumber) &&
     (await analytics().setUserProperty('phoneNumber', phoneNumber));
+
+  await Promise.all([
+    crashlytics().setUserId(userId),
+    crashlytics().setAttributes({
+      role: role,
+      email: email,
+      fullName: fullName,
+    }),
+  ]);
 };
 
 export const _setUserPropertiesInAllAnalyticsTools = data => {
   _setUserPropertiesInFirebase(data);
+
   // _setUserPropertiesInMoengage(data);
 };
