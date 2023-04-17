@@ -10,6 +10,7 @@ import {
   Text,
   ToastAndroid,
   View,
+  AppState,
 } from 'react-native';
 import WifiManager from 'react-native-wifi-reborn';
 import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
@@ -53,6 +54,7 @@ const SequentialBackupScreen = props => {
   const [hotspotDetails, setHotspotDetails] = useState({});
   const [mediaList, setMediaList] = useState(null);
   const [downloadDirectory, setDownloadDirectory] = useState(null);
+  const [appState, setAppState] = useState(AppState.currentState);
 
   const [isPopupVisibile, setPopupVisibility] = useState(false);
 
@@ -77,6 +79,45 @@ const SequentialBackupScreen = props => {
       logLoadEvent('app_backup_popup');
     }
   }, [isPopupVisibile]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const handleAppStateChange = nextAppState => {
+    console.log(nextAppState);
+
+    if (nextAppState == 'active') {
+      BleManager.enableBluetooth();
+      BleManager.getConnectedPeripherals([])
+        .then(pArr => {
+          const goProDevices = pArr.filter(device =>
+            device?.name?.includes('GoPro'),
+          );
+
+          if (goProDevices.length) {
+            setConnectedDevice(goProDevices[0]);
+          } else {
+            // setConnectedDevice({});
+            // ToastAndroid.show(
+            //   'GoPro device is not connected',
+            //   ToastAndroid.CENTER,
+            // );
+          }
+        })
+        .catch(e => {
+          console.log('Unable to get connected peripheral details');
+        });
+    }
+    setAppState(nextAppState);
+  };
 
   useEffect(() => {
     BleManager.enableBluetooth();
@@ -769,7 +810,7 @@ const SequentialBackupScreen = props => {
       'https://play.google.com/store/apps/details?id=com.gopro.smarty',
     );
 
-    props.navigation.goBack();
+    // props.navigation.goBack();
   };
 
   const onCancel = () => {

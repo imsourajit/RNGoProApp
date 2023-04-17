@@ -40,7 +40,7 @@ const OtpInputScreen = props => {
     logLoadEvent('app_otp_screen');
     setTimeout(() => {
       txtInputRef.current.focus();
-    }, 10);
+    }, 300);
   }, []);
 
   useEffect(() => {
@@ -140,7 +140,6 @@ const OtpInputScreen = props => {
           maxLength={4}
           keyboardType={'phone-pad'}
           ref={txtInputRef}
-          focusable
         />
         <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
           <Pressable onPress={_resend}>
