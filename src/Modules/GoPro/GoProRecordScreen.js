@@ -23,6 +23,7 @@ import {
   getSessionIdToTagInLiveVideo,
   tagLiveUrlsToSession,
 } from '../CameraAPI/Redux/CameraApiActions';
+import {btnBgColor} from '../../Config';
 
 const isProd = false;
 
@@ -458,12 +459,12 @@ const GoProRecordScreen = props => {
             color: '#FFFFFF',
             textAlign: 'center',
           }}>
-          Session Has started at {'\n'}
+          Session started at {'\n\n\n'}
           <Text
             style={{
-              color: 'red',
+              color: btnBgColor,
             }}>
-            {sessionStartedTime} {'\n'}
+            {sessionStartedTime} {'\n\n\n'}
           </Text>
           Please start recording on the GoPro
         </Text>

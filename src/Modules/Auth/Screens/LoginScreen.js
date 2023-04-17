@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
+import {btnBgColor} from '../../../Config';
 
 const LOGO_HEIGHT = 100,
   LOGO_WIDTH = 250;
@@ -53,7 +54,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   btn: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: btnBgColor,
     padding: 10,
     borderRadius: 5,
     justifyContent: 'center',

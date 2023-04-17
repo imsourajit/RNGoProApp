@@ -13,6 +13,7 @@ import {useDispatch} from 'react-redux';
 import {sendOtpForValidation} from '../../Core/Redux/UserActions';
 import AnalyticsServices from '../../../Services/AnalyticsTools/AnalyticsService';
 import {logClickEvent} from '../../../Services/AnalyticsTools';
+import {btnBgColor} from '../../../Config';
 
 const {width, height} = Dimensions.get('window');
 const LOGO_HEIGHT = 100,
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   btn: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: btnBgColor,
     padding: 10,
     borderRadius: 5,
     justifyContent: 'center',

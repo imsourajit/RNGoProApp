@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, Modal, StyleSheet} from 'react-native';
+import {btnBgColor} from '../../../Config';
 
 const ConfirmModal = ({visible, message, onConfirm, onCancel}) => {
   return (
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     flex: 1,
-    backgroundColor: '#3164F4',
+    backgroundColor: btnBgColor,
     borderRadius: 5,
     paddingVertical: 12,
     alignItems: 'center',
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    color: 'white',
+    color: '#000000',
   },
 });
 
