@@ -9,7 +9,7 @@ export const ProdConfig = {
     // '104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com',
     '440167015126-u51pgofdd7osl69vufnjjjfdhb072ovq.apps.googleusercontent.com',
   mixPanelToken: '230caaf11ac87526eca00667b89307c5',
-  codepushDeploymentKey: 'OvwzRvaf394PsAK0YC8SFFgT-Un_BvXF8Ajka',
+  codepushDeploymentKey: 'TZcfLKDuUdAL6mo8mdPHHG6bs7Mmlh9fRa4ui',
   smartLookKey: '3d0ddeecc2701627da7dca3af9d5532b335d3fc3',
 };
 
@@ -18,7 +18,7 @@ export const StagingConfig = {
   googleAuthWebClientId:
     '104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com',
   mixPanelToken: '230caaf11ac87526eca00667b89307c5',
-  codepushDeploymentKey: 'b6ACZWT8SOz1UW_pLjh2_dExgfPft-MFycdZr',
+  codepushDeploymentKey: 'dvtf7buh9Hkj3Mru6ZLUhkIcugQn-ogj9RuCX',
   smartLookKey: '3d0ddeecc2701627da7dca3af9d5532b335d3fc3',
 };
 

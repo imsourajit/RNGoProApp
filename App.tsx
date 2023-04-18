@@ -14,6 +14,15 @@ import store, {persistor} from './src/Store/store';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 import Source from './src/Modules/Core/Source';
+import CodePush from 'react-native-code-push';
+import {getConfigs} from './src/Config';
+
+let CodePushOptions = {
+  checkFrequency: CodePush.CheckFrequency.ON_APP_START,
+  mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+  installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+  deploymentKey: getConfigs().codepushDeploymentKey,
+};
 
 class App extends React.Component {
   componentDidMount() {
@@ -55,4 +64,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default CodePush(CodePushOptions)(App);
