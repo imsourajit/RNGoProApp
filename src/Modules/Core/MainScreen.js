@@ -27,6 +27,7 @@ import SelectionPopupModal from './Screens/SelectionPopupModal';
 import ConfirmModal from './Screens/ConfirmModal';
 import {logClickEvent, logLoadEvent} from '../../Services/AnalyticsTools';
 import AnalyticsServices from '../../Services/AnalyticsTools/AnalyticsService';
+import {btnBgColor} from '../../Config';
 
 const deviceList = [
   {
@@ -379,7 +380,7 @@ const styles = StyleSheet.create({
   },
   fullName: {
     fontSize: 24,
-    color: '#85C1E9',
+    color: btnBgColor,
     fontWeight: '500',
     justifyContent: 'center',
   },

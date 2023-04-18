@@ -16,6 +16,7 @@ import WifiManager from 'react-native-wifi-reborn';
 import {GOPRO_BASE_URL} from '../../GoPro/Utility/Constants';
 import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDescription';
 import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
+import {isEmpty} from 'lodash';
 
 const SessionListScreens = props => {
   const [sessionsList, setSessionsList] = useState([]);
@@ -163,6 +164,11 @@ const SessionListScreens = props => {
   };
 
   const _goToSessionWebview = url => {
+    if (isEmpty(url)) {
+      ToastAndroid.show('unable to find the session url');
+      return;
+    }
+
     logClickEvent('app_session_select', {
       url,
     });

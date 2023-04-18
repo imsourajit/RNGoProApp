@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 
-import coach.fc.one.ReactNativeFlipper;
+ import coach.goprohero10.ReactNativeFlipper;
 import coach.fc.one.nativecamera.CameraPackage;
 import com.microsoft.codepush.react.CodePush;
 import java.util.List;
