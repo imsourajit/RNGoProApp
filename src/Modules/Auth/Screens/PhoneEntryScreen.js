@@ -10,6 +10,7 @@ import {
   Dimensions,
   Modal,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
 import {sendOtpForValidation} from '../../Core/Redux/UserActions';
@@ -100,6 +101,13 @@ const PhoneEntryScreen = props => {
   };
 
   const _goToSupport = _ => {
+    try {
+      Linking.openURL(
+        'https://api.whatsapp.com/send/?phone=%2B919987840055&text=Hello%2C+I+am+reaching+you+out+from+the+FC.ONE+App',
+      );
+    } catch (error) {
+      ToastAndroid.show('Unable to find whatsapp in your phone');
+    }
     setSupportPopup(false);
   };
 

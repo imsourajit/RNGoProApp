@@ -3,6 +3,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  Linking,
   NativeModules,
   PermissionsAndroid,
   Pressable,
@@ -164,6 +165,13 @@ const MainScreen = props => {
         logClickEvent('app_support_click', {
           screen: 'homepage',
         });
+        try {
+          Linking.openURL(
+            'https://api.whatsapp.com/send/?phone=%2B919987840055&text=Hello%2C+I+am+reaching+you+out+from+the+FC.ONE+App',
+          );
+        } catch (error) {
+          ToastAndroid.show('Unable to find whatsapp in your phone');
+        }
         break;
       case 1:
         logClickEvent('app_logout');
