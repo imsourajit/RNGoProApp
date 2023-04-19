@@ -171,7 +171,7 @@ const BatchesListScreen = props => {
         renderItem={_renderListOfSessions}
         keyExtractor={(item, index) => item.title.toString() + index}
       />
-      <View
+      {/* <View
         style={{
           position: 'absolute',
           bottom: 0,
@@ -185,7 +185,7 @@ const BatchesListScreen = props => {
           color={'#FFFFFF'}
           onPress={addBatchesFormVisibility}
         />
-      </View>
+      </View> */}
     </View>
   );
 };

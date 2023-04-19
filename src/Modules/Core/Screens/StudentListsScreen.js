@@ -172,7 +172,7 @@ const StudentListsScreen = props => {
           </View>
         }
       />
-      <View
+      {/* <View
         style={{
           position: 'absolute',
           bottom: 0,
@@ -186,7 +186,7 @@ const StudentListsScreen = props => {
           color={'#FFFFFF'}
           onPress={showContactList}
         />
-      </View>
+      </View> */}
     </View>
   );
 };
