@@ -11,7 +11,6 @@
     "postinstall": "react-native setup-ios-permissions && npx pod-install"
   },
   "dependencies": {
-    "@api.video/react-native-livestream": "^1.2.3",
     "@react-native-async-storage/async-storage": "^1.17.11",
     "@react-native-community/netinfo": "^9.3.7",
     "@react-native-firebase/analytics": "^17.4.2",

@@ -117,8 +117,8 @@ const PhoneEntryScreen = props => {
       <Image
         source={require('../Assets/FC1_logo.png')}
         style={{
-          height: 50,
-          width: 120,
+          height: 70,
+          width: 160,
           alignSelf: 'center',
           marginBottom: 30,
           // position: 'absolute',

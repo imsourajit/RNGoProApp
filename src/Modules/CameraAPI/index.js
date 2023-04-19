@@ -1,4 +1,3 @@
-import {LiveStreamView} from '@api.video/react-native-livestream';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {
   StatusBar,
@@ -148,36 +147,6 @@ const CameraAPI = props => {
         onDeviceChange={orientation =>
           console.log('onDeviceChange', orientation)
         }
-      />
-      <LiveStreamView
-        style={styles.livestreamView}
-        ref={ref}
-        camera="back"
-        video={{
-          fps: 30,
-          resolution: '2160p',
-          bitrate: 4 * 1024 * 1024, // # 2 Mbps
-          orientation: 'landscape',
-        }}
-        audio={{
-          bitrate: 128000,
-          sampleRate: 44100,
-          isStereo: true,
-        }}
-        isMuted={false}
-        onConnectionSuccess={() => {
-          //do what you want
-          console.log('CONNECTED');
-        }}
-        onConnectionFailed={e => {
-          //do what you want
-          console.log('ERROR', e);
-        }}
-        onDisconnect={() => {
-          //do what you want
-          console.log('DISCONNECTED');
-        }}
-        enablePinchedZoom
       />
 
       <View

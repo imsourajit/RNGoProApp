@@ -44,10 +44,10 @@ const OtpInputScreen = props => {
   }, []);
 
   useEffect(() => {
-    let timer = 1;
+    let timer = 30;
     const interval = setInterval(() => {
-      setTimerRunning(timer++);
-      if (timer == 31) {
+      setTimerRunning(timer--);
+      if (timer == 0) {
         clearInterval(interval);
         setTimerRunning(0);
       }
@@ -89,10 +89,10 @@ const OtpInputScreen = props => {
 
   const _resend = () => {
     if (!timerRunning) {
-      let timer = 1;
+      let timer = 30;
       const interval = setInterval(() => {
-        setTimerRunning(timer++);
-        if (timer == 31) {
+        setTimerRunning(timer--);
+        if (timer == 0) {
           clearInterval(interval);
           setTimerRunning(0);
         }
@@ -103,10 +103,10 @@ const OtpInputScreen = props => {
             phoneNumber,
           },
           response => {
-            props.navigation.navigate('OtpInputScreen', {
-              phoneNumber,
-            });
-            console.log('Send otp response', response);
+            ToastAndroid.show(
+              'Otp has been resent successfully',
+              ToastAndroid.BOTTOM,
+            );
           },
           error => {
             console.log('Otp send api error', error);
@@ -122,8 +122,8 @@ const OtpInputScreen = props => {
       <Image
         source={require('../Assets/FC1_logo.png')}
         style={{
-          height: 50,
-          width: 120,
+          height: 70,
+          width: 160,
           alignSelf: 'center',
           marginBottom: 30,
           // position: 'absolute',
@@ -149,7 +149,7 @@ const OtpInputScreen = props => {
                 alignSelf: 'flex-end',
                 marginHorizontal: 10,
               }}>
-              Didn't get OTP ? Resend
+              Didn't get OTP ? <Text style={{color: btnBgColor}}>Resend</Text>
             </Text>
           </Pressable>
           {timerRunning ? (
