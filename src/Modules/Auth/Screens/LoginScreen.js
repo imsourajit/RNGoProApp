@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnTxt: {
-    color: '#303030',
+    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 18,
   },

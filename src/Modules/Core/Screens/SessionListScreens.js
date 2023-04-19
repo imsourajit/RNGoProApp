@@ -172,7 +172,11 @@ const SessionListScreens = props => {
     logClickEvent('app_session_select', {
       url,
     });
-    Linking.openURL(url);
+    try {
+      Linking.openURL(url);
+    } catch (error) {
+      ToastAndroid.show('unable to find the session url');
+    }
   };
 
   const _renderListOfSessions = ({item, index}) => {

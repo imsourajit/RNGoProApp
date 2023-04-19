@@ -15,4 +15,4 @@ export const getConfigs = _ =>
 export const getFirebaseConfigs = _ =>
   getEnvType() === PROD_ENV ? prodFirebaseConfig : stagingFirebaseConfig;
 
-export const btnBgColor = '#F2C04C';
+export const btnBgColor = '#F2994A';

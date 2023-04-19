@@ -215,12 +215,12 @@ const MainScreen = props => {
   };
 
   const onConfirm = () => {
-    logClickEvent('app_record_confirm_popup_action', {
-      action: 'confirm',
-    });
+    // logClickEvent('app_record_confirm_popup_action', {
+    //   action: 'confirm',
+    // });
 
-    closeDeviceSelectionPopup();
-    setConfirmationModalVisibility(false);
+    // closeDeviceSelectionPopup();
+    // setConfirmationModalVisibility(false);
     switch (device.type) {
       case 'GO_PRO': {
         goToGoPro();
@@ -242,7 +242,8 @@ const MainScreen = props => {
 
   const startGoProRecording = () => {
     selectedItem(deviceList[0]);
-    setConfirmationModalVisibility(true);
+    // setTimeout()
+    // setConfirmationModalVisibility(true);
   };
 
   return (
@@ -278,7 +279,7 @@ const MainScreen = props => {
           marginTop: 10,
           marginBottom: 20,
         }}>
-        <Text style={styles.fullName}>Hey, {firstName}</Text>
+        <Text style={styles.fullName}>Hey {firstName}</Text>
       </View>
       <View
         style={{
@@ -287,12 +288,12 @@ const MainScreen = props => {
           // backgroundColor: 'red',
         }}>
         <View style={styles.arrowBoxes}>
-          <RightArrowBox pressed={goToBackUpScreen} btnTitle={'Backup Files'} />
+          <RightArrowBox pressed={goToBackUpScreen} btnTitle={'Cloud Backup'} />
 
           <RightArrowBox pressed={_openBatchesPage} btnTitle={'Batches'} />
           <RightArrowBox
             pressed={_openSessionDetailsPage}
-            btnTitle={'Session Listing'}
+            btnTitle={'Sessions'}
           />
         </View>
 
@@ -304,7 +305,7 @@ const MainScreen = props => {
             style={styles.goProImage}
           />
 
-          <Pressable onPress={startGoProRecording}>
+          <Pressable onPress={goToGoPro}>
             <View style={styles.box}>
               <Text style={styles.btnTxt}>Record Session</Text>
             </View>

@@ -47,14 +47,24 @@ const CoreStackNavigator = () => {
           },
           headerTintColor: '#ffffff',
           headerTitleStyle: {
-            fontWeight: 'bold',
+            position: 'absolute',
+            left: 10,
+            // right: 0,
+            textAlign: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+            top: 15,
+            height: 70,
+            minWidth: 200,
+            // backgroundColor: 'red',
           },
           headerLeft: props => (
             <Icon.Button
-              name="arrow-back"
+              name="arrow-back-ios"
               backgroundColor="#000000"
               onPress={() => onBackPress(props, 'session')}
-              size={35}
+              size={30}
+              style={{marginLeft: 10}}
             />
           ),
         }}
@@ -71,14 +81,24 @@ const CoreStackNavigator = () => {
           },
           headerTintColor: '#ffffff',
           headerTitleStyle: {
-            fontWeight: 'bold',
+            position: 'absolute',
+            left: 10,
+            // right: 0,
+            textAlign: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+            top: 15,
+            height: 70,
+            minWidth: 200,
+            // backgroundColor: 'red',
           },
           headerLeft: props => (
             <Icon.Button
-              name="arrow-back"
+              name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'batch_details')}
-              size={35}
+              onPress={() => onBackPress(props, 'session')}
+              size={30}
+              style={{marginLeft: 10}}
             />
           ),
         }}
@@ -99,10 +119,11 @@ const CoreStackNavigator = () => {
           },
           headerLeft: props => (
             <Icon.Button
-              name="arrow-back"
+              name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'batch')}
-              size={35}
+              onPress={() => onBackPress(props, 'session')}
+              size={30}
+              style={{marginLeft: 10}}
             />
           ),
         }}
@@ -122,6 +143,15 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back-ios"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'session')}
+              size={30}
+              style={{marginLeft: 10}}
+            />
+          ),
         }}
       />
       <CoreStack.Screen
@@ -133,6 +163,7 @@ const CoreStackNavigator = () => {
           headerStyle: {
             backgroundColor: '#000000',
             elevation: 0,
+            alignItems: 'center',
           },
           headerTintColor: '#ffffff',
           headerTitleStyle: {
@@ -150,8 +181,26 @@ const CoreStackNavigator = () => {
           },
           headerTintColor: '#ffffff',
           headerTitleStyle: {
-            fontWeight: 'bold',
+            position: 'absolute',
+            left: 10,
+            // right: 0,
+            textAlign: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+            top: 15,
+            height: 70,
+            minWidth: 200,
+            // backgroundColor: 'red',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back-ios"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'session')}
+              size={30}
+              style={{marginLeft: 10}}
+            />
+          ),
         }}
         name="BackupScreen"
         component={BackupScreen}
@@ -160,21 +209,31 @@ const CoreStackNavigator = () => {
       <CoreStack.Screen
         options={{
           headerShown: true,
-          title: 'Backup Files',
+          title: 'Cloud Backup',
           headerStyle: {
             backgroundColor: '#000000',
             elevation: 0,
           },
           headerTintColor: '#ffffff',
           headerTitleStyle: {
-            fontWeight: 'bold',
+            position: 'absolute',
+            left: 10,
+            // right: 0,
+            textAlign: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+            top: 15,
+            height: 70,
+            minWidth: 200,
+            // backgroundColor: 'red',
           },
           headerLeft: props => (
             <Icon.Button
-              name="arrow-back"
+              name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'backup')}
-              size={35}
+              onPress={() => onBackPress(props, 'session')}
+              size={30}
+              style={{marginLeft: 10}}
             />
           ),
         }}
@@ -195,6 +254,15 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back-ios"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'session')}
+              size={30}
+              style={{marginLeft: 10}}
+            />
+          ),
         }}
       />
       <CoreStack.Screen
@@ -211,6 +279,15 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back-ios"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'session')}
+              size={30}
+              style={{marginLeft: 10}}
+            />
+          ),
         }}
       />
     </CoreStack.Navigator>

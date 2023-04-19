@@ -824,7 +824,7 @@ const SequentialBackupScreen = props => {
     <View style={styles.container}>
       <ConfirmModal
         visible={isPopupVisibile}
-        message="Please connect gopro and comeback"
+        message="Please Open GoPro Quik App to Connect GoPro & Continue"
         onConfirm={onConfirm}
         onCancel={onCancel}
       />
@@ -863,9 +863,7 @@ const SequentialBackupScreen = props => {
             checkIfAnyUploadingIsPending();
           }}>
           <View style={styles.box}>
-            <Text style={[styles.btnTxt, {fontSize: 18}]}>
-              Upload files to cloud
-            </Text>
+            <Text style={[styles.btnTxt, {fontSize: 18}]}>Start Backup</Text>
           </View>
         </Pressable>
 

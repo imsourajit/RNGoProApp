@@ -147,18 +147,22 @@ const OtpInputScreen = props => {
               style={{
                 color: timerRunning ? '#ABABAB' : '#FFFFFF',
                 alignSelf: 'flex-end',
-                marginHorizontal: 10,
+                marginHorizontal: 6,
               }}>
-              Didn't get OTP ? <Text style={{color: btnBgColor}}>Resend</Text>
+              Didn't get OTP ?{' '}
+              <Text style={{color: timerRunning ? '#ABABAB' : btnBgColor}}>
+                Resend
+              </Text>
             </Text>
           </Pressable>
           {timerRunning ? (
             <Text
               style={{
                 color: '#FFFFFF',
-                width: 30,
-                alignSelf: 'flex-end',
-                justifyContent: 'flex-end',
+                width: 26,
+                // backgroundColor: 'red',
+                // alignSelf: 'flex-end',
+                // justifyContent: 'flex-end',
               }}>
               {timerRunning}s
             </Text>
@@ -206,7 +210,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   btnTxt: {
-    color: '#303030',
+    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 18,
   },

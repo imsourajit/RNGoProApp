@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#C2C2C2',
     borderRadius: 10,
     padding: 16,
     width: '80%',
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: '#ababab',
+    backgroundColor: '#000000',
     borderRadius: 5,
     paddingVertical: 12,
     alignItems: 'center',
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    color: '#000000',
+    color: '#FFFFFF',
   },
 });
 

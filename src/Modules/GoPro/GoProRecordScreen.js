@@ -459,14 +459,14 @@ const GoProRecordScreen = props => {
             color: '#FFFFFF',
             textAlign: 'center',
           }}>
-          Session started at {'\n\n\n'}
+          Session started {'\n'} @ {'\n'}
           <Text
             style={{
               color: btnBgColor,
             }}>
-            {sessionStartedTime} {'\n\n\n'}
+            {sessionStartedTime} {'\n\n'}
           </Text>
-          Please start recording on the GoPro
+          Please start recording on your GoPro
         </Text>
         {/*{isGeneratingQR ? (*/}
         {/*  <ActivityIndicator size={'large'} color={'#FFFFFF'} />*/}

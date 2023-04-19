@@ -32,11 +32,11 @@ const PopupWithButton = ({visible, onClose}) => {
       <View style={styles.container}>
         <View style={styles.popup}>
           <Text style={styles.popupText}>
-            You are not registered with us. Please click below button to have
-            chat with our support team.{' '}
+            You are not registered with us.{'\n'}Please contact our support
+            team.{' '}
           </Text>
-          <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>Support</Text>
+          <TouchableOpacity style={styles.popupBtn} onPress={onClose}>
+            <Text style={styles.buttonText}>Contact Us</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnTxt: {
-    color: '#303030',
+    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 18,
   },
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   popup: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
@@ -206,6 +206,12 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: btnBgColor,
+    padding: 10,
+    borderRadius: 5,
+    minWidth: 100,
+  },
+  popupBtn: {
+    backgroundColor: 'rgba(242, 153, 74, 1)',
     padding: 10,
     borderRadius: 5,
     minWidth: 100,
