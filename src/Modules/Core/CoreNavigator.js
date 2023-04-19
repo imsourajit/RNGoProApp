@@ -52,7 +52,6 @@ const CoreStackNavigator = () => {
             // right: 0,
             textAlign: 'center',
             justifyContent: 'center',
-            alignItems: 'center',
             top: 15,
             height: 70,
             minWidth: 200,
@@ -86,7 +85,6 @@ const CoreStackNavigator = () => {
             // right: 0,
             textAlign: 'center',
             justifyContent: 'center',
-            alignItems: 'center',
             top: 15,
             height: 70,
             minWidth: 200,
@@ -163,7 +161,6 @@ const CoreStackNavigator = () => {
           headerStyle: {
             backgroundColor: '#000000',
             elevation: 0,
-            alignItems: 'center',
           },
           headerTintColor: '#ffffff',
           headerTitleStyle: {
