@@ -1,19 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useState} from 'react';
 import {
-  ActivityIndicator,
+  AppState,
   Dimensions,
   Image,
   Linking,
+  NativeModules,
   Pressable,
   StyleSheet,
   Text,
   ToastAndroid,
   View,
-  AppState,
 } from 'react-native';
 import WifiManager from 'react-native-wifi-reborn';
-import {APP_DIR, GOPRO_BASE_URL} from './Utility/Constants';
+import {APP_DIR, CAMERA_DIR, GOPRO_BASE_URL} from './Utility/Constants';
 import BleManager from 'react-native-ble-manager';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -36,9 +36,7 @@ import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgress
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
 import _ from 'lodash';
-import {CAMERA_DIR} from './Utility/Constants';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import NoDevicesConnectedScreen from './Screens/NoDevicesConnectedScreen';
+import {launchImageLibrary} from 'react-native-image-picker';
 import {useIsFocused} from '@react-navigation/native';
 import ConfirmModal from '../Core/Screens/ConfirmModal';
 import {
@@ -46,6 +44,7 @@ import {
   logEvent,
   logLoadEvent,
 } from '../../Services/AnalyticsTools';
+import DocumentPicker from 'react-native-document-picker';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -544,7 +543,6 @@ const SequentialBackupScreen = props => {
           dispatch(setUploadingProgressOfMedia(null));
           deleteFile(filePath);
           console.log('Upload Completed');
-          return;
         })
         .catch(err => {
           dispatch(setPartUploadUrl(undefined));
@@ -567,7 +565,7 @@ const SequentialBackupScreen = props => {
 
     bytesRead += CHUNK_SIZE;
 
-    const chunkFilePath = APP_DIR + `/fc${new Date().getTime()}.MP4`;
+    const chunkFilePath = APP_DIR + '/fc_.mp4';
 
     console.log('Chunkfilepath', chunkFilePath);
     await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
@@ -607,7 +605,7 @@ const SequentialBackupScreen = props => {
         parts.push(eTagPart);
 
         dispatch(setETagForAssetId(eTagPart));
-        deleteFile(chunkFilePath);
+        // deleteFile(chunkFilePath);
         await uploadChunkToGumlet(
           assetId,
           filePath,
@@ -638,7 +636,6 @@ const SequentialBackupScreen = props => {
       filename: fileName,
     });
     await uploadChunkToGumlet(assetId, filePath, totalNoOfChunks, 0, 1);
-    return;
   };
 
   const checkIfAnyUploadingIsPending = async (isGallery = false) => {
@@ -792,7 +789,6 @@ const SequentialBackupScreen = props => {
         'Selected videos backup completed successfully',
         ToastAndroid.CENTER,
       );
-      return;
     } else {
       await chunkWiseUploadToGumlet(
         assets[assetIndex].uri.replace('file://', ''),
@@ -818,6 +814,164 @@ const SequentialBackupScreen = props => {
       action: 'cancel',
     });
     setPopupVisibility(false);
+  };
+
+  const uploadUriToGumlet = async (
+    assetId,
+    filePath,
+    totalNoOfChunks,
+    bytesRead,
+    partNumber,
+  ) => {
+    // const {eTag} = uploadedChunkMedia ?? {};
+
+    console.log(
+      '__GUMLET_UPLOAD',
+      assetId,
+      filePath,
+      totalNoOfChunks,
+      bytesRead,
+      partNumber,
+    );
+
+    if (totalNoOfChunks <= 0) {
+      const multipartCompleteOptions = {
+        method: 'POST',
+        url: `https://api.gumlet.com/v1/video/assets/${assetId}/multipartupload/complete`,
+        headers: {
+          'content-type': 'application/json',
+          Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
+        },
+        data: {
+          parts: _getParts(),
+        },
+      };
+
+      await axios
+        .request(multipartCompleteOptions)
+        .then(res => {
+          dispatch(setPartUploadUrl(undefined));
+          dispatch(setCompletedUploading());
+          dispatch(setUploadingProgressOfMedia(null));
+          deleteFile(filePath);
+          console.log('Upload Completed');
+        })
+        .catch(err => {
+          dispatch(setPartUploadUrl(undefined));
+          dispatch(setCompletedUploading());
+          dispatch(setUploadingProgressOfMedia(null));
+          console.log('Multipart upload error', err);
+        });
+      deleteFile(filePath);
+      return;
+    }
+
+    const chunkData = await RNFS.read(
+      filePath,
+      CHUNK_SIZE,
+      bytesRead,
+      'base64',
+    );
+    console.log('partNumber', partNumber);
+    dispatch(setBytesRead(bytesRead));
+
+    bytesRead += CHUNK_SIZE;
+
+    const time = new Date();
+
+    const chunkFilePath = APP_DIR + `/chunk_${time.getTime()}.mp4`;
+
+    console.log('Chunkfilepath', chunkFilePath);
+    await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
+    const preSignedUrl = await getPreSignedUrlForUpload(assetId, partNumber);
+
+    RNFetchBlob.config({
+      fileCache: false,
+    });
+
+    await RNFetchBlob.fetch(
+      'PUT',
+      preSignedUrl,
+      {
+        'Content-Type': 'video/mp4',
+      },
+      RNFetchBlob.wrap(chunkFilePath),
+    )
+      .uploadProgress({interval: 550}, (written, total) => {
+        const uploadProgressPercentage =
+          ((partNumber - 1 + written / total) /
+            (totalNoOfChunks - 1 + partNumber)) *
+          100;
+        dispatch(
+          setUploadingProgressOfMedia({
+            fileName: getLastString(filePath, '/'),
+            percentile: uploadProgressPercentage,
+          }),
+        );
+        console.log('Upload Progress Percentage', uploadProgressPercentage);
+      })
+      .then(async res => {
+        const eTagPart = {
+          PartNumber: partNumber,
+          ETag: res.respInfo.headers.ETag,
+        };
+
+        parts.push(eTagPart);
+
+        dispatch(setETagForAssetId(eTagPart));
+        // deleteFile(chunkFilePath);
+        await uploadUriToGumlet(
+          assetId,
+          filePath,
+          totalNoOfChunks - 1,
+          bytesRead,
+          partNumber + 1,
+        );
+      })
+      .catch(err => console.log('Unable to upload chunk', err));
+  };
+
+  const generateAssetId = async (fileName, creationTime) => {
+    const options = {
+      method: 'POST',
+      url: 'https://api.gumlet.com/v1/video/assets/upload',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
+      },
+      data: {
+        collection_id: '63fe06f5b4ade3692e1bb407',
+        format: 'HLS',
+        metadata: {
+          userId: userId ?? 'Anonymous',
+          creationTime: creationTime,
+        },
+      },
+    };
+
+    const resp = await axios.request(options);
+    return resp.data.asset_id;
+  };
+
+  const takeBackUpFromStorage = async () => {
+    console.log(NativeModules);
+    DocumentPicker.pickMultiple().then(async files => {
+      files.map(async file => {
+        const assetId = await generateAssetId(
+          file.name,
+          parseInt(file.creationTime),
+        );
+
+        const lm = await uploadUriToGumlet(
+          assetId,
+          file.uri,
+          Math.ceil(file.size / CHUNK_SIZE),
+          0,
+          1,
+        );
+      });
+    });
   };
 
   return (
@@ -864,6 +1018,20 @@ const SequentialBackupScreen = props => {
           }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>Start Backup</Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            logClickEvent('app_backup_click', {
+              type: 'gopro',
+            });
+            takeBackUpFromStorage();
+          }}>
+          <View style={styles.box}>
+            <Text style={[styles.btnTxt, {fontSize: 18}]}>
+              Backup from storage
+            </Text>
           </View>
         </Pressable>
 

@@ -2,23 +2,23 @@ import {logLoadEvent} from '../../../Services/AnalyticsTools';
 import {
   COMPLETED_DOWNLOADED_FILE,
   COMPLETED_UPLOADED_FILE,
+  SET_ASSET_ID,
+  SET_BYTES_READ,
+  SET_COMPLETED_UPLOADING_SEQUENTIAL_UPLOAD,
   SET_DIR_NAME_TO_DOWNLOAD,
   SET_DOWNLOAD_MEDIA_PROGRESS,
   SET_DOWNLOADED_COMPLETED,
   SET_DOWNLOADING_FILE,
+  SET_ETAG,
+  SET_FILE_PATH,
   SET_GOPRO_FILES_TO_LOCAL_STORAGE,
   SET_GOPRO_MEDIA,
+  SET_PART_UPLOAD_URL,
   SET_SCHEDULED_SESSIONS,
   SET_SESSION_DETAILS,
   SET_UPLOAD_MEDIA_PROGRESS,
   SET_UPLOADEDED_COMPLETED,
   SET_UPLOADING_FILE,
-  SET_ASSET_ID,
-  SET_FILE_PATH,
-  SET_ETAG,
-  SET_BYTES_READ,
-  SET_COMPLETED_UPLOADING_SEQUENTIAL_UPLOAD,
-  SET_PART_UPLOAD_URL,
 } from './GoProActionTypes';
 
 const initialState = {
@@ -218,6 +218,16 @@ export const GoProReducer = (state = initialState, action) => {
       return {
         ...state,
         uploadedChunkMedia: {},
+      };
+    }
+
+    case 'SET_FILE_SIZE': {
+      return {
+        ...state,
+        uploadedChunkMedia: {
+          ...state.uploadedChunkMedia,
+          size: action.data,
+        },
       };
     }
 
