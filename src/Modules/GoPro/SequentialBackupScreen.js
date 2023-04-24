@@ -24,7 +24,6 @@ import {
   setDownloadingProgressOfMedia,
   setETagForAssetId,
   setFilePath,
-  setFileSize,
   setGoProMedia,
   setPartUploadUrl,
   setUploadingAssetId,
@@ -47,7 +46,6 @@ import {
   logLoadEvent,
 } from '../../Services/AnalyticsTools';
 import DocumentPicker from 'react-native-document-picker';
-import {size} from 'lodash/collection';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -862,15 +860,6 @@ const SequentialBackupScreen = props => {
     files,
     filePosition,
   ) => {
-    console.log(
-      '__GUMLET_UPLOAD',
-      assetId,
-      filePath,
-      totalNoOfChunks,
-      bytesRead,
-      partNumber,
-    );
-
     if (totalNoOfChunks === 0) {
       const multipartCompleteOptions = {
         method: 'POST',
@@ -887,10 +876,8 @@ const SequentialBackupScreen = props => {
       await axios
         .request(multipartCompleteOptions)
         .then(res => {
-          // dispatch(setPartUploadUrl(undefined));
           dispatch(setCompletedUploading());
           dispatch(setUploadingProgressOfMedia(null));
-          // deleteFile(filePath);
           console.log('Upload Completed');
           logLoadEvent('app_backup_progress', {
             progress: 100,
@@ -898,46 +885,44 @@ const SequentialBackupScreen = props => {
             filename: files[filePosition].name,
           });
           deleteFileUsingUri(files[filePosition].uri);
-          setTimeout(() => {
-            filePosition++;
-            if (files.length > filePosition) {
-              startChunkUpload(files, filePosition);
-            }
-          }, 2000);
+          parts = []; //empty all the tag response once file is uploaded
+          // start uploading next file
+          filePosition++;
+          if (files.length > filePosition) {
+            startChunkUpload(files, filePosition);
+          } else {
+            ToastAndroid.show('Cloud back completed', ToastAndroid.BOTTOM);
+          }
         })
         .catch(err => {
-          // dispatch(setPartUploadUrl(undefined));
           dispatch(setCompletedUploading());
-          // dispatch(setUploadingProgressOfMedia(null));
-          console.log('Multipart upload error', err);
+          console.log('__Error Multipart upload error', err);
         });
       deleteFile(filePath);
       return;
     }
 
-    const chunkData = await RNFS.read(
-      filePath,
-      CHUNK_SIZE,
-      bytesRead,
-      'base64',
-    );
+    let chunkFilePath = '';
+    try {
+      const chunkData = await RNFS.read(
+        filePath,
+        CHUNK_SIZE,
+        bytesRead,
+        'base64',
+      );
 
-    // dispatch(setBytesRead(bytesRead));
+      bytesRead += CHUNK_SIZE;
 
-    bytesRead += CHUNK_SIZE;
+      const time = new Date();
 
-    const time = new Date();
+      chunkFilePath = APP_DIR + `/chunk_${time.getTime()}.mp4`;
 
-    const chunkFilePath = APP_DIR + `/chunk_${time.getTime()}.mp4`;
+      console.log('Chunkfilepath', chunkFilePath);
+      await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
+    } catch (error) {
+      console.log('__Error in create chunkfile path', error);
+    }
 
-    console.log('Chunkfilepath', chunkFilePath);
-    await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
-    console.log(
-      'partNumber, bytesRead',
-      partNumber,
-      bytesRead,
-      chunkData.length,
-    );
     const preSignedUrl = await getPreSignedUrlForUpload(assetId, partNumber);
 
     RNFetchBlob.config({
@@ -972,11 +957,8 @@ const SequentialBackupScreen = props => {
         };
 
         parts.push(eTagPart);
-
-        // dispatch(setETagForAssetId(eTagPart));
         await RNFetchBlob.fs.unlink(chunkFilePath);
         res.flush();
-        // deleteFile(chunkFilePath);
         await uploadUriToGumlet(
           assetId,
           filePath,
@@ -1014,8 +996,6 @@ const SequentialBackupScreen = props => {
   };
 
   const startChunkUpload = async (files, filePosition) => {
-    console.log(files, filePosition, NativeModules);
-
     if (files.length < filePosition) {
       ToastAndroid.show('Cloud backup completed', ToastAndroid.BOTTOM);
       return;
@@ -1025,12 +1005,9 @@ const SequentialBackupScreen = props => {
 
     const assetId = await generateAssetId(
       file.name,
+      // eslint-disable-next-line radix
       parseInt(file.creationTime),
     );
-
-    // dispatch(setUploadingAssetId(assetId));
-    // dispatch(setFilePath(file.uri));
-    // dispatch(setFileSize(file.size));
 
     await uploadUriToGumlet(
       assetId,
