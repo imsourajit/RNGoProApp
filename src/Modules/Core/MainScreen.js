@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
+  BackHandler,
   Dimensions,
   Image,
   Linking,

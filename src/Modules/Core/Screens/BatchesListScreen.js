@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  BackHandler,
   FlatList,
   Modal,
   Pressable,
@@ -27,6 +28,23 @@ const BatchesListScreen = props => {
   const {
     user: {userId},
   } = useSelector(st => st.userReducer);
+
+  useEffect(() => {
+    const backAction = () => {
+      logClickEvent('app_back', {
+        screen: 'batch_details',
+        type: 'soft',
+      });
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     logLoadEvent('app_batch_screen');

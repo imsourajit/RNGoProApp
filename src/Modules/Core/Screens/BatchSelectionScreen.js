@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  BackHandler,
   FlatList,
   NativeModules,
   Pressable,
@@ -23,6 +24,23 @@ const BatchSelectionScreen = props => {
   const {
     user: {userId},
   } = useSelector(st => st.userReducer);
+
+  useEffect(() => {
+    const backAction = () => {
+      logClickEvent('app_back', {
+        screen: 'batch',
+        type: 'soft',
+      });
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     logLoadEvent('app_record_batch_screen', {

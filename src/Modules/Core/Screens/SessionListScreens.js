@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  BackHandler,
   FlatList,
   Linking,
   StyleSheet,
@@ -32,6 +33,23 @@ const SessionListScreens = props => {
     const month = date.toLocaleString('en-US', {month: 'long'});
     return `${day} ${month}`;
   }
+
+  useEffect(() => {
+    const backAction = () => {
+      logClickEvent('app_back', {
+        screen: 'session',
+        type: 'soft',
+      });
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     logLoadEvent('app_session_screen');

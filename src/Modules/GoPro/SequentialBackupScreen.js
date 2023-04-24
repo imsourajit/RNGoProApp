@@ -2,6 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   AppState,
+  BackHandler,
   Dimensions,
   Image,
   Linking,
@@ -23,6 +24,7 @@ import {
   setDownloadingProgressOfMedia,
   setETagForAssetId,
   setFilePath,
+  setFileSize,
   setGoProMedia,
   setPartUploadUrl,
   setUploadingAssetId,
@@ -64,11 +66,36 @@ const SequentialBackupScreen = props => {
   const {media, scheduledSessions, uploadedChunkMedia} = useSelector(
     st => st.GoProReducer,
   );
+
+  const {
+    eTag: localETag = [],
+    assetId: localAssetId,
+    filePath: localFilePath,
+    bytesRead: localBytesRead = 0,
+    size: localFileSize,
+  } = uploadedChunkMedia ?? {};
   const {user: {userId} = {}} = useSelector(st => st.userReducer);
 
   const {ssid, password} = hotspotDetails;
 
   let parts = [];
+
+  useEffect(() => {
+    const backAction = () => {
+      logClickEvent('app_back', {
+        screen: 'backup',
+        type: 'soft',
+      });
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     logLoadEvent('app_backup_screen');
@@ -827,10 +854,6 @@ const SequentialBackupScreen = props => {
     files,
     filePosition,
   ) => {
-    // const {eTag} = uploadedChunkMedia ?? {};
-
-    // console.log('ETag', eTag);
-
     console.log(
       '__GUMLET_UPLOAD',
       assetId,
@@ -938,6 +961,7 @@ const SequentialBackupScreen = props => {
 
         dispatch(setETagForAssetId(eTagPart));
         await RNFetchBlob.fs.unlink(chunkFilePath);
+        res.flush();
         // deleteFile(chunkFilePath);
         await uploadUriToGumlet(
           assetId,
@@ -979,7 +1003,7 @@ const SequentialBackupScreen = props => {
     console.log(files, filePosition);
 
     if (files.length < filePosition) {
-      ToastAndroid.show('backup completed', ToastAndroid.BOTTOM);
+      ToastAndroid.show('Cloud backup completed', ToastAndroid.BOTTOM);
       return;
     }
 
@@ -989,6 +1013,10 @@ const SequentialBackupScreen = props => {
       file.name,
       parseInt(file.creationTime),
     );
+
+    dispatch(setUploadingAssetId(assetId));
+    dispatch(setFilePath(file.uri));
+    dispatch(setFileSize(file.size));
 
     await uploadUriToGumlet(
       assetId,
@@ -1002,7 +1030,22 @@ const SequentialBackupScreen = props => {
   };
 
   const takeBackUpFromStorage = async () => {
-    console.log(NativeModules);
+    if (localAssetId) {
+      DocumentPicker.pickMultiple().then(async files => {
+        await uploadUriToGumlet(
+          localAssetId,
+          localFilePath,
+          Math.ceil(localFileSize / CHUNK_SIZE) - localETag.length,
+          localBytesRead,
+          localETag.length + 1,
+          [],
+          0,
+        );
+      });
+
+      ToastAndroid.show('Cloud backup completed', ToastAndroid.BOTTOM);
+      return;
+    }
     DocumentPicker.pickMultiple().then(async files => {
       await startChunkUpload(files, 0);
 
@@ -1065,7 +1108,7 @@ const SequentialBackupScreen = props => {
         <Pressable
           onPress={() => {
             logClickEvent('app_backup_click', {
-              type: 'gopro',
+              type: 'gallery',
             });
             takeBackUpFromStorage();
           }}>
