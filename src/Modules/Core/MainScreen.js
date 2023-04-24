@@ -163,7 +163,7 @@ const MainScreen = props => {
     switch (index) {
       case 0:
         logClickEvent('app_support_click', {
-          screen: 'homepage',
+          screen: 'home',
         });
         try {
           Linking.openURL(

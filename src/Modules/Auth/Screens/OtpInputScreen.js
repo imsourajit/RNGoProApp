@@ -97,6 +97,9 @@ const OtpInputScreen = props => {
           setTimerRunning(0);
         }
       }, 1000);
+      logClickEvent('app_otp_resend', {
+        phone: phoneNumber,
+      });
       dispatch(
         sendOtpForValidation(
           {

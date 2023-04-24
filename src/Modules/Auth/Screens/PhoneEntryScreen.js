@@ -15,7 +15,7 @@ import {
 import {useDispatch} from 'react-redux';
 import {sendOtpForValidation} from '../../Core/Redux/UserActions';
 import AnalyticsServices from '../../../Services/AnalyticsTools/AnalyticsService';
-import {logClickEvent} from '../../../Services/AnalyticsTools';
+import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
 import {btnBgColor} from '../../../Config';
 
 const {width, height} = Dimensions.get('window');
@@ -61,6 +61,12 @@ const PhoneEntryScreen = props => {
     }, 10);
   }, []);
 
+  useEffect(() => {
+    if (isSupportPopup) {
+      logLoadEvent('app_login_support_popup');
+    }
+  }, [isSupportPopup]);
+
   const proceedBtnPressed = () => {
     if (_checkPhoneNumberValidation()) {
       logClickEvent('app_phone_submit', {
@@ -102,6 +108,7 @@ const PhoneEntryScreen = props => {
 
   const _goToSupport = _ => {
     try {
+      logClickEvent('app_login_support_popup_action');
       Linking.openURL(
         'https://api.whatsapp.com/send/?phone=%2B919987840055&text=Hello%2C+I+am+reaching+you+out+from+the+FC.ONE+App',
       );

@@ -23,6 +23,7 @@ const CoreStackNavigator = () => {
     // props.navigation.goBack();
     logClickEvent('app_back', {
       screen,
+      type: 'button',
     });
     props.onPress();
     // return false;
