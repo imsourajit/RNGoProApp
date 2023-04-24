@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  BackHandler,
   NativeAppEventEmitter,
   PermissionsAndroid,
   Platform,
@@ -24,6 +25,7 @@ import {
   tagLiveUrlsToSession,
 } from '../CameraAPI/Redux/CameraApiActions';
 import {btnBgColor} from '../../Config';
+import {logClickEvent} from '../../Services/AnalyticsTools';
 
 const isProd = false;
 
@@ -75,6 +77,23 @@ const GoProRecordScreen = props => {
       ' ' +
       (date.getHours() > 12 ? 'pm' : 'am');
   }
+
+  useEffect(() => {
+    const backAction = () => {
+      logClickEvent('app_back', {
+        screen: 'record_gopro',
+        type: 'soft',
+      });
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     dispatch(

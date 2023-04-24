@@ -28,7 +28,7 @@ const BatchSelectionScreen = props => {
   useEffect(() => {
     const backAction = () => {
       logClickEvent('app_back', {
-        screen: 'batch',
+        screen: 'record',
         type: 'soft',
       });
       return false;

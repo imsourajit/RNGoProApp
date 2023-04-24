@@ -32,7 +32,7 @@ const BatchesListScreen = props => {
   useEffect(() => {
     const backAction = () => {
       logClickEvent('app_back', {
-        screen: 'batch_details',
+        screen: 'batch',
         type: 'soft',
       });
       return false;

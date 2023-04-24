@@ -95,7 +95,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'batch_details')}
+              onPress={() => onBackPress(props, 'batch')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -120,7 +120,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'batch')}
+              onPress={() => onBackPress(props, 'record')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -146,7 +146,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'session')}
+              onPress={() => onBackPress(props, 'record')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -167,6 +167,15 @@ const CoreStackNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerLeft: props => (
+            <Icon.Button
+              name="arrow-back-ios"
+              backgroundColor="#000000"
+              onPress={() => onBackPress(props, 'record_gopro')}
+              size={30}
+              style={{marginLeft: 10}}
+            />
+          ),
         }}
       />
       <CoreStack.Screen
@@ -194,7 +203,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'record')}
+              onPress={() => onBackPress(props, 'backup')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -256,7 +265,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'students_list')}
+              onPress={() => onBackPress(props, 'batch_details')}
               size={30}
               style={{marginLeft: 10}}
             />

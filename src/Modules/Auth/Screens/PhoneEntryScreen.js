@@ -78,6 +78,9 @@ const PhoneEntryScreen = props => {
             phoneNumber,
           },
           response => {
+            logClickEvent('app_phone_success', {
+              phone: phoneNumber,
+            });
             props.navigation.navigate('OtpInputScreen', {
               phoneNumber,
             });

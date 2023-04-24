@@ -490,10 +490,10 @@ const SequentialBackupScreen = props => {
   const getPreSignedUrlForUpload = async (assetId, partNumber) => {
     const {partDetails} = uploadedChunkMedia;
 
-    if (partDetails !== undefined && partDetails.partNumber === partNumber) {
-      console.log('PrevUrl');
-      return partDetails?.signedUrl;
-    }
+    // if (partDetails !== undefined && partDetails.partNumber === partNumber) {
+    //   console.log('PrevUrl');
+    //   return partDetails?.signedUrl;
+    // }
 
     let chunkUploadsOptions = {
       method: 'GET',
@@ -514,23 +514,23 @@ const SequentialBackupScreen = props => {
   };
 
   const _getParts = () => {
-    const {eTag} = uploadedChunkMedia ?? {};
-    let eTagTemp = [];
-    console.log('ETags and Parts', eTag, parts);
+    // const {eTag} = uploadedChunkMedia ?? {};
+    // let eTagTemp = [];
+    // console.log('ETags and Parts', eTag, parts);
 
-    Array.isArray(eTag) &&
-      eTag.map(tag => {
-        let found = _.findIndex(
-          parts,
-          part => part.PartNumber == tag.PartNumber,
-        );
+    // Array.isArray(eTag) &&
+    //   eTag.map(tag => {
+    //     let found = _.findIndex(
+    //       parts,
+    //       part => part.PartNumber == tag.PartNumber,
+    //     );
 
-        if (found < 0) {
-          eTagTemp.push(tag);
-        }
-      });
+    //     if (found < 0) {
+    //       eTagTemp.push(tag);
+    //     }
+    //   });
 
-    return [...eTagTemp, ...parts];
+    return [...parts];
   };
 
   const uploadChunkToGumlet = async (
@@ -845,6 +845,14 @@ const SequentialBackupScreen = props => {
     setPopupVisibility(false);
   };
 
+  const deleteFileUsingUri = uri => {
+    try {
+      NativeModules.RNDocumentPicker.deleteFile(uri);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const uploadUriToGumlet = async (
     assetId,
     filePath,
@@ -872,18 +880,24 @@ const SequentialBackupScreen = props => {
           Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
         },
         data: {
-          parts: _getParts(),
+          parts: parts,
         },
       };
 
       await axios
         .request(multipartCompleteOptions)
         .then(res => {
-          dispatch(setPartUploadUrl(undefined));
+          // dispatch(setPartUploadUrl(undefined));
           dispatch(setCompletedUploading());
           dispatch(setUploadingProgressOfMedia(null));
-          deleteFile(filePath);
+          // deleteFile(filePath);
           console.log('Upload Completed');
+          logLoadEvent('app_backup_progress', {
+            progress: 100,
+            type: 'upload',
+            filename: files[filePosition].name,
+          });
+          deleteFileUsingUri(files[filePosition].uri);
           setTimeout(() => {
             filePosition++;
             if (files.length > filePosition) {
@@ -892,9 +906,9 @@ const SequentialBackupScreen = props => {
           }, 2000);
         })
         .catch(err => {
-          dispatch(setPartUploadUrl(undefined));
+          // dispatch(setPartUploadUrl(undefined));
           dispatch(setCompletedUploading());
-          dispatch(setUploadingProgressOfMedia(null));
+          // dispatch(setUploadingProgressOfMedia(null));
           console.log('Multipart upload error', err);
         });
       deleteFile(filePath);
@@ -908,7 +922,7 @@ const SequentialBackupScreen = props => {
       'base64',
     );
 
-    dispatch(setBytesRead(bytesRead));
+    // dispatch(setBytesRead(bytesRead));
 
     bytesRead += CHUNK_SIZE;
 
@@ -959,7 +973,7 @@ const SequentialBackupScreen = props => {
 
         parts.push(eTagPart);
 
-        dispatch(setETagForAssetId(eTagPart));
+        // dispatch(setETagForAssetId(eTagPart));
         await RNFetchBlob.fs.unlink(chunkFilePath);
         res.flush();
         // deleteFile(chunkFilePath);
@@ -1000,7 +1014,7 @@ const SequentialBackupScreen = props => {
   };
 
   const startChunkUpload = async (files, filePosition) => {
-    console.log(files, filePosition);
+    console.log(files, filePosition, NativeModules);
 
     if (files.length < filePosition) {
       ToastAndroid.show('Cloud backup completed', ToastAndroid.BOTTOM);
@@ -1014,9 +1028,9 @@ const SequentialBackupScreen = props => {
       parseInt(file.creationTime),
     );
 
-    dispatch(setUploadingAssetId(assetId));
-    dispatch(setFilePath(file.uri));
-    dispatch(setFileSize(file.size));
+    // dispatch(setUploadingAssetId(assetId));
+    // dispatch(setFilePath(file.uri));
+    // dispatch(setFileSize(file.size));
 
     await uploadUriToGumlet(
       assetId,
@@ -1030,31 +1044,8 @@ const SequentialBackupScreen = props => {
   };
 
   const takeBackUpFromStorage = async () => {
-    if (localAssetId) {
-      DocumentPicker.pickMultiple().then(async files => {
-        await uploadUriToGumlet(
-          localAssetId,
-          localFilePath,
-          Math.ceil(localFileSize / CHUNK_SIZE) - localETag.length,
-          localBytesRead,
-          localETag.length + 1,
-          [],
-          0,
-        );
-      });
-
-      ToastAndroid.show('Cloud backup completed', ToastAndroid.BOTTOM);
-      return;
-    }
     DocumentPicker.pickMultiple().then(async files => {
       await startChunkUpload(files, 0);
-
-      // for (let i in files) {
-      //   new Promise(async resolve => {
-      //     await startChunkUpload(files, 0);
-      //     resolve();
-      //   });
-      // }
     });
   };
 
