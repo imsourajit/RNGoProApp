@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 
-//import coach.goprohero10.ReactNativeFlipper;
+// import coach.goprohero10.ReactNativeFlipper;
 import coach.fc.one.nativecamera.CameraPackage;
 import com.microsoft.codepush.react.CodePush;
 
@@ -70,7 +70,7 @@ public class MainApplication extends Application implements ReactApplication {
             // If you opted-in for the New Architecture, we load the native entry point for this app.
             DefaultNewArchitectureEntryPoint.load();
         }
-//        ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    //    ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
     }
 //    registerActivityLifecycleCallbacks(OrientationActivityLifecycle.getInstance());
 }
