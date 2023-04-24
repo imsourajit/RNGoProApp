@@ -45,6 +45,7 @@ import {
   logLoadEvent,
 } from '../../Services/AnalyticsTools';
 import DocumentPicker from 'react-native-document-picker';
+import {size} from 'lodash/collection';
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -488,6 +489,7 @@ const SequentialBackupScreen = props => {
   const _getParts = () => {
     const {eTag} = uploadedChunkMedia ?? {};
     let eTagTemp = [];
+    console.log('ETags and Parts', eTag, parts);
 
     Array.isArray(eTag) &&
       eTag.map(tag => {
@@ -822,8 +824,12 @@ const SequentialBackupScreen = props => {
     totalNoOfChunks,
     bytesRead,
     partNumber,
+    files,
+    filePosition,
   ) => {
     // const {eTag} = uploadedChunkMedia ?? {};
+
+    // console.log('ETag', eTag);
 
     console.log(
       '__GUMLET_UPLOAD',
@@ -834,7 +840,7 @@ const SequentialBackupScreen = props => {
       partNumber,
     );
 
-    if (totalNoOfChunks <= 0) {
+    if (totalNoOfChunks === 0) {
       const multipartCompleteOptions = {
         method: 'POST',
         url: `https://api.gumlet.com/v1/video/assets/${assetId}/multipartupload/complete`,
@@ -855,6 +861,12 @@ const SequentialBackupScreen = props => {
           dispatch(setUploadingProgressOfMedia(null));
           deleteFile(filePath);
           console.log('Upload Completed');
+          setTimeout(() => {
+            filePosition++;
+            if (files.length > filePosition) {
+              startChunkUpload(files, filePosition);
+            }
+          }, 2000);
         })
         .catch(err => {
           dispatch(setPartUploadUrl(undefined));
@@ -926,6 +938,8 @@ const SequentialBackupScreen = props => {
           totalNoOfChunks - 1,
           bytesRead,
           partNumber + 1,
+          files,
+          filePosition,
         );
       })
       .catch(err => console.log('Unable to upload chunk', err));
@@ -954,23 +968,43 @@ const SequentialBackupScreen = props => {
     return resp.data.asset_id;
   };
 
+  const startChunkUpload = async (files, filePosition) => {
+    console.log(files);
+
+    if (files.length < filePosition) {
+      ToastAndroid.show('backup completed', ToastAndroid.BOTTOM);
+      return;
+    }
+
+    const file = files[filePosition];
+
+    const assetId = await generateAssetId(
+      file.name,
+      parseInt(file.creationTime),
+    );
+
+    const lm = await uploadUriToGumlet(
+      assetId,
+      file.uri,
+      Math.ceil(file.size / CHUNK_SIZE),
+      0,
+      1,
+      files,
+      filePosition,
+    );
+  };
+
   const takeBackUpFromStorage = async () => {
     console.log(NativeModules);
     DocumentPicker.pickMultiple().then(async files => {
-      files.map(async file => {
-        const assetId = await generateAssetId(
-          file.name,
-          parseInt(file.creationTime),
-        );
+      await startChunkUpload(files, 0);
 
-        const lm = await uploadUriToGumlet(
-          assetId,
-          file.uri,
-          Math.ceil(file.size / CHUNK_SIZE),
-          0,
-          1,
-        );
-      });
+      // for (let i in files) {
+      //   new Promise(async resolve => {
+      //     await startChunkUpload(files, 0);
+      //     resolve();
+      //   });
+      // }
     });
   };
 
