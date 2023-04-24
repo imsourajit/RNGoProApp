@@ -884,7 +884,7 @@ const SequentialBackupScreen = props => {
       bytesRead,
       'base64',
     );
-    console.log('partNumber', partNumber);
+
     dispatch(setBytesRead(bytesRead));
 
     bytesRead += CHUNK_SIZE;
@@ -895,6 +895,12 @@ const SequentialBackupScreen = props => {
 
     console.log('Chunkfilepath', chunkFilePath);
     await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
+    console.log(
+      'partNumber, bytesRead',
+      partNumber,
+      bytesRead,
+      chunkData.length,
+    );
     const preSignedUrl = await getPreSignedUrlForUpload(assetId, partNumber);
 
     RNFetchBlob.config({
@@ -931,6 +937,7 @@ const SequentialBackupScreen = props => {
         parts.push(eTagPart);
 
         dispatch(setETagForAssetId(eTagPart));
+        await RNFetchBlob.fs.unlink(chunkFilePath);
         // deleteFile(chunkFilePath);
         await uploadUriToGumlet(
           assetId,
@@ -969,7 +976,7 @@ const SequentialBackupScreen = props => {
   };
 
   const startChunkUpload = async (files, filePosition) => {
-    console.log(files);
+    console.log(files, filePosition);
 
     if (files.length < filePosition) {
       ToastAndroid.show('backup completed', ToastAndroid.BOTTOM);
@@ -983,7 +990,7 @@ const SequentialBackupScreen = props => {
       parseInt(file.creationTime),
     );
 
-    const lm = await uploadUriToGumlet(
+    await uploadUriToGumlet(
       assetId,
       file.uri,
       Math.ceil(file.size / CHUNK_SIZE),

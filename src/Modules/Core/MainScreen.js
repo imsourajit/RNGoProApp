@@ -123,6 +123,7 @@ const MainScreen = props => {
   };
 
   const goToGoPro = () => {
+    logClickEvent('app_record');
     props.navigation.navigate('BatchSelectionScreen', {
       selectedDevice: 'GO_PRO',
     });

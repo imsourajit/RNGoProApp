@@ -95,7 +95,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'session')}
+              onPress={() => onBackPress(props, 'batch_details')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -120,7 +120,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'session')}
+              onPress={() => onBackPress(props, 'batch')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -194,7 +194,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'session')}
+              onPress={() => onBackPress(props, 'record')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -229,7 +229,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'session')}
+              onPress={() => onBackPress(props, 'backup')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -256,7 +256,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'session')}
+              onPress={() => onBackPress(props, 'students_list')}
               size={30}
               style={{marginLeft: 10}}
             />
@@ -281,7 +281,7 @@ const CoreStackNavigator = () => {
             <Icon.Button
               name="arrow-back-ios"
               backgroundColor="#000000"
-              onPress={() => onBackPress(props, 'session')}
+              onPress={() => onBackPress(props, 'network_log')}
               size={30}
               style={{marginLeft: 10}}
             />
