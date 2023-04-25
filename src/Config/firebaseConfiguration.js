@@ -33,11 +33,11 @@ export const prodFirebaseConfig = {
 
 export const stagingFirebaseConfig = {
   apiKey: 'AIzaSyC2oeMz3fcd-Y23aM0aiydTq2pSopBr1ZI',
-  appId: '1:104781298024:android:410ccc7c1f202b1a2abedd',
+  appId: '1:688457505501:android:67bd26332561dab4fd9934',
   databaseURL: 'firebase-adminsdk-1r2ez@wagmi-qa.iam.gserviceaccount.com',
   messagingSenderId: '104781298024',
-  projectId: 'wagmi-qa',
-  storageBucket: 'wagmi-qa.appspot.com',
+  projectId: 'fcone-qa',
+  storageBucket: 'fcone-qa.appspot.com',
 };
 
 export const ALL = {
