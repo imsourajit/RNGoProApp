@@ -135,3 +135,8 @@ export const setFileSize = data => ({
   type: 'SET_FILE_SIZE',
   data,
 });
+
+export const setCurrentBackFile = data => ({
+  type: 'SET_CURRENT_BACKUP_FILE',
+  data,
+});

@@ -21,6 +21,7 @@ import {
   downloadedCompletedFile,
   setBytesRead,
   setCompletedUploading,
+  setCurrentBackFile,
   setDownloadingProgressOfMedia,
   setETagForAssetId,
   setFilePath,
@@ -36,7 +37,7 @@ import {backgroundUpload} from 'react-native-compressor';
 import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgressBar';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
-import _ from 'lodash';
+import _, {set} from 'lodash';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useIsFocused} from '@react-navigation/native';
 import ConfirmModal from '../Core/Screens/ConfirmModal';
@@ -1002,6 +1003,13 @@ const SequentialBackupScreen = props => {
     }
 
     const file = files[filePosition];
+
+    dispatch(
+      setCurrentBackFile({
+        filesSelected: files.length,
+        backupFilePos: filePosition + 1,
+      }),
+    );
 
     const assetId = await generateAssetId(
       file.name,

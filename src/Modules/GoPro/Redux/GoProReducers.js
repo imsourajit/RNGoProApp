@@ -231,6 +231,16 @@ export const GoProReducer = (state = initialState, action) => {
       };
     }
 
+    case 'SET_CURRENT_BACKUP_FILE': {
+      return {
+        ...state,
+        uploadedChunkMedia: {
+          ...state.uploadedChunkMedia,
+          ...action.data,
+        },
+      };
+    }
+
     default:
       return state;
   }

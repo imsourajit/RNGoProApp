@@ -1,31 +1,51 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, StyleSheet, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {useSelector} from 'react-redux';
 import * as Progress from 'react-native-progress';
 import _ from 'lodash';
+import {btnBgColor} from '../../../Config';
 
 const DownloadAndUploadProgressBar = () => {
-  const {downloadedMediaProgress, uploadedMediaProgress, media} = useSelector(
-    st => st.GoProReducer,
-  );
+  const {
+    downloadedMediaProgress,
+    uploadedMediaProgress,
+    media,
+    uploadedChunkMedia,
+  } = useSelector(st => st.GoProReducer);
+
+  const {filesSelected, backupFilePos} = uploadedChunkMedia ?? {};
 
   const [backupText, setBackupText] = useState('Taking backup');
 
   useEffect(() => {
-    let allFiles = [];
-    media?.map(item => {
-      allFiles = [...allFiles, ...item.fs];
-    });
+    console.log(filesSelected, backupFilePos, uploadedChunkMedia);
 
-    const index = _.findIndex(allFiles, file =>
-      (file.n === downloadedMediaProgress) === null
-        ? uploadedMediaProgress?.fileName
-        : downloadedMediaProgress?.fileName,
-    );
-    if (index >= 0) {
-      setBackupText(`Taking backup of ${index + 1} of ${allFiles.length}`);
+    if (filesSelected != undefined && backupFilePos !== undefined) {
+      setBackupText(`Taking backup ${backupFilePos} of ${filesSelected}`);
     }
-  }, [media]);
+  }, [filesSelected, backupFilePos]);
+
+  // useEffect(() => {
+  //   let allFiles = [];
+  //   media?.map(item => {
+  //     allFiles = [...allFiles, ...item.fs];
+  //   });
+
+  //   const index = _.findIndex(allFiles, file =>
+  //     (file.n === downloadedMediaProgress) === null
+  //       ? uploadedMediaProgress?.fileName
+  //       : downloadedMediaProgress?.fileName,
+  //   );
+  //   if (index >= 0) {
+  //     setBackupText(`Taking backup of ${index + 1} of ${allFiles.length}`);
+  //   }
+  // }, [media]);
 
   if (downloadedMediaProgress == null && uploadedMediaProgress == null) {
     return null;
@@ -40,6 +60,14 @@ const DownloadAndUploadProgressBar = () => {
     downloadedMediaProgress === null ? uploadedProgress : downloadedProgress;
   const fileName =
     downloadedMediaProgress === null ? uploadedFileName : downloadedFileName;
+
+  if (!progressPercentile) {
+    return (
+      <View style={{justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={btnBgColor} />
+      </View>
+    );
+  }
 
   return (
     <View
@@ -65,7 +93,7 @@ const DownloadAndUploadProgressBar = () => {
             justifyContent: 'space-between',
             // marginRight: 10,
           }}>
-          <Text>{fileName.slice(0, 35) ?? ''}</Text>
+          <Text>{decodeURIComponent(fileName.slice(0, 35)) ?? ''}</Text>
           <Text style={{color: '#F6F6F6', fontSize: 12}}>
             {progressPercentile.toFixed(2)} %
           </Text>

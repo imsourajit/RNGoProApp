@@ -1,122 +1,34 @@
 {
   "project_info": {
-    "project_number": "104781298024",
-    "firebase_url": "https://wagmi-qa-default-rtdb.firebaseio.com",
-    "project_id": "wagmi-qa",
-    "storage_bucket": "wagmi-qa.appspot.com"
+    "project_number": "688457505501",
+    "project_id": "fcone-qa",
+    "storage_bucket": "fcone-qa.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:104781298024:android:c873de0b8d2e86102abedd",
+        "mobilesdk_app_id": "1:688457505501:android:67bd26332561dab4fd9934",
         "android_client_info": {
           "package_name": "coach.fc.one"
         }
       },
       "oauth_client": [
         {
-          "client_id": "104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com",
+          "client_id": "688457505501-blntofnq19lsjdkl5bm8n3g97l25h1tk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC2oeMz3fcd-Y23aM0aiydTq2pSopBr1ZI"
+          "current_key": "AIzaSyDUCQwgkHsJKexqc-Zz64xUq8oceQmUwpE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com",
+              "client_id": "688457505501-blntofnq19lsjdkl5bm8n3g97l25h1tk.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "104781298024-3rvt5iud8nc3lmlmeidjvnp7qp2nuh9c.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "wagmi.app"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:104781298024:android:75c6412e6e032a3a2abedd",
-        "android_client_info": {
-          "package_name": "com.fc.one"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyC2oeMz3fcd-Y23aM0aiydTq2pSopBr1ZI"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "104781298024-3rvt5iud8nc3lmlmeidjvnp7qp2nuh9c.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "wagmi.app"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:104781298024:android:40e16951adb6dc872abedd",
-        "android_client_info": {
-          "package_name": "com.wagmi"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "104781298024-ke70ng5jkee81bmue0tg34ohlmm98hdg.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.wagmi",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
-          }
-        },
-        {
-          "client_id": "104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyC2oeMz3fcd-Y23aM0aiydTq2pSopBr1ZI"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "104781298024-3rvt5iud8nc3lmlmeidjvnp7qp2nuh9c.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "wagmi.app"
-              }
             }
           ]
         }
