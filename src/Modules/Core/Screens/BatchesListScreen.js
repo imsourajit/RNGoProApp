@@ -101,10 +101,10 @@ const BatchesListScreen = props => {
   };
 
   const fetchContactList = () => {
-    Contacts.getAll().then(contacts => {
-      // contacts returned
-      console.log('@contacts', contacts);
-    });
+    // Contacts.getAll().then(contacts => {
+    //   // contacts returned
+    //   console.log('@contacts', contacts);
+    // });
   };
 
   const addBatch = () => {

@@ -168,7 +168,8 @@ const OtpInputScreen = props => {
             </Text>
           ) : null}
         </View>
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+        <View
+          style={{justifyContent: 'center', alignItems: 'center', padding: 16}}>
           <Text style={{color: 'red', fontSize: 19}}>{otpValidationError}</Text>
         </View>
       </View>

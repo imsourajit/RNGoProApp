@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  BackHandler,
   FlatList,
   Modal,
   Pressable,
@@ -19,7 +20,7 @@ import RightArrowBoxesWithDescription from '../Components/RightArrowBoxesWithDes
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Contacts from 'react-native-contacts';
 import ContactSelectionBox from '../Components/ContactSelectionBox';
-import {logLoadEvent} from '../../../Services/AnalyticsTools';
+import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
 
 const StudentListsScreen = props => {
   const dispatch = useDispatch();
@@ -32,7 +33,27 @@ const StudentListsScreen = props => {
   const {selectedContacs} = useSelector(st => st.userReducer);
 
   useEffect(() => {
-    logLoadEvent('app_batch_details_screen');
+    const backAction = () => {
+      logClickEvent('app_back', {
+        screen: 'batch_details',
+        type: 'soft',
+      });
+      props.navigation.goBack();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    logLoadEvent('app_batch_details_screen', {
+      batch: batchId,
+    });
   }, []);
 
   useEffect(() => {

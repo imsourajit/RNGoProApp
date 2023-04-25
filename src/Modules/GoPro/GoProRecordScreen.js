@@ -25,7 +25,7 @@ import {
   tagLiveUrlsToSession,
 } from '../CameraAPI/Redux/CameraApiActions';
 import {btnBgColor} from '../../Config';
-import {logClickEvent} from '../../Services/AnalyticsTools';
+import {logClickEvent, logLoadEvent} from '../../Services/AnalyticsTools';
 
 const isProd = false;
 
@@ -93,6 +93,10 @@ const GoProRecordScreen = props => {
     );
 
     return () => backHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    logLoadEvent('app_recording_screen');
   }, []);
 
   useEffect(() => {
