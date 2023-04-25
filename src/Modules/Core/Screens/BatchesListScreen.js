@@ -35,7 +35,8 @@ const BatchesListScreen = props => {
         screen: 'batch',
         type: 'soft',
       });
-      return false;
+      props.navigation.goBack();
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(

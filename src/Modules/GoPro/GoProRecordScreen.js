@@ -84,7 +84,8 @@ const GoProRecordScreen = props => {
         screen: 'record_gopro',
         type: 'soft',
       });
-      return false;
+      props.navigation.goBack();
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(

@@ -103,7 +103,10 @@ const PhoneEntryScreen = props => {
 
   const _checkPhoneNumberValidation = () => {
     if (phoneNumber.length != 10) {
-      ToastAndroid.show('Please enter valid mobile number', ToastAndroid.SHORT);
+      ToastAndroid.show(
+        'Please enter a valid Phone Number',
+        ToastAndroid.SHORT,
+      );
       return false;
     }
     return true;

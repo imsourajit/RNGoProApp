@@ -31,7 +31,8 @@ const BatchSelectionScreen = props => {
         screen: 'record',
         type: 'soft',
       });
-      return false;
+      props.navigation.goBack();
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(

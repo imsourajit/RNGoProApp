@@ -40,7 +40,8 @@ const SessionListScreens = props => {
         screen: 'session',
         type: 'soft',
       });
-      return false;
+      props.navigation.goBack();
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(

@@ -85,7 +85,8 @@ const SequentialBackupScreen = props => {
         screen: 'backup',
         type: 'soft',
       });
-      return false;
+      props.navigation.goBack();
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(
