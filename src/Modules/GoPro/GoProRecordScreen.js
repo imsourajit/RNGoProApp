@@ -125,6 +125,9 @@ const GoProRecordScreen = props => {
             PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            Platform.Version > 32
+              ? PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN
+              : '',
           ]);
           return userResponse;
         }

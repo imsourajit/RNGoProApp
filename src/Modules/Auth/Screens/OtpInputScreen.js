@@ -106,10 +106,7 @@ const OtpInputScreen = props => {
             phoneNumber,
           },
           response => {
-            ToastAndroid.show(
-              'Otp has been resent successfully',
-              ToastAndroid.BOTTOM,
-            );
+            ToastAndroid.show('Otp Resent', ToastAndroid.BOTTOM);
           },
           error => {
             console.log('Otp send api error', error);
@@ -171,7 +168,9 @@ const OtpInputScreen = props => {
             </Text>
           ) : null}
         </View>
-        <Text style={{color: 'red', fontSize: 16}}>{otpValidationError}</Text>
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={{color: 'red', fontSize: 19}}>{otpValidationError}</Text>
+        </View>
       </View>
 
       <Pressable onPress={validateOtpBtnPressed}>
