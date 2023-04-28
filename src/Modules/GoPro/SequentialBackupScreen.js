@@ -514,23 +514,23 @@ const SequentialBackupScreen = props => {
   };
 
   const _getParts = () => {
-    // const {eTag} = uploadedChunkMedia ?? {};
-    // let eTagTemp = [];
-    // console.log('ETags and Parts', eTag, parts);
+    const {eTag} = uploadedChunkMedia ?? {};
+    let eTagTemp = [];
+    console.log('ETags and Parts', eTag, parts);
 
-    // Array.isArray(eTag) &&
-    //   eTag.map(tag => {
-    //     let found = _.findIndex(
-    //       parts,
-    //       part => part.PartNumber == tag.PartNumber,
-    //     );
+    Array.isArray(eTag) &&
+      eTag.map(tag => {
+        let found = _.findIndex(
+          parts,
+          part => part.PartNumber == tag.PartNumber,
+        );
 
-    //     if (found < 0) {
-    //       eTagTemp.push(tag);
-    //     }
-    //   });
+        if (found < 0) {
+          eTagTemp.push(tag);
+        }
+      });
 
-    return [...parts];
+    return [...eTagTemp, ...parts];
   };
 
   const uploadChunkToGumlet = async (

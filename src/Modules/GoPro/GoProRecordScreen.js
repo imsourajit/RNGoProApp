@@ -121,102 +121,102 @@ const GoProRecordScreen = props => {
     );
   }, []);
 
-  useEffect(() => {
-    async function GetAllPermissions() {
-      try {
-        if (Platform.OS === 'android') {
-          const userResponse = await PermissionsAndroid.requestMultiple([
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-            Platform.Version > 32
-              ? PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN
-              : '',
-          ]);
-          return userResponse;
-        }
-      } catch (err) {
-        // Warning(err);
-      }
-    }
+  // useEffect(() => {
+  //   async function GetAllPermissions() {
+  //     try {
+  //       if (Platform.OS === 'android') {
+  //         const userResponse = await PermissionsAndroid.requestMultiple([
+  //           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //           PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
+  //           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+  //           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+  //           Platform.Version > 32
+  //             ? PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN
+  //             : '',
+  //         ]);
+  //         return userResponse;
+  //       }
+  //     } catch (err) {
+  //       // Warning(err);
+  //     }
+  //   }
 
-    GetAllPermissions();
-  }, []);
+  //   GetAllPermissions();
+  // }, []);
 
-  useEffect(() => {
-    const subscribe = NativeAppEventEmitter.addListener(
-      'BleManagerDiscoverPeripheral',
-      data => {
-        console.log(data);
-      },
-    );
+  // useEffect(() => {
+  //   const subscribe = NativeAppEventEmitter.addListener(
+  //     'BleManagerDiscoverPeripheral',
+  //     data => {
+  //       console.log(data);
+  //     },
+  //   );
 
-    return subscribe && subscribe.remove();
-  }, []);
+  //   return subscribe && subscribe.remove();
+  // }, []);
 
-  useEffect(() => {
-    const enableAndStartBluetooth = () => {
-      BleManager.enableBluetooth();
-      BleManager.start({showAlert: true, forceLegacy: true}).then(() => {
-        console.log('Module initialized');
-      });
-    };
-    enableAndStartBluetooth();
-  }, []);
+  // useEffect(() => {
+  //   const enableAndStartBluetooth = () => {
+  //     BleManager.enableBluetooth();
+  //     BleManager.start({showAlert: true, forceLegacy: true}).then(() => {
+  //       console.log('Module initialized');
+  //     });
+  //   };
+  //   enableAndStartBluetooth();
+  // }, []);
 
-  useEffect(() => {
-    const startScanningBluetoothDevices = () => {
-      BleManager.scan([], 5, false).then(devices => {
-        console.log('Scan started', devices);
-      });
-    };
-    startScanningBluetoothDevices();
-  }, []);
+  // useEffect(() => {
+  //   const startScanningBluetoothDevices = () => {
+  //     BleManager.scan([], 5, false).then(devices => {
+  //       console.log('Scan started', devices);
+  //     });
+  //   };
+  //   startScanningBluetoothDevices();
+  // }, []);
 
-  useEffect(() => {
-    BleManager.getConnectedPeripherals([]).then(peripheralsArray => {
-      let goProDevices = peripheralsArray.filter(peripheral =>
-        peripheral.name.includes('GoPro'),
-      );
-      if (goProDevices.length) {
-        setDevicesConnected(goProDevices[0]);
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   BleManager.getConnectedPeripherals([]).then(peripheralsArray => {
+  //     let goProDevices = peripheralsArray.filter(peripheral =>
+  //       peripheral.name.includes('GoPro'),
+  //     );
+  //     if (goProDevices.length) {
+  //       setDevicesConnected(goProDevices[0]);
+  //     }
+  //   });
+  // }, []);
 
-  useEffect(() => {
-    // Get GoPro Name and Password for wifi connection
-    const getHotspotDetails = async _ => {
-      const deviceId = devicesConnected.id;
-      try {
-        await BleManager.connect(deviceId);
-        await BleManager.retrieveServices(deviceId, []);
-        const ssid = await BleManager.read(
-          deviceId,
-          'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
-          'b5f90002-aa8d-11e3-9046-0002a5d5c51b',
-        );
+  // useEffect(() => {
+  //   // Get GoPro Name and Password for wifi connection
+  //   const getHotspotDetails = async _ => {
+  //     const deviceId = devicesConnected.id;
+  //     try {
+  //       await BleManager.connect(deviceId);
+  //       await BleManager.retrieveServices(deviceId, []);
+  //       const ssid = await BleManager.read(
+  //         deviceId,
+  //         'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+  //         'b5f90002-aa8d-11e3-9046-0002a5d5c51b',
+  //       );
 
-        const password = await BleManager.read(
-          deviceId,
-          'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
-          'b5f90003-aa8d-11e3-9046-0002a5d5c51b',
-        );
+  //       const password = await BleManager.read(
+  //         deviceId,
+  //         'b5f90001-aa8d-11e3-9046-0002a5d5c51b',
+  //         'b5f90003-aa8d-11e3-9046-0002a5d5c51b',
+  //       );
 
-        setHotspotDetails({
-          ssid: String.fromCharCode(...ssid),
-          password: String.fromCharCode(...password),
-        });
-      } catch (e) {
-        console.log('Oops!!! Unable to fetch device hotspot details', e);
-      }
-    };
+  //       setHotspotDetails({
+  //         ssid: String.fromCharCode(...ssid),
+  //         password: String.fromCharCode(...password),
+  //       });
+  //     } catch (e) {
+  //       console.log('Oops!!! Unable to fetch device hotspot details', e);
+  //     }
+  //   };
 
-    if (Object.keys(devicesConnected).length) {
-      getHotspotDetails();
-    }
-  }, [devicesConnected]);
+  //   if (Object.keys(devicesConnected).length) {
+  //     getHotspotDetails();
+  //   }
+  // }, [devicesConnected]);
 
   // const _scrollToNextItem = () => {
   //   currentRefIndex = 1;
