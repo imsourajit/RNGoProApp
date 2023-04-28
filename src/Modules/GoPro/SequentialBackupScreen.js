@@ -848,6 +848,7 @@ const SequentialBackupScreen = props => {
   };
 
   const deleteFileUsingUri = uri => {
+    console.log('Uri', uri);
     try {
       NativeModules.RNDocumentPicker.deleteFile(uri);
     } catch (error) {
@@ -967,7 +968,7 @@ const SequentialBackupScreen = props => {
       .then(uploadId => {
         console.log('Upload started');
         Upload.addListener('progress', uploadId, data => {
-          let eachPartMaxSize = 100 / totalNoOfChunks;
+          let eachPartMaxSize = 100 / (totalNoOfChunks - 1 + partNumber);
 
           let percentage =
             (partNumber - 1) * eachPartMaxSize +
@@ -1152,9 +1153,9 @@ const SequentialBackupScreen = props => {
     DocumentPicker.pickMultiple({
       type: 'video/mp4',
     }).then(async files => {
-      console.log('@files', files);
-      deleteFileUsingUri(files[0].uri);
-      // await startChunkUpload(files, 0);
+      // deleteFileUsingUri(files[0].uri);
+      console.log(files);
+      await startChunkUpload(files, 0);
     });
   };
 

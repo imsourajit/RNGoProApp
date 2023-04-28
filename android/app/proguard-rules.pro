@@ -14,3 +14,5 @@
 }
 
 -keep class com.google.android.gms.common.** {*;}
+
+-keep class net.gotev.uploadservice.** { *; }
