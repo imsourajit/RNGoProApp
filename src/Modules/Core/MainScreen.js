@@ -111,6 +111,7 @@ const MainScreen = props => {
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         // PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
         PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+        // PermissionsAndroid.PERMISSIONS.MANAGE_DOCUMENTS,
       ]);
     } catch (err) {
       console.warn(err);

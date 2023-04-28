@@ -48,6 +48,8 @@ import {
 } from '../../Services/AnalyticsTools';
 import DocumentPicker from 'react-native-document-picker';
 
+import Upload from 'react-native-background-upload';
+
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
 const SequentialBackupScreen = props => {
@@ -910,9 +912,7 @@ const SequentialBackupScreen = props => {
         })
         .catch(err => {
           dispatch(setCompletedUploading());
-          RNFetchBlob.fs.unlink(
-            APP_DIR + `/${files[filePosition--].name.replaceAll('.', '_')}`,
-          );
+
           console.log('__Error Multipart upload error', err);
         });
 
@@ -921,6 +921,7 @@ const SequentialBackupScreen = props => {
     }
 
     let chunkFilePath = '';
+    let tempPath = '';
     try {
       const chunkData = await RNFS.read(
         filePath,
@@ -937,6 +938,7 @@ const SequentialBackupScreen = props => {
       console.log(fileName, files, filePosition);
 
       chunkFilePath = await createChunkDirectory(files[filePosition]?.name);
+      tempPath = chunkFilePath;
       chunkFilePath = chunkFilePath + `/chunk_${time.getTime()}.mp4`;
 
       console.log('Chunkfilepath', chunkFilePath);
@@ -947,54 +949,122 @@ const SequentialBackupScreen = props => {
 
     const preSignedUrl = await getPreSignedUrlForUpload(assetId, partNumber);
 
-    RNFetchBlob.config({
-      fileCache: false,
-    });
-
-    await RNFetchBlob.fetch(
-      'PUT',
-      preSignedUrl,
-      {
+    const options = {
+      url: preSignedUrl,
+      path: chunkFilePath,
+      method: 'PUT',
+      type: 'raw',
+      maxRetries: 10,
+      headers: {
         'Content-Type': 'video/mp4',
       },
-      RNFetchBlob.wrap(chunkFilePath),
-    )
-      .uploadProgress({interval: 550}, (written, total) => {
-        const uploadProgressPercentage =
-          ((partNumber - 1 + written / total) /
-            (totalNoOfChunks - 1 + partNumber)) *
-          100;
-        dispatch(
-          setUploadingProgressOfMedia({
-            fileName: getLastString(filePath, '/'),
-            percentile: uploadProgressPercentage,
-          }),
-        );
-        console.log('Upload Progress Percentage', uploadProgressPercentage);
-      })
-      .then(async res => {
-        const eTagPart = {
-          PartNumber: partNumber,
-          ETag: res.respInfo.headers.ETag,
-        };
+      notification: {
+        enabled: true,
+      },
+    };
 
-        parts.push(eTagPart);
-        await RNFetchBlob.fs.unlink(chunkFilePath);
-        res.flush();
-        await uploadUriToGumlet(
-          assetId,
-          filePath,
-          totalNoOfChunks - 1,
-          bytesRead,
-          partNumber + 1,
-          files,
-          filePosition,
-        );
+    Upload.startUpload(options)
+      .then(uploadId => {
+        console.log('Upload started');
+        Upload.addListener('progress', uploadId, data => {
+          let eachPartMaxSize = 100 / totalNoOfChunks;
+
+          let percentage =
+            (partNumber - 1) * eachPartMaxSize +
+            (data.progress / 100) * eachPartMaxSize;
+
+          // const uploadProgressPercentage =
+          //   ((partNumber - 1 + data / 100) /
+          //     (totalNoOfChunks - 1 + partNumber)) *
+          //   100;
+          dispatch(
+            setUploadingProgressOfMedia({
+              fileName: getLastString(filePath, '/'),
+              percentile: percentage,
+            }),
+          );
+          console.log(`Progress: ${data.progress}%`);
+        });
+        Upload.addListener('error', uploadId, data => {
+          console.log(`Error: ${data.error}%`);
+        });
+        Upload.addListener('cancelled', uploadId, data => {
+          console.log('Cancelled!');
+        });
+        Upload.addListener('completed', uploadId, async data => {
+          console.log(data);
+          const eTagPart = {
+            PartNumber: partNumber,
+            ETag: data.responseHeaders.ETag,
+          };
+
+          parts.push(eTagPart);
+          await RNFetchBlob.fs.unlink(chunkFilePath);
+          // data.flush();
+          await uploadUriToGumlet(
+            assetId,
+            filePath,
+            totalNoOfChunks - 1,
+            bytesRead,
+            partNumber + 1,
+            files,
+            filePosition,
+          );
+        });
       })
       .catch(async err => {
-        console.log('Unable to upload chunk', err);
-        await RNFetchBlob.fs.unlink(chunkFilePath);
+        await RNFetchBlob.fs.unlink(tempPath);
+        console.log('Upload error!', err);
       });
+
+    // RNFetchBlob.config({
+    //   fileCache: false,
+    // });
+
+    // await RNFetchBlob.fetch(
+    //   'PUT',
+    //   preSignedUrl,
+    //   {
+    //     'Content-Type': 'video/mp4',
+    //   },
+    //   RNFetchBlob.wrap(chunkFilePath),
+    // )
+    //   .uploadProgress({interval: 550}, (written, total) => {
+    //     const uploadProgressPercentage =
+    //       ((partNumber - 1 + written / total) /
+    //         (totalNoOfChunks - 1 + partNumber)) *
+    //       100;
+    //     dispatch(
+    //       setUploadingProgressOfMedia({
+    //         fileName: getLastString(filePath, '/'),
+    //         percentile: uploadProgressPercentage,
+    //       }),
+    //     );
+    //     console.log('Upload Progress Percentage', uploadProgressPercentage);
+    //   })
+    //   .then(async res => {
+    //     const eTagPart = {
+    //       PartNumber: partNumber,
+    //       ETag: res.respInfo.headers.ETag,
+    //     };
+
+    //     parts.push(eTagPart);
+    //     await RNFetchBlob.fs.unlink(chunkFilePath);
+    //     res.flush();
+    //     await uploadUriToGumlet(
+    //       assetId,
+    //       filePath,
+    //       totalNoOfChunks - 1,
+    //       bytesRead,
+    //       partNumber + 1,
+    //       files,
+    //       filePosition,
+    //     );
+    //   })
+    //   .catch(async err => {
+    //     console.log('Unable to upload chunk', err);
+    //     await RNFetchBlob.fs.unlink(tempPath);
+    //   });
   };
 
   const createChunkDirectory = async dir => {
@@ -1083,7 +1153,8 @@ const SequentialBackupScreen = props => {
       type: 'video/mp4',
     }).then(async files => {
       console.log('@files', files);
-      await startChunkUpload(files, 0);
+      deleteFileUsingUri(files[0].uri);
+      // await startChunkUpload(files, 0);
     });
   };
 
