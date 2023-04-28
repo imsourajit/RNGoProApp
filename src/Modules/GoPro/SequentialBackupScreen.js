@@ -37,7 +37,7 @@ import {backgroundUpload} from 'react-native-compressor';
 import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgressBar';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
-import _, {set} from 'lodash';
+import _, {result, set} from 'lodash';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useIsFocused} from '@react-navigation/native';
 import ConfirmModal from '../Core/Screens/ConfirmModal';
@@ -888,9 +888,21 @@ const SequentialBackupScreen = props => {
           });
           deleteFileUsingUri(files[filePosition].uri);
           parts = []; //empty all the tag response once file is uploaded
+
+          // delete temp folder
+          RNFetchBlob.fs.unlink(
+            APP_DIR + `/${files[filePosition--].name.replaceAll('.', '_')}`,
+          );
+
           // start uploading next file
           filePosition++;
           if (files.length > filePosition) {
+            console.log(
+              APP_DIR +
+                `/${files[filePosition--].name.replaceAll('.', '_')}
+            `,
+            );
+
             startChunkUpload(files, filePosition);
           } else {
             ToastAndroid.show('Cloud back completed', ToastAndroid.BOTTOM);
@@ -898,8 +910,12 @@ const SequentialBackupScreen = props => {
         })
         .catch(err => {
           dispatch(setCompletedUploading());
+          RNFetchBlob.fs.unlink(
+            APP_DIR + `/${files[filePosition--].name.replaceAll('.', '_')}`,
+          );
           console.log('__Error Multipart upload error', err);
         });
+
       deleteFile(filePath);
       return;
     }
@@ -917,7 +933,11 @@ const SequentialBackupScreen = props => {
 
       const time = new Date();
 
-      chunkFilePath = APP_DIR + `/chunk_${time.getTime()}.mp4`;
+      const fileName = files[filePosition]?.name;
+      console.log(fileName, files, filePosition);
+
+      chunkFilePath = await createChunkDirectory(files[filePosition]?.name);
+      chunkFilePath = chunkFilePath + `/chunk_${time.getTime()}.mp4`;
 
       console.log('Chunkfilepath', chunkFilePath);
       await RNFS.writeFile(chunkFilePath, chunkData, 'base64');
@@ -971,7 +991,36 @@ const SequentialBackupScreen = props => {
           filePosition,
         );
       })
-      .catch(err => console.log('Unable to upload chunk', err));
+      .catch(async err => {
+        console.log('Unable to upload chunk', err);
+        await RNFetchBlob.fs.unlink(chunkFilePath);
+      });
+  };
+
+  const createChunkDirectory = async dir => {
+    const {config, fs} = RNFetchBlob;
+
+    let tempPath = APP_DIR + `/${dir.replaceAll('.', '_')}`;
+    console.log('tempPath', tempPath);
+
+    // eslint-disable-next-line prettier/prettier
+   return new Promise(async (resolve) => {
+      try {
+        RNFS.exists(tempPath)
+          .then(async result => {
+            if (result) {
+              // await RNFetchBlob.fs.mkdir(tempPath);
+            } else {
+              await RNFetchBlob.fs.mkdir(tempPath);
+            }
+            resolve(tempPath);
+          })
+          .catch(err => {});
+      } catch (error) {
+        console.log('tempPath error', error);
+        resolve(APP_DIR);
+      }
+    });
   };
 
   const generateAssetId = async (fileName, creationTime) => {
@@ -1030,7 +1079,10 @@ const SequentialBackupScreen = props => {
   };
 
   const takeBackUpFromStorage = async () => {
-    DocumentPicker.pickMultiple().then(async files => {
+    DocumentPicker.pickMultiple({
+      type: 'video/mp4',
+    }).then(async files => {
+      console.log('@files', files);
       await startChunkUpload(files, 0);
     });
   };
