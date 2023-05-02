@@ -30,6 +30,10 @@ import ConfirmModal from './Screens/ConfirmModal';
 import {logClickEvent, logLoadEvent} from '../../Services/AnalyticsTools';
 import AnalyticsServices from '../../Services/AnalyticsTools/AnalyticsService';
 import {btnBgColor} from '../../Config';
+import {
+  OpenOptimizationSettings,
+  BatteryOptEnabled,
+} from 'react-native-battery-optimization-check';
 
 const deviceList = [
   {
@@ -113,9 +117,21 @@ const MainScreen = props => {
         PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
         // PermissionsAndroid.PERMISSIONS.MANAGE_DOCUMENTS,
       ]);
+      changeBatteryOptimisation();
     } catch (err) {
       console.warn(err);
     }
+  };
+
+  const changeBatteryOptimisation = () => {
+    BatteryOptEnabled().then(isEnabled => {
+      // returns promise<boolean>
+      if (isEnabled) {
+        // if battery optimization is enabled, request to disable it.
+        OpenOptimizationSettings();
+        // ...
+      }
+    });
   };
 
   const goToCamera = () => {
