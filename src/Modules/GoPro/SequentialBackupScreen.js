@@ -46,7 +46,7 @@ import {
   logEvent,
   logLoadEvent,
 } from '../../Services/AnalyticsTools';
-import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker from '@imsourajit/react-native-document-picker';
 
 import Upload from 'react-native-background-upload';
 

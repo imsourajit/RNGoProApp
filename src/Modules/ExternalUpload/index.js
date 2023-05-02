@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import RNFS from 'react-native-fs';
-import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker from '@imsourajit/react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 
 const ExternalUpload = props => {

@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {BackHandler, Pressable, StyleSheet, Text, View} from 'react-native';
 import {logClickEvent, logLoadEvent} from '../../../Services/AnalyticsTools';
-import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker from '@imsourajit/react-native-document-picker';
 
 const CloudBackupScreen = props => {
   useEffect(() => {

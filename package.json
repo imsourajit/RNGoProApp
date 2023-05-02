@@ -11,6 +11,7 @@
     "postinstall": "react-native setup-ios-permissions && npx pod-install"
   },
   "dependencies": {
+    "@imsourajit/react-native-document-picker": "^8.2.0",
     "@react-native-async-storage/async-storage": "^1.17.11",
     "@react-native-community/netinfo": "^9.3.7",
     "@react-native-firebase/analytics": "^17.4.2",
@@ -33,7 +34,6 @@
     "react-native-compressor": "https://github.com/Shobbak/react-native-compressor",
     "react-native-contacts": "^7.0.5",
     "react-native-device-info": "^10.6.0",
-    "react-native-document-picker": "^8.2.0",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.9.0",
     "react-native-image-picker": "^5.3.1",
