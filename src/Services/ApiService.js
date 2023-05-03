@@ -6,8 +6,8 @@ import {updateAuthToken} from '../Modules/Core/Redux/UserActions';
 import store from '../Store/store';
 import crashlytics from '@react-native-firebase/crashlytics';
 
-const STAGING_END_POINT = 'https://qa-platform.thewagmi.app/platform';
-const PRODUCTION_END_POINT = 'https://platform.thewagmi.app/platform';
+const STAGING_END_POINT = 'https://staging-platform.fc.one/platform';
+const PRODUCTION_END_POINT = 'https://platform.fc.one/platform';
 
 const apiUrl = STAGING_END_POINT;
 

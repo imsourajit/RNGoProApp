@@ -33,7 +33,12 @@ import {
 } from './Redux/GoProActions';
 import RNFS from 'react-native-fs';
 import axios from 'axios';
-import {backgroundUpload} from 'react-native-compressor';
+import {
+  backgroundUpload,
+  getRealPath,
+  Video,
+  generateFilePath,
+} from 'react-native-compressor';
 import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgressBar';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -1155,8 +1160,57 @@ const SequentialBackupScreen = props => {
     }).then(async files => {
       // deleteFileUsingUri(files[0].uri);
       console.log(files);
-      await startChunkUpload(files, 0);
+
+      await compressVideo(files[0].uri);
+
+      // await startChunkUpload(files, 0);
     });
+  };
+
+  const compressVideo = async fileUri => {
+    const realPath = await getRealPath(fileUri, 'video');
+
+    console.log('@Item upload started', new Date().getTime());
+
+    const uploadUrl =
+      'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/6452547d5336a60e6227099e/origin-6452547d5336a60e6227099e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230503%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230503T123302Z&X-Amz-Expires=3600&X-Amz-Signature=6bd2067be9fa0be97fc28dea1f45d4151768b216cfbcf3bebcc23e67d08a091e&X-Amz-SignedHeaders=host&x-id=PutObject';
+
+    // const m = await generateFilePath(
+    //   'file:///data/user/0/coach.fc.one/cache/e7238a00-6e1a-478b-a565-62008645fbe6.mp4',
+    // );
+    console.log('@RealPath', realPath);
+
+    const result = await Video.compress(
+      fileUri,
+      {
+        compressionMethod: 'manual',
+        maxSize: 2704,
+        bitrate: 12,
+        getCancellationId: cancellationId => {},
+      },
+      progress => {
+        console.log('Compression Progress: ', progress);
+      },
+    );
+    console.log('@Item compression ended', new Date().getTime());
+
+    await backgroundUpload(
+      uploadUrl,
+      result,
+      {
+        httpMethod: 'PUT',
+        headers: {
+          'Content-Type': 'video/mp4',
+        },
+      },
+      (written, total) => {
+        console.log('Uploading ', written, total, new Date().getTime());
+      },
+    ).catch(err => console.log('Error', err));
+    console.log('@Item uploaded', new Date().getTime());
+
+    const size = RNFetchBlob.fs.stat(result);
+    console.log('Video Progress', size);
   };
 
   return (

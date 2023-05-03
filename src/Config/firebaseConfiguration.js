@@ -14,7 +14,7 @@ export const ProdConfig = {
 };
 
 export const StagingConfig = {
-  apiEndPoint: 'https://qa-platform.thewagmi.app/platform',
+  apiEndPoint: 'https://staging-platform.fc.one/platform',
   googleAuthWebClientId:
     '104781298024-d76o5hi446b48ao6uh9pub5rlb6c3ggf.apps.googleusercontent.com',
   mixPanelToken: '230caaf11ac87526eca00667b89307c5',
