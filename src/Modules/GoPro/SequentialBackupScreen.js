@@ -54,6 +54,7 @@ import {
 import DocumentPicker from '@imsourajit/react-native-document-picker';
 
 import Upload from 'react-native-background-upload';
+var Buffer = require('@craftzdog/react-native-buffer').Buffer;
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -1161,11 +1162,54 @@ const SequentialBackupScreen = props => {
       // deleteFileUsingUri(files[0].uri);
       console.log(files);
 
-      await compressVideo(files[0].uri);
+      await _startParallelUpload(files[0]);
+
+      // await compressVideoWithProcessor(files[0].uri);
 
       // await startChunkUpload(files, 0);
     });
   };
+
+  // const compressVideoWithProcessor = async fileUri => {
+  //   const realPath = await getRealPath(fileUri, 'video');
+  //   const uploadUrl =
+  //     'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/6452727356ecc7951d78cdbc/origin-6452727356ecc7951d78cdbc?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230503%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230503T144052Z&X-Amz-Expires=3600&X-Amz-Signature=0ae3b9bccbd53ee9d8e4112428492e81f84bb5361fd473f58df1fcee719574b6&X-Amz-SignedHeaders=host&x-id=PutObject';
+  //   console.log('@RealPath', realPath);
+  //   const options = {
+  //     width: 1920,
+  //     height: 1080,
+  //     bitrateMultiplier: 3,
+  //     saveToCameraRoll: true, // default is false, iOS only
+  //     saveWithCurrentDate: true, // default is false, iOS only
+  //     minimumBitrate: 300000,
+  //     removeAudio: false, // default is false
+  //   };
+  //   ProcessingManager.getVideoInfo(realPath).then(k => console.log(k));
+  //   console.log('@Item compress started', new Date().getTime());
+  //   ProcessingManager.compress(realPath, options)
+  //     .then(async newSource => {
+  //       console.log(
+  //         '@Item upload started',
+  //         newSource.source,
+  //         new Date().getTime(),
+  //       );
+  //       await backgroundUpload(
+  //         uploadUrl,
+  //         newSource.source,
+  //         {
+  //           httpMethod: 'PUT',
+  //           headers: {
+  //             'Content-Type': 'video/mp4',
+  //           },
+  //         },
+  //         (written, total) => {
+  //           console.log('Uploading ', written, total, new Date().getTime());
+  //         },
+  //       ).catch(err => console.log('Error', err));
+  //       console.log('@Item uploaded', new Date().getTime());
+  //     })
+  //     .catch(console.warn);
+  // };
 
   const compressVideo = async fileUri => {
     const realPath = await getRealPath(fileUri, 'video');
@@ -1211,6 +1255,131 @@ const SequentialBackupScreen = props => {
 
     const size = RNFetchBlob.fs.stat(result);
     console.log('Video Progress', size);
+  };
+
+  const _startParallelUpload = async file => {
+    const fileUri = file.uri;
+    // const realPath = await getRealPath(fileUri, 'video');
+
+    const assetId = await generateAssetId(
+      file.name,
+      // eslint-disable-next-line radix
+      parseInt(file.creationTime),
+    );
+
+    let bytesRead = 0;
+    let CHUNKED_DATA_ARRAY = [];
+
+    // RNFS.readFile(realPath, 'base64')
+    //   .then(r => console.log('read', r))
+    //   .catch(e => console.log('Error', e));
+
+    console.log('__MUNNA @File read started', new Date().getTime());
+
+    for (; bytesRead <= file.size; ) {
+      const chunkData = await RNFS.read(
+        fileUri,
+        CHUNK_SIZE,
+        bytesRead,
+        'base64',
+      );
+
+      CHUNKED_DATA_ARRAY.push(chunkData);
+      bytesRead += CHUNK_SIZE;
+    }
+
+    console.log('__MUNNA @File read ended', new Date().getTime());
+
+    let uploadPromises = CHUNKED_DATA_ARRAY.map(async (chunkData, index) => {
+      // console.log('__MUNNA chunk', chunkData);
+
+      return getPreSignedUrlForUpload(assetId, index + 1).then(async res => {
+        // console.log('__MUNNA res', chunkData);
+        // const blob = new Blob([chunkData], {type: 'video/mp4'});
+
+        // // const formData = new FormData();
+        const data = Buffer.from(chunkData, 'base64');
+        // // // console.log(data);
+        // // formData.append('video', blob, `video${index}.mp4`);
+
+        return axios.put(res, data, {
+          headers: {
+            'Content-Type': 'video/mp4',
+            // 'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        return RNFetchBlob.fetch(
+          'PUT',
+          res,
+          {
+            'Content-Type': 'video/mp4',
+          },
+          [
+            {
+              name: `part${index + 1}`,
+              filename: `part${index + 1}.mp4`,
+              type: 'video/mp4',
+              data: 'RNFetchBlob-file://' + chunkData,
+            },
+          ],
+        );
+      });
+
+      // return await RNFetchBlob.fetch(
+      //   'PUT',
+      //   partUrl,
+      //   {
+      //     'Content-Type': 'video/mp4',
+      //   },
+      //   'RNFetchBlob-file://' + JSON.parse(chunkData),
+      // );
+    });
+
+    console.log('__MUNNA Upload Promises ended', new Date().getTime());
+
+    const eTagResponses = await Promise.all(uploadPromises);
+
+    console.log('__MUNNA eTagResponses received', new Date().getTime());
+
+    const completeReqParam = eTagResponses.map((res, index) => {
+      return {
+        PartNumber: (index + 1).toString(),
+        ETag: res.headers.etag,
+        // ETag: res.respInfo.headers.ETag,
+      };
+    });
+
+    console.log(
+      '__MUNNA eTagResponses manipulations',
+      new Date().getTime(),
+      completeReqParam,
+    );
+
+    const options = {
+      method: 'POST',
+      url: `https://api.gumlet.com/v1/video/assets/${assetId}/multipartupload/complete`,
+      headers: {
+        'content-type': 'application/json',
+        Authorization: 'Bearer 244953dc1ad898aa48bd000856d4f879',
+      },
+      data: {
+        parts: completeReqParam,
+      },
+    };
+
+    axios
+      .request(options)
+      .then(res => {
+        console.log('__GUMLET__  multipart complete api res', res);
+      })
+      .catch(err =>
+        console.log(
+          '__GUMLET__ multipart complete api error',
+          JSON.stringify(err),
+          err.message,
+        ),
+      );
   };
 
   return (

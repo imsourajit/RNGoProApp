@@ -11,6 +11,7 @@
     "postinstall": "react-native setup-ios-permissions && npx pod-install"
   },
   "dependencies": {
+    "@craftzdog/react-native-buffer": "^6.0.5",
     "@imsourajit/react-native-document-picker": "^8.2.0",
     "@react-native-async-storage/async-storage": "^1.17.11",
     "@react-native-community/netinfo": "^9.3.7",
@@ -42,6 +43,7 @@
     "react-native-permissions": "^3.8.0",
     "react-native-progress": "^5.0.0",
     "react-native-qrcode-svg": "^6.2.0",
+    "react-native-quick-base64": "^2.0.6",
     "react-native-safe-area-context": "^4.5.0",
     "react-native-screens": "^3.20.0",
     "react-native-svg": "^13.8.0",

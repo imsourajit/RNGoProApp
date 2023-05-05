@@ -170,6 +170,8 @@ dependencies {
         implementation jscFlavor
     }
 
+    
+
 }
 project.ext.vectoricons = [
         iconFontNames: ['MaterialIcons.ttf', 'EvilIcons.ttf'] // Name of the font files you want to copy
