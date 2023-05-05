@@ -370,13 +370,14 @@ const SequentialBackupScreen = props => {
     RNFS.exists(filepath)
       .then(result => {
         if (result) {
-          return RNFS.unlink(filepath)
-            .then(() => {
-              console.log('FILE DELETED');
-            })
-            .catch(err => {
-              console.log(err.message);
-            });
+          return RNFetchBlob.fs.unlink(filepath);
+          // return RNFS.unlink(filepath)
+          //   .then(() => {
+          //     console.log('FILE DELETED');
+          //   })
+          //   .catch(err => {
+          //     console.log(err.message);
+          //   });
         }
       })
       .catch(err => {
@@ -1259,7 +1260,7 @@ const SequentialBackupScreen = props => {
 
   const _startParallelUpload = async file => {
     const fileUri = file.uri;
-    // const realPath = await getRealPath(fileUri, 'video');
+    const realPath = await getRealPath(fileUri, 'video');
 
     const assetId = await generateAssetId(
       file.name,
@@ -1269,14 +1270,18 @@ const SequentialBackupScreen = props => {
 
     let bytesRead = 0;
     let CHUNKED_DATA_ARRAY = [];
+    let chunkFilePath = await createChunkDirectory(
+      file.name + new Date().getTime(),
+    );
 
     // RNFS.readFile(realPath, 'base64')
     //   .then(r => console.log('read', r))
     //   .catch(e => console.log('Error', e));
 
-    console.log('__MUNNA @File read started', new Date().getTime());
+    console.log('__MUNNA @File read started', new Date().getTime(), realPath);
+    let totalNoOfChunks = Math.ceil(file.size / CHUNK_SIZE);
 
-    for (; bytesRead <= file.size; ) {
+    for (; totalNoOfChunks > 0; totalNoOfChunks--) {
       const chunkData = await RNFS.read(
         fileUri,
         CHUNK_SIZE,
@@ -1286,6 +1291,12 @@ const SequentialBackupScreen = props => {
 
       CHUNKED_DATA_ARRAY.push(chunkData);
       bytesRead += CHUNK_SIZE;
+      console.log('__MUNNA bytesRead ', bytesRead);
+      new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 300);
+      });
     }
 
     console.log('__MUNNA @File read ended', new Date().getTime());
@@ -1294,20 +1305,20 @@ const SequentialBackupScreen = props => {
       // console.log('__MUNNA chunk', chunkData);
 
       return getPreSignedUrlForUpload(assetId, index + 1).then(async res => {
-        // console.log('__MUNNA res', chunkData);
-        // const blob = new Blob([chunkData], {type: 'video/mp4'});
+        // const data = Buffer.from(chunkData, 'base64');
 
-        // // const formData = new FormData();
-        const data = Buffer.from(chunkData, 'base64');
-        // // // console.log(data);
-        // // formData.append('video', blob, `video${index}.mp4`);
+        // return axios.put(res, data, {
+        //   headers: {
+        //     'Content-Type': 'video/mp4',
+        //     // 'Content-Type': 'multipart/form-data',
+        //   },
+        // });
 
-        return axios.put(res, data, {
-          headers: {
-            'Content-Type': 'video/mp4',
-            // 'Content-Type': 'multipart/form-data',
-          },
-        });
+        const tempPath = chunkFilePath + `/chunk_${new Date().getTime()}.mp4`;
+
+        console.log(tempPath);
+
+        await RNFS.writeFile(tempPath, chunkData, 'base64');
 
         return RNFetchBlob.fetch(
           'PUT',
@@ -1315,25 +1326,9 @@ const SequentialBackupScreen = props => {
           {
             'Content-Type': 'video/mp4',
           },
-          [
-            {
-              name: `part${index + 1}`,
-              filename: `part${index + 1}.mp4`,
-              type: 'video/mp4',
-              data: 'RNFetchBlob-file://' + chunkData,
-            },
-          ],
+          RNFetchBlob.wrap(tempPath),
         );
       });
-
-      // return await RNFetchBlob.fetch(
-      //   'PUT',
-      //   partUrl,
-      //   {
-      //     'Content-Type': 'video/mp4',
-      //   },
-      //   'RNFetchBlob-file://' + JSON.parse(chunkData),
-      // );
     });
 
     console.log('__MUNNA Upload Promises ended', new Date().getTime());
@@ -1345,8 +1340,8 @@ const SequentialBackupScreen = props => {
     const completeReqParam = eTagResponses.map((res, index) => {
       return {
         PartNumber: (index + 1).toString(),
-        ETag: res.headers.etag,
-        // ETag: res.respInfo.headers.ETag,
+        // ETag: res.headers.etag,
+        ETag: res.respInfo.headers.ETag,
       };
     });
 
@@ -1380,6 +1375,8 @@ const SequentialBackupScreen = props => {
           err.message,
         ),
       );
+
+    deleteFile(chunkFilePath);
   };
 
   return (
