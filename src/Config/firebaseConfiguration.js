@@ -38,6 +38,7 @@ export const stagingFirebaseConfig = {
   messagingSenderId: '104781298024',
   projectId: 'fcone-qa',
   storageBucket: 'fcone-qa.appspot.com',
+  gstURL: 'gs://fcone-qa.appspot.com/fcone-raw-recording',
 };
 
 export const ALL = {

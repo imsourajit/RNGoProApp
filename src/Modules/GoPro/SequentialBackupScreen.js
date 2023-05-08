@@ -33,16 +33,11 @@ import {
 } from './Redux/GoProActions';
 import RNFS from 'react-native-fs';
 import axios from 'axios';
-import {
-  backgroundUpload,
-  getRealPath,
-  Video,
-  generateFilePath,
-} from 'react-native-compressor';
+import {backgroundUpload, getRealPath} from 'react-native-compressor';
 import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgressBar';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
-import _, {result, set} from 'lodash';
+import _ from 'lodash';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useIsFocused} from '@react-navigation/native';
 import ConfirmModal from '../Core/Screens/ConfirmModal';
@@ -54,6 +49,12 @@ import {
 import DocumentPicker from '@imsourajit/react-native-document-picker';
 
 import Upload from 'react-native-background-upload';
+import storage, {
+  firebase,
+  updateMetadata,
+} from '@react-native-firebase/storage';
+import {getFirebaseConfigs} from '../../Config';
+
 var Buffer = require('@craftzdog/react-native-buffer').Buffer;
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
@@ -1081,8 +1082,7 @@ const SequentialBackupScreen = props => {
     let tempPath = APP_DIR + `/${dir.replaceAll('.', '_')}`;
     console.log('tempPath', tempPath);
 
-    // eslint-disable-next-line prettier/prettier
-   return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       try {
         RNFS.exists(tempPath)
           .then(async result => {
@@ -1163,7 +1163,7 @@ const SequentialBackupScreen = props => {
       // deleteFileUsingUri(files[0].uri);
       console.log(files);
 
-      await _startParallelUpload(files[0]);
+      await storeFileToGCP(files, 0);
 
       // await compressVideoWithProcessor(files[0].uri);
 
@@ -1212,55 +1212,149 @@ const SequentialBackupScreen = props => {
   //     .catch(console.warn);
   // };
 
-  const compressVideo = async fileUri => {
+  // const compressVideo = async fileUri => {
+  //   const realPath = await getRealPath(fileUri, 'video');
+
+  //   console.log('@Item upload started', new Date().getTime());
+
+  //   const uploadUrl =
+  //     'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/6452547d5336a60e6227099e/origin-6452547d5336a60e6227099e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230503%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230503T123302Z&X-Amz-Expires=3600&X-Amz-Signature=6bd2067be9fa0be97fc28dea1f45d4151768b216cfbcf3bebcc23e67d08a091e&X-Amz-SignedHeaders=host&x-id=PutObject';
+
+  //   // const m = await generateFilePath(
+  //   //   'file:///data/user/0/coach.fc.one/cache/e7238a00-6e1a-478b-a565-62008645fbe6.mp4',
+  //   // );
+  //   console.log('@RealPath', realPath);
+
+  //   const result = await Video.compress(
+  //     fileUri,
+  //     {
+  //       compressionMethod: 'manual',
+  //       maxSize: 2704,
+  //       bitrate: 12,
+  //       getCancellationId: cancellationId => {},
+  //     },
+  //     progress => {
+  //       console.log('Compression Progress: ', progress);
+  //     },
+  //   );
+  //   console.log('@Item compression ended', new Date().getTime());
+
+  //   await backgroundUpload(
+  //     uploadUrl,
+  //     result,
+  //     {
+  //       httpMethod: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'video/mp4',
+  //       },
+  //     },
+  //     (written, total) => {
+  //       console.log('Uploading ', written, total, new Date().getTime());
+  //     },
+  //   ).catch(err => console.log('Error', err));
+  //   console.log('@Item uploaded', new Date().getTime());
+
+  //   const size = RNFetchBlob.fs.stat(result);
+  //   console.log('Video Progress', size);
+  // };
+
+  const storeFileToGCP = async (files, index) => {
+    if (index >= files.length) {
+      return;
+    }
+
+    const file = files[index];
+    const fileUri = file.uri;
     const realPath = await getRealPath(fileUri, 'video');
 
-    console.log('@Item upload started', new Date().getTime());
-
-    const uploadUrl =
-      'https://vod-ingest.gumlet.com/gumlet-user-uploads-prod/63fe06f5b4ade3692e1bb407/6452547d5336a60e6227099e/origin-6452547d5336a60e6227099e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4WNLTXWDOHE3WKEQ%2F20230503%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230503T123302Z&X-Amz-Expires=3600&X-Amz-Signature=6bd2067be9fa0be97fc28dea1f45d4151768b216cfbcf3bebcc23e67d08a091e&X-Amz-SignedHeaders=host&x-id=PutObject';
-
-    // const m = await generateFilePath(
-    //   'file:///data/user/0/coach.fc.one/cache/e7238a00-6e1a-478b-a565-62008645fbe6.mp4',
-    // );
-    console.log('@RealPath', realPath);
-
-    const result = await Video.compress(
-      fileUri,
-      {
-        compressionMethod: 'manual',
-        maxSize: 2704,
-        bitrate: 12,
-        getCancellationId: cancellationId => {},
-      },
-      progress => {
-        console.log('Compression Progress: ', progress);
-      },
+    console.log('Realpath', realPath);
+    const defaultApp = firebase.app();
+    const storageForBucket = defaultApp.storage(
+      getFirebaseConfigs().gstURL ?? '',
     );
-    console.log('@Item compression ended', new Date().getTime());
 
-    await backgroundUpload(
-      uploadUrl,
-      result,
-      {
-        httpMethod: 'PUT',
-        headers: {
-          'Content-Type': 'video/mp4',
+    const reference = storageForBucket.ref(`${file.creationTime}_${file.name}`);
+
+    console.log('Ref', reference);
+
+    const pathToFile = realPath.replace('file://', '');
+    // uploads file
+
+    try {
+      const task = reference.putFile(pathToFile, {
+        customMetadata: {
+          userId: userId.toString() ?? 'Anonymous',
+          creationTime: files[index]?.creationTime?.toString(),
         },
-      },
-      (written, total) => {
-        console.log('Uploading ', written, total, new Date().getTime());
-      },
-    ).catch(err => console.log('Error', err));
-    console.log('@Item uploaded', new Date().getTime());
+      });
+      task.on('state_changed', taskSnapshot => {
+        console.log(
+          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+        );
+        dispatch(
+          setUploadingProgressOfMedia({
+            fileName: file.name,
+            percentile:
+              (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100,
+            progressText: `Taking backup ${index + 1} of ${files.length}`,
+          }),
+        );
+      });
 
-    const size = RNFetchBlob.fs.stat(result);
-    console.log('Video Progress', size);
+      task
+        .then(async () => {
+          console.log(index, files.length);
+          dispatch(setCompletedUploading());
+          dispatch(setUploadingProgressOfMedia(null));
+          deleteFileUsingUri(files[index].uri);
+          if (index + 1 < files.length) {
+            storeFileToGCP(files, index + 1);
+          } else {
+            ToastAndroid.show('Backup completed', ToastAndroid.BOTTOM);
+          }
+        })
+        .catch(e => console.log(e));
+    } catch (error) {
+      console.log('Error', error);
+    }
   };
 
   const _startParallelUpload = async file => {
     const fileUri = file.uri;
     const realPath = await getRealPath(fileUri, 'video');
+
+    console.log('Realpath', realPath);
+    const reference = storage().ref(`${new Date().getTime()}${file.name}`);
+
+    console.log('Ref', reference);
+
+    const pathToFile = realPath.replace('file://', '');
+    // uploads file
+
+    try {
+      const task = reference.putFile(pathToFile);
+
+      console.log(task);
+      task.on('state_changed', taskSnapshot => {
+        console.log(
+          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+        );
+      });
+
+      task.on('completed', () => {
+        console.log('Successfully completed');
+      });
+
+      // task
+      //   .then(() => {
+      //     console.log('Image uploaded to the bucket!');
+      //   })
+      //   .catch(e => console.log(e));
+    } catch (error) {
+      console.log('Error', error);
+    }
+
+    return;
 
     const assetId = await generateAssetId(
       file.name,
@@ -1292,11 +1386,6 @@ const SequentialBackupScreen = props => {
       CHUNKED_DATA_ARRAY.push(chunkData);
       bytesRead += CHUNK_SIZE;
       console.log('__MUNNA bytesRead ', bytesRead);
-      new Promise(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 300);
-      });
     }
 
     console.log('__MUNNA @File read ended', new Date().getTime());

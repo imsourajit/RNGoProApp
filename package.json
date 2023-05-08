@@ -18,6 +18,7 @@
     "@react-native-firebase/analytics": "^17.4.2",
     "@react-native-firebase/app": "^17.4.2",
     "@react-native-firebase/crashlytics": "^17.4.2",
+    "@react-native-firebase/storage": "^17.4.3",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "@react-navigation/stack": "^6.3.16",
