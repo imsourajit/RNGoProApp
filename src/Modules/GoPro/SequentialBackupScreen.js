@@ -49,21 +49,17 @@ import {
 import DocumentPicker from '@imsourajit/react-native-document-picker';
 
 import Upload from 'react-native-background-upload';
-import storage, {
-  firebase,
-  updateMetadata,
-} from '@react-native-firebase/storage';
+import storage, {firebase} from '@react-native-firebase/storage';
 import {getFirebaseConfigs} from '../../Config';
 
-var Buffer = require('@craftzdog/react-native-buffer').Buffer;
+// var Buffer = require('@craftzdog/react-native-buffer').Buffer;
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
 const SequentialBackupScreen = props => {
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [hotspotDetails, setHotspotDetails] = useState({});
-  const [mediaList, setMediaList] = useState(null);
-  const [downloadDirectory, setDownloadDirectory] = useState(null);
+
   const [appState, setAppState] = useState(AppState.currentState);
 
   const [isPopupVisibile, setPopupVisibility] = useState(false);
@@ -1267,7 +1263,6 @@ const SequentialBackupScreen = props => {
     const fileUri = file.uri;
     const realPath = await getRealPath(fileUri, 'video');
 
-    console.log('Realpath', realPath);
     const defaultApp = firebase.app();
     const storageForBucket = defaultApp.storage(
       getFirebaseConfigs().gstURL ?? '',
