@@ -7,6 +7,7 @@ import {
   Image,
   Linking,
   NativeModules,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -59,7 +60,8 @@ let CHUNK_SIZE = 10 * 1024 * 1024;
 const SequentialBackupScreen = props => {
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [hotspotDetails, setHotspotDetails] = useState({});
-
+  const [mediaList, setMediaList] = useState(null);
+  const [downloadDirectory, setDownloadDirectory] = useState(null);
   const [appState, setAppState] = useState(AppState.currentState);
 
   const [isPopupVisibile, setPopupVisibility] = useState(false);
@@ -940,7 +942,6 @@ const SequentialBackupScreen = props => {
       const time = new Date();
 
       const fileName = files[filePosition]?.name;
-      console.log(fileName, files, filePosition);
 
       chunkFilePath = await createChunkDirectory(files[filePosition]?.name);
       tempPath = chunkFilePath;
@@ -1153,9 +1154,15 @@ const SequentialBackupScreen = props => {
   };
 
   const takeBackUpFromStorage = async () => {
-    DocumentPicker.pickMultiple({
+    let options = {
       type: 'video/mp4',
-    }).then(async files => {
+    };
+
+    if (Platform.Version >= 33) {
+      options = {...options, copyTo: 'cachesDirectory'};
+    }
+
+    DocumentPicker.pickMultiple(options).then(async files => {
       // deleteFileUsingUri(files[0].uri);
       console.log(files);
 
@@ -1259,18 +1266,22 @@ const SequentialBackupScreen = props => {
       return;
     }
 
+    console.log(files);
+
     const file = files[index];
-    const fileUri = file.uri;
+    const fileUri = Platform.Version >= 33 ? file.fileCopyUri : file.uri;
     const realPath = await getRealPath(fileUri, 'video');
+
+    console.log(realPath);
 
     const defaultApp = firebase.app();
     const storageForBucket = defaultApp.storage(
       getFirebaseConfigs().gstURL ?? '',
     );
 
-    const reference = storageForBucket.ref(`${file.creationTime}_${file.name}`);
-
-    console.log('Ref', reference);
+    const reference = storageForBucket.ref(
+      `${new Date().getTime()}_${file.name}`,
+    );
 
     const pathToFile = realPath.replace('file://', '');
     // uploads file
@@ -1302,15 +1313,25 @@ const SequentialBackupScreen = props => {
           dispatch(setCompletedUploading());
           dispatch(setUploadingProgressOfMedia(null));
           deleteFileUsingUri(files[index].uri);
+          file?.fileCopyUri ? deleteFile(file?.fileCopyUri) : null;
+          deleteAppCacheDir();
           if (index + 1 < files.length) {
             storeFileToGCP(files, index + 1);
           } else {
             ToastAndroid.show('Backup completed', ToastAndroid.BOTTOM);
           }
         })
-        .catch(e => console.log(e));
+        .catch(e => console.log(e.message));
     } catch (error) {
       console.log('Error', error);
+    }
+  };
+
+  const deleteAppCacheDir = () => {
+    try {
+      NativeModules.RNDocumentPicker.deleteCache();
+    } catch (error) {
+      console.log('Error in deleting cache', error);
     }
   };
 
@@ -1515,7 +1536,9 @@ const SequentialBackupScreen = props => {
             logClickEvent('app_backup_click', {
               type: 'gallery',
             });
+
             takeBackUpFromStorage();
+            // deleteAppCacheDir();
           }}>
           <View style={styles.box}>
             <Text style={[styles.btnTxt, {fontSize: 18}]}>
