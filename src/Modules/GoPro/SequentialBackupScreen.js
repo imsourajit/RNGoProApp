@@ -1158,9 +1158,9 @@ const SequentialBackupScreen = props => {
       type: 'video/mp4',
     };
 
-    if (Platform.Version >= 33) {
-      options = {...options, copyTo: 'cachesDirectory'};
-    }
+    // if (Platform.Version >= 36) {
+    //   options = {...options, copyTo: 'cachesDirectory'};
+    // }
 
     DocumentPicker.pickMultiple(options).then(async files => {
       // deleteFileUsingUri(files[0].uri);
@@ -1269,7 +1269,8 @@ const SequentialBackupScreen = props => {
     console.log(files);
 
     const file = files[index];
-    const fileUri = Platform.Version >= 33 ? file.fileCopyUri : file.uri;
+    // const fileUri = Platform.Version >= 36 ? file.fileCopyUri : file.uri;
+    const fileUri = file.uri;
     const realPath = await getRealPath(fileUri, 'video');
 
     console.log(realPath);
