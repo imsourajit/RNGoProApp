@@ -61,6 +61,8 @@ const DownloadAndUploadProgressBar = () => {
   const fileName =
     downloadedMediaProgress === null ? uploadedFileName : downloadedFileName;
 
+  const uploadBackUpText = uploadedMediaProgress?.progressText;
+
   if (!progressPercentile) {
     return (
       <View style={{justifyContent: 'center', alignItems: 'center'}}>
@@ -84,7 +86,7 @@ const DownloadAndUploadProgressBar = () => {
           // marginTop: 5,
           fontSize: 16,
         }}>
-        {backupText}
+        {uploadBackUpText ?? backupText}
       </Text>
       <View>
         <View

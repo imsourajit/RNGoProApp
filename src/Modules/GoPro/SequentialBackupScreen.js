@@ -1172,6 +1172,9 @@ const SequentialBackupScreen = props => {
 
       // await startChunkUpload(files, 0);
     });
+    DocumentPicker.isCancel(err => {
+      console.log('User has cancelled document picker', err);
+    });
   };
 
   // const compressVideoWithProcessor = async fileUri => {
