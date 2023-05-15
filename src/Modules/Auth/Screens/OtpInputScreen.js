@@ -72,7 +72,9 @@ const OtpInputScreen = props => {
             status: 'success',
           });
           _setUserPropertiesInAllAnalyticsTools(res);
-          dispatch(setUserDetails(res.user));
+          dispatch(
+            setUserDetails({...res.user, userCentreCode: res.centreCode}),
+          );
           console.log('Otp Verification response', res);
         },
         err => {

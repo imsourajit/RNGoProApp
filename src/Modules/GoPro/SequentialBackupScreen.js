@@ -53,8 +53,6 @@ import Upload from 'react-native-background-upload';
 import storage, {firebase} from '@react-native-firebase/storage';
 import {getFirebaseConfigs} from '../../Config';
 
-// var Buffer = require('@craftzdog/react-native-buffer').Buffer;
-
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
 const SequentialBackupScreen = props => {
@@ -80,7 +78,9 @@ const SequentialBackupScreen = props => {
     bytesRead: localBytesRead = 0,
     size: localFileSize,
   } = uploadedChunkMedia ?? {};
-  const {user: {userId} = {}} = useSelector(st => st.userReducer);
+  const {user: {userId, userCentreCode} = {}} = useSelector(
+    st => st.userReducer,
+  );
 
   const {ssid, password} = hotspotDetails;
 
@@ -1276,11 +1276,11 @@ const SequentialBackupScreen = props => {
     const fileUri = file.uri;
     const realPath = await getRealPath(fileUri, 'video');
 
-    console.log(realPath);
+    const centreCodePath = userCentreCode ? `/${userCentreCode}` : '';
 
     const defaultApp = firebase.app();
     const storageForBucket = defaultApp.storage(
-      getFirebaseConfigs().gstURL ?? '',
+      getFirebaseConfigs().gstURL + centreCodePath ?? '',
     );
 
     const reference = storageForBucket.ref(
