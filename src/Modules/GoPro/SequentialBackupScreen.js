@@ -7,7 +7,6 @@ import {
   Image,
   Linking,
   NativeModules,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -34,7 +33,10 @@ import {
 } from './Redux/GoProActions';
 import RNFS from 'react-native-fs';
 import axios from 'axios';
-import {backgroundUpload, getRealPath} from 'react-native-compressor';
+import {
+  backgroundUpload,
+  getRealPath,
+} from '@imsourajit/react-native-compressor';
 import DownloadAndUploadProgressBar from './Components/DownloadAndUploadProgressBar';
 import GoProDeviceDetails from './Components/GoProDeviceDetails';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -52,6 +54,9 @@ import DocumentPicker from '@imsourajit/react-native-document-picker';
 import Upload from 'react-native-background-upload';
 import storage, {firebase} from '@react-native-firebase/storage';
 import {getFirebaseConfigs} from '../../Config';
+import getPath from '@flyerhq/react-native-android-uri-path';
+
+var RNGRP = require('react-native-get-real-path');
 
 let CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -1274,9 +1279,26 @@ const SequentialBackupScreen = props => {
     const file = files[index];
     // const fileUri = Platform.Version >= 36 ? file.fileCopyUri : file.uri;
     const fileUri = file.uri;
+
+    // try {
+    //   const path = getPath(fileUri);
+    //   console.log('__PATH', path);
+    //   // const stat = await RNFetchBlob.fs.stat(
+    //   //   'content://com.android.externalstorage.documents/document/7ACC-14FD/VID-20230515-WA0002.mp4',
+    //   // );
+    //   // console.log(stat.path, '__STAT');
+    // } catch (e) {
+    //   console.log(e, '__STAT', file.uri);
+    // }
     const realPath = await getRealPath(fileUri, 'video');
 
-    const centreCodePath = userCentreCode ? `/${userCentreCode}` : '';
+    console.log('__FILE_URI', realPath);
+
+    // RNGRP.getRealPathFromURI(fileUri)
+    //   .then(f => console.log(f))
+    //   .catch(e => console.log(e));
+
+    const centreCodePath = userCentreCode ? `/${userCentreCode}` : '/sourajit';
 
     const defaultApp = firebase.app();
     const storageForBucket = defaultApp.storage(
@@ -1289,6 +1311,8 @@ const SequentialBackupScreen = props => {
 
     const pathToFile = realPath.replace('file://', '');
     // uploads file
+
+    console.log('File Path ');
 
     try {
       const task = reference.putFile(pathToFile, {

@@ -6,7 +6,7 @@ import {APP_DIR} from '../Utility/Constants';
 import axios from 'axios';
 import UploadFileAndProgress from './UploadFileAndProgress';
 import {setUploadCompleted, setUploadingFile} from '../Redux/GoProActions';
-import {backgroundUpload} from 'react-native-compressor';
+import {backgroundUpload} from '@imsourajit/react-native-compressor';
 
 const UploadMediaSection = props => {
   const {

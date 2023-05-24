@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {
-  Alert,
-  BackHandler,
   Dimensions,
   Image,
   Linking,
@@ -23,16 +21,14 @@ import {
   setScheduledSessions,
   setUploadingProgressOfMedia,
 } from '../GoPro/Redux/GoProActions';
-import RNFS from 'react-native-fs';
 import {getFreeSpaceInGB} from '../../Utility/helpers';
 import SelectionPopupModal from './Screens/SelectionPopupModal';
 import ConfirmModal from './Screens/ConfirmModal';
 import {logClickEvent, logLoadEvent} from '../../Services/AnalyticsTools';
-import AnalyticsServices from '../../Services/AnalyticsTools/AnalyticsService';
 import {btnBgColor} from '../../Config';
 import {
-  OpenOptimizationSettings,
   BatteryOptEnabled,
+  OpenOptimizationSettings,
 } from 'react-native-battery-optimization-check';
 
 const deviceList = [
@@ -117,8 +113,9 @@ const MainScreen = props => {
         PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
         PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
         // PermissionsAndroid.PERMISSIONS.MANAGE_DOCUMENTS,
+        // PermissionsAndroid.PERMISSIONS.MANAGE_EXTERNAL_STORAGE,
       ]);
-      changeBatteryOptimisation();
+      // changeBatteryOptimisation();
     } catch (err) {
       console.warn(err);
     }

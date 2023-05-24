@@ -32,13 +32,13 @@ export const prodFirebaseConfig = {
 };
 
 export const stagingFirebaseConfig = {
-  apiKey: 'AIzaSyC2oeMz3fcd-Y23aM0aiydTq2pSopBr1ZI',
+  apiKey: 'AIzaSyDUCQwgkHsJKexqc-Zz64xUq8oceQmUwpE',
   appId: '1:688457505501:android:67bd26332561dab4fd9934',
   databaseURL: 'firebase-adminsdk-1r2ez@wagmi-qa.iam.gserviceaccount.com',
   messagingSenderId: '104781298024',
   projectId: 'fcone-qa',
   storageBucket: 'fcone-qa.appspot.com',
-  gstURL: 'gs://fcone-qa.appspot.com/fcone-unprocessed-videos-qa',
+  gstURL: 'gs://fcone-raw-recording-qa',
 };
 
 export const ALL = {
